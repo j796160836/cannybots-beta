@@ -7,7 +7,18 @@
 //
 
 #import "BrainDashFlipsideViewController.h"
+#import "UARTPeripheral.h"
 
-@interface BrainDashMainViewController : UIViewController <BrainDashFlipsideViewControllerDelegate>
+@interface BrainDashMainViewController : UIViewController <BrainDashFlipsideViewControllerDelegate,UARTPeripheralDelegate, CBCentralManagerDelegate>
+
+typedef enum {
+    ConnectionStatusDisconnected = 0,
+    ConnectionStatusScanning,
+    ConnectionStatusConnected,
+} ConnectionStatus;
+
+
+@property (nonatomic, assign) ConnectionStatus                  connectionStatus;
+
 
 @end

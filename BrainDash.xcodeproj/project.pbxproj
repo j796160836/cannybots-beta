@@ -22,6 +22,12 @@
 		B92C5A0218FEC8FF005EC882 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59E118FEC8FE005EC882 /* UIKit.framework */; };
 		B92C5A0A18FEC8FF005EC882 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = B92C5A0818FEC8FF005EC882 /* InfoPlist.strings */; };
 		B92C5A0C18FEC8FF005EC882 /* BrainDashTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B92C5A0B18FEC8FF005EC882 /* BrainDashTests.m */; };
+		B92C5A2418FECE96005EC882 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C5A2318FECE96005EC882 /* CoreBluetooth.framework */; };
+		B92C5A6118FEFD1D005EC882 /* UARTPeripheral.m in Sources */ = {isa = PBXBuildFile; fileRef = B92C5A5918FEFD1D005EC882 /* UARTPeripheral.m */; };
+		B92C5A6218FEFD1D005EC882 /* CBUUID+StringExtraction.m in Sources */ = {isa = PBXBuildFile; fileRef = B92C5A5C18FEFD1D005EC882 /* CBUUID+StringExtraction.m */; };
+		B92C5A6318FEFD1D005EC882 /* NSData+hex.m in Sources */ = {isa = PBXBuildFile; fileRef = B92C5A5E18FEFD1D005EC882 /* NSData+hex.m */; };
+		B92C5A6418FEFD1D005EC882 /* NSString+hex.m in Sources */ = {isa = PBXBuildFile; fileRef = B92C5A6018FEFD1D005EC882 /* NSString+hex.m */; };
+		B9AD38DB1900FDDE00FA9CD0 /* NTProtocol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B9AD38DA1900FDDE00FA9CD0 /* NTProtocol.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +62,17 @@
 		B92C5A0718FEC8FF005EC882 /* BrainDashTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "BrainDashTests-Info.plist"; sourceTree = "<group>"; };
 		B92C5A0918FEC8FF005EC882 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		B92C5A0B18FEC8FF005EC882 /* BrainDashTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BrainDashTests.m; sourceTree = "<group>"; };
+		B92C5A2318FECE96005EC882 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
+		B92C5A5818FEFD1D005EC882 /* UARTPeripheral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UARTPeripheral.h; sourceTree = "<group>"; };
+		B92C5A5918FEFD1D005EC882 /* UARTPeripheral.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UARTPeripheral.m; sourceTree = "<group>"; };
+		B92C5A5B18FEFD1D005EC882 /* CBUUID+StringExtraction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CBUUID+StringExtraction.h"; sourceTree = "<group>"; };
+		B92C5A5C18FEFD1D005EC882 /* CBUUID+StringExtraction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CBUUID+StringExtraction.m"; sourceTree = "<group>"; };
+		B92C5A5D18FEFD1D005EC882 /* NSData+hex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+hex.h"; sourceTree = "<group>"; };
+		B92C5A5E18FEFD1D005EC882 /* NSData+hex.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+hex.m"; sourceTree = "<group>"; };
+		B92C5A5F18FEFD1D005EC882 /* NSString+hex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+hex.h"; sourceTree = "<group>"; };
+		B92C5A6018FEFD1D005EC882 /* NSString+hex.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+hex.m"; sourceTree = "<group>"; };
+		B9AD38D9190030D900FA9CD0 /* NTProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NTProtocol.h; path = ../../../avr/CannyFirmata/NTProtocol.h; sourceTree = "<group>"; };
+		B9AD38DA1900FDDE00FA9CD0 /* NTProtocol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NTProtocol.cpp; path = ../../../avr/CannyFirmata/NTProtocol.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +80,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B92C5A2418FECE96005EC882 /* CoreBluetooth.framework in Frameworks */,
 				B92C59E018FEC8FE005EC882 /* CoreGraphics.framework in Frameworks */,
 				B92C59E218FEC8FE005EC882 /* UIKit.framework in Frameworks */,
 				B92C59DE18FEC8FE005EC882 /* Foundation.framework in Frameworks */,
@@ -85,6 +103,10 @@
 		B92C59D118FEC8FE005EC882 = {
 			isa = PBXGroup;
 			children = (
+				B9AD38DA1900FDDE00FA9CD0 /* NTProtocol.cpp */,
+				B9AD38D9190030D900FA9CD0 /* NTProtocol.h */,
+				B92C5A5718FEFD1D005EC882 /* BLE_BlueFruit_UART */,
+				B92C5A5A18FEFD1D005EC882 /* Categories */,
 				B92C59E318FEC8FE005EC882 /* BrainDash */,
 				B92C5A0518FEC8FF005EC882 /* BrainDashTests */,
 				B92C59DC18FEC8FE005EC882 /* Frameworks */,
@@ -104,6 +126,7 @@
 		B92C59DC18FEC8FE005EC882 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B92C5A2318FECE96005EC882 /* CoreBluetooth.framework */,
 				B92C59DD18FEC8FE005EC882 /* Foundation.framework */,
 				B92C59DF18FEC8FE005EC882 /* CoreGraphics.framework */,
 				B92C59E118FEC8FE005EC882 /* UIKit.framework */,
@@ -155,6 +178,30 @@
 				B92C5A0818FEC8FF005EC882 /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		B92C5A5718FEFD1D005EC882 /* BLE_BlueFruit_UART */ = {
+			isa = PBXGroup;
+			children = (
+				B92C5A5818FEFD1D005EC882 /* UARTPeripheral.h */,
+				B92C5A5918FEFD1D005EC882 /* UARTPeripheral.m */,
+			);
+			name = BLE_BlueFruit_UART;
+			path = Libraries/BLE_BlueFruit_UART;
+			sourceTree = "<group>";
+		};
+		B92C5A5A18FEFD1D005EC882 /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				B92C5A5B18FEFD1D005EC882 /* CBUUID+StringExtraction.h */,
+				B92C5A5C18FEFD1D005EC882 /* CBUUID+StringExtraction.m */,
+				B92C5A5D18FEFD1D005EC882 /* NSData+hex.h */,
+				B92C5A5E18FEFD1D005EC882 /* NSData+hex.m */,
+				B92C5A5F18FEFD1D005EC882 /* NSString+hex.h */,
+				B92C5A6018FEFD1D005EC882 /* NSString+hex.m */,
+			);
+			name = Categories;
+			path = Libraries/Categories;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -256,9 +303,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				B92C59EA18FEC8FE005EC882 /* main.m in Sources */,
+				B92C5A6418FEFD1D005EC882 /* NSString+hex.m in Sources */,
+				B9AD38DB1900FDDE00FA9CD0 /* NTProtocol.cpp in Sources */,
+				B92C5A6118FEFD1D005EC882 /* UARTPeripheral.m in Sources */,
 				B92C59F718FEC8FE005EC882 /* BrainDashFlipsideViewController.m in Sources */,
+				B92C5A6218FEFD1D005EC882 /* CBUUID+StringExtraction.m in Sources */,
 				B92C59EE18FEC8FE005EC882 /* BrainDashAppDelegate.m in Sources */,
 				B92C59F418FEC8FE005EC882 /* BrainDashMainViewController.m in Sources */,
+				B92C5A6318FEFD1D005EC882 /* NSData+hex.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -463,6 +515,7 @@
 				B92C5A1118FEC8FF005EC882 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		B92C5A1218FEC8FF005EC882 /* Build configuration list for PBXNativeTarget "BrainDashTests" */ = {
 			isa = XCConfigurationList;
@@ -471,6 +524,7 @@
 				B92C5A1418FEC8FF005EC882 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
