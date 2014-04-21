@@ -7,12 +7,20 @@
 //
 
 #import "BrainDashAppDelegate.h"
+#import "TheBrain.h"
+#import "BrainSpeakBLE.h"
 
 @implementation BrainDashAppDelegate
+
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     // Override point for customization after application launch.
+    TheBrain*       theBrain = [TheBrain sharedInstance];
+    BrainSpeakBLE*  bsle     = [BrainSpeakBLE sharedInstance];
+    theBrain.writer=bsle;
+    bsle.delegate = theBrain;
+    
     return YES;
 }
 							

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B916F51F190506920057388D /* TheBriain.m in Sources */ = {isa = PBXBuildFile; fileRef = B916F51E190506920057388D /* TheBriain.m */; };
+		B916F522190529B40057388D /* BrainSpeakBLE.m in Sources */ = {isa = PBXBuildFile; fileRef = B916F521190529B40057388D /* BrainSpeakBLE.m */; };
 		B92C59DE18FEC8FE005EC882 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59DD18FEC8FE005EC882 /* Foundation.framework */; };
 		B92C59E018FEC8FE005EC882 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59DF18FEC8FE005EC882 /* CoreGraphics.framework */; };
 		B92C59E218FEC8FE005EC882 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59E118FEC8FE005EC882 /* UIKit.framework */; };
@@ -41,6 +43,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B916F51D190506920057388D /* TheBrain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TheBrain.h; sourceTree = "<group>"; };
+		B916F51E190506920057388D /* TheBriain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TheBriain.m; sourceTree = "<group>"; };
+		B916F520190529B40057388D /* BrainSpeakBLE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrainSpeakBLE.h; sourceTree = "<group>"; };
+		B916F521190529B40057388D /* BrainSpeakBLE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrainSpeakBLE.m; sourceTree = "<group>"; };
 		B92C59DA18FEC8FE005EC882 /* BrainDash.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BrainDash.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B92C59DD18FEC8FE005EC882 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		B92C59DF18FEC8FE005EC882 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -71,8 +77,8 @@
 		B92C5A5E18FEFD1D005EC882 /* NSData+hex.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+hex.m"; sourceTree = "<group>"; };
 		B92C5A5F18FEFD1D005EC882 /* NSString+hex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+hex.h"; sourceTree = "<group>"; };
 		B92C5A6018FEFD1D005EC882 /* NSString+hex.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+hex.m"; sourceTree = "<group>"; };
-		B9AD38D9190030D900FA9CD0 /* NTProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NTProtocol.h; path = ../../../avr/CannyFirmata/NTProtocol.h; sourceTree = "<group>"; };
-		B9AD38DA1900FDDE00FA9CD0 /* NTProtocol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NTProtocol.cpp; path = ../../../avr/CannyFirmata/NTProtocol.cpp; sourceTree = "<group>"; };
+		B9AD38D9190030D900FA9CD0 /* NTProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NTProtocol.h; path = ../../../../../avr/CannyFirmata/NTProtocol.h; sourceTree = "<group>"; };
+		B9AD38DA1900FDDE00FA9CD0 /* NTProtocol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NTProtocol.cpp; path = ../../../../../avr/CannyFirmata/NTProtocol.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,11 +106,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		B92C59D118FEC8FE005EC882 = {
+		B916F51C190506920057388D /* TheBrain */ = {
 			isa = PBXGroup;
 			children = (
 				B9AD38DA1900FDDE00FA9CD0 /* NTProtocol.cpp */,
 				B9AD38D9190030D900FA9CD0 /* NTProtocol.h */,
+				B916F51D190506920057388D /* TheBrain.h */,
+				B916F51E190506920057388D /* TheBriain.m */,
+				B916F520190529B40057388D /* BrainSpeakBLE.h */,
+				B916F521190529B40057388D /* BrainSpeakBLE.m */,
+			);
+			name = TheBrain;
+			path = Libraries/TheBrain;
+			sourceTree = "<group>";
+		};
+		B92C59D118FEC8FE005EC882 = {
+			isa = PBXGroup;
+			children = (
+				B916F51C190506920057388D /* TheBrain */,
 				B92C5A5718FEFD1D005EC882 /* BLE_BlueFruit_UART */,
 				B92C5A5A18FEFD1D005EC882 /* Categories */,
 				B92C59E318FEC8FE005EC882 /* BrainDash */,
@@ -303,11 +322,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				B92C59EA18FEC8FE005EC882 /* main.m in Sources */,
+				B916F522190529B40057388D /* BrainSpeakBLE.m in Sources */,
 				B92C5A6418FEFD1D005EC882 /* NSString+hex.m in Sources */,
 				B9AD38DB1900FDDE00FA9CD0 /* NTProtocol.cpp in Sources */,
 				B92C5A6118FEFD1D005EC882 /* UARTPeripheral.m in Sources */,
 				B92C59F718FEC8FE005EC882 /* BrainDashFlipsideViewController.m in Sources */,
 				B92C5A6218FEFD1D005EC882 /* CBUUID+StringExtraction.m in Sources */,
+				B916F51F190506920057388D /* TheBriain.m in Sources */,
 				B92C59EE18FEC8FE005EC882 /* BrainDashAppDelegate.m in Sources */,
 				B92C59F418FEC8FE005EC882 /* BrainDashMainViewController.m in Sources */,
 				B92C5A6318FEFD1D005EC882 /* NSData+hex.m in Sources */,

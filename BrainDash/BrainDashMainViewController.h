@@ -6,19 +6,11 @@
 //  Copyright (c) 2014 CannyBots. All rights reserved.
 //
 
-#import "BrainDashFlipsideViewController.h"
-#import "UARTPeripheral.h"
 
-@interface BrainDashMainViewController : UIViewController <BrainDashFlipsideViewControllerDelegate,UARTPeripheralDelegate, CBCentralManagerDelegate>
+#import "TheBrain.h"
 
-typedef enum {
-    ConnectionStatusDisconnected = 0,
-    ConnectionStatusScanning,
-    ConnectionStatusConnected,
-} ConnectionStatus;
+@interface BrainDashMainViewController : UIViewController <BrainDashFlipsideViewControllerDelegate>
 
-
-@property (nonatomic, assign) ConnectionStatus                  connectionStatus;
 
 
 @end

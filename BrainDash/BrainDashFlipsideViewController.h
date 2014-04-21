@@ -7,6 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "TheBrain.h"
+
+
 
 @class BrainDashFlipsideViewController;
 
@@ -14,9 +17,10 @@
 - (void)flipsideViewControllerDidFinish:(BrainDashFlipsideViewController *)controller;
 @end
 
-@interface BrainDashFlipsideViewController : UIViewController
+@interface BrainDashFlipsideViewController : UIViewController //<NTDebugReceiver>
 
 @property (weak, nonatomic) id <BrainDashFlipsideViewControllerDelegate> delegate;
+@property (weak, nonatomic) IBOutlet UITextView *debugTextView;
 
 - (IBAction)done:(id)sender;
 
