@@ -22,6 +22,18 @@ void debug(char * format, ...)
   BLESerial.print(buffer);
 }
 
+void debug(const __FlashStringHelper* format, ...)
+{
+  char buffer[32];
+  va_list args;
+  va_start (args, format);
+  vsnprintf (buffer, 31, reinterpret_cast<const char*>(format), args);
+  va_end (args);
+  //DBG(buffer);
+  BLESerial.print(buffer);
+}
+
+
 
 long readVcc() {
   // Read 1.1V reference against AVcc. Inverting that, means vcc becomes known!

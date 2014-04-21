@@ -1,7 +1,7 @@
 
 #include "NTProtocol.h"
 
-uint8_t NT_lastError = NT_STATUS_OK;
+uint8_t NT_lastError;
 
 void NT_sendError(uint8_t err) {
   NT_lastError = err;

@@ -83,6 +83,15 @@
 #define BROADCAST_ID             254
 
 
+/** Error Levels **/
+#define ERR_VOLTAGE                 1
+#define ERR_ANGLE_LIMIT             2
+#define ERR_OVERHEATING             4
+#define ERR_RANGE                   8
+#define ERR_CHECKSUM                16
+#define ERR_OVERLOAD                32
+#define ERR_INSTRUCTION             64
+
 typedef unsigned char boolean;
 typedef unsigned char byte;
 
@@ -120,11 +129,11 @@ class AX12
     int action ();
     AX12info readInfo (byte registr);
     int writeInfo (byte registr, int value, boolean isReg = false);
-    void setEndlessTurnMode (boolean endless);
-    void endlessTurn (int velocidad);
+    int setEndlessTurnMode (boolean endless);
+    int endlessTurn (int velocidad);
     int presentPSL (int* PSL);
-    void setSRL (byte _srl);
-    void changeID (byte newID);
+    int setSRL (byte _srl);
+    int changeID (byte newID);
     int setPosVel (int pos, int vel);
     
   private:

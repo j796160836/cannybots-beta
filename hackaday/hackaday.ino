@@ -69,7 +69,7 @@ void setup() {
   AX12::init (1000000);   // inicializa los AX12 a 1 Mb/s
   num = AX12::autoDetect (detect, 2); 
   int m1id = num>0? detect[0]: 1; 
-  int m2id = num>1? detect[1]: 50; 
+  int m2id = num>1? detect[1]: 2; 
   motor1 = AX12((byte)m1id);
   motor2 = AX12((byte)m2id,true);    // true for inverted commands, motors are facing each other
   
@@ -127,7 +127,29 @@ void rxCallback(uint8_t *buffer, uint8_t len)
   }
   uart.write(buffer, len);
 }
-
-void loop() {
+void loop() {     
     uart.pollACI();
+    // uncomment or comment one or both.
+    randomSpeed();
+    //randomPos();
 }
+
+void randomSpeed() {
+    motor1.setEndlessTurnMode(true);
+    motor2.setEndlessTurnMode(true);
+    int speed = random (100, 900*2) - 900;
+    motor1.endlessTurn(speed);
+    motor2.endlessTurn(-speed); 
+    delay(2000);
+}
+
+void randomPos() {
+    motor1.setEndlessTurnMode(false);
+    motor2.setEndlessTurnMode(false);
+    motor1.setVel (random (100, 300));
+    motor1.setPos (random (200, 800));
+    motor2.setVel (random (100, 300));
+    motor2.setPos (random (200, 800));
+    delay(2000);
+}
+

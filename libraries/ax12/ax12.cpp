@@ -388,18 +388,18 @@ void AX12::syncInfo (byte registr, byte targetlength, byte* targets, int* values
  * Macro Level
  ******************************************************************************/
 
-void AX12::setEndlessTurnMode (boolean endless) {           // prende o apaga el modo "endless turn"
+int AX12::setEndlessTurnMode (boolean endless) {           // prende o apaga el modo "endless turn"
     writeInfo (CW_ANGLE_LIMIT, 0);
     if (endless) {
       writeInfo (CCW_ANGLE_LIMIT, 0);
     } else {
-      writeInfo (CCW_ANGLE_LIMIT, 1023);
+      return writeInfo (CCW_ANGLE_LIMIT, 1023);
     }
 }
 
-void AX12::endlessTurn (int velocidad) {                    // setea la velocidad, en el modo "endless turn"
+int AX12::endlessTurn (int velocidad) {                    // setea la velocidad, en el modo "endless turn"
     boolean direccion = sign2bin (velocidad);
-    writeInfo (MOVING_SPEED, abs(velocidad)|((direccion^inverse)<<10));
+    return writeInfo (MOVING_SPEED, abs(velocidad)|((direccion^inverse)<<10));
 }
 
 int AX12::presentPSL (int* PSL) {                                // lee position, speed & load de una sola vez
@@ -412,15 +412,15 @@ int AX12::presentPSL (int* PSL) {                                // lee position
 }
 
 // nota: si no coincide el SRL declarado con el del motor, los mensajes de respuesta son malinterpretados
-void AX12::setSRL (byte _srl) {
+int AX12::setSRL (byte _srl) {
   SRL = _srl;
-  writeInfo (STATUS_RETURN_LEVEL, SRL);
+  return writeInfo (STATUS_RETURN_LEVEL, SRL);
 }
 
-void AX12::changeID (byte newID) {
-  if (newID > 253) {return;}
-  writeInfo (ID, newID);
+int AX12::changeID (byte newID) {
+  if (newID > 253) {return ERR_RANGE;}
   id = newID;
+  return writeInfo (ID, newID);
 }
  
 int AX12::setPosVel (int pos, int vel) {

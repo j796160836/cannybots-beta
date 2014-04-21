@@ -121,6 +121,9 @@ extern "C" {
 //#define copy_bytes16(x, adr) *(adr) =
 #define NT_CREATE_CMD(cat, cmd, cont)   ( (cat & 0x7) << 5 )  +  ( (cont & 1) << 4 ) + ( cmd & 0xF)
 
+#define NT_CREATE_CMD1(cat,cmd,id,arg1)  NT_CREATE_CMD(cat, cmd, NT_CMD_NO_CONT), id, bytesFromInt(arg1)
+
+
 #define NT_CREATE_CMD_WITH_ARG1(buf, cat,cmd,id,arg1)  \
       buf[0] = NT_CREATE_CMD(cat, cmd, NT_CMD_NO_CONT); \
       buf[1] = id; \
@@ -147,6 +150,8 @@ extern "C" {
 #define NT_ERROR_CAT_INVALID          4
 #define NT_ERROR_CMD_INVALID          5
 #define NT_ERROR_CMD_PARAMS_INVALID   6
+#define NT_ERROR_CMD_GENERIC_ERROR    7
+
 
 #define NT_MSG_SIZE 20
 #define NT_ERROR_BYTE_OFFSET  19

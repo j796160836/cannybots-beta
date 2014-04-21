@@ -6,17 +6,17 @@
 #define USE_BLE 1
 #define USE_AX12 1
 //#define USE_SONAR 1
-//#define USE_PIXY
+//#define USE_PIXY 1
 //#define USE_SERVOS
 //#define USE_MOTORS
-#define USE_IRRECV 1
+//#define USE_IRRECV 1
 
 
 
 // Pin Info:
 
 //Genral info:
-// Default pijns - BLE = these avialble pins:
+// Default pins - BLE = these avialble pins:
 // digital 3-8 and analog 0-6
 // Pins support PWM  :  3, 5, 6, 9, 10, and 11.  (BLE takes 9,10,11 -   BLE can be configure to use somethng other than 9 & 10)
 // Intrurrpt pins:
@@ -49,6 +49,29 @@
 // Motor: where to put up to 4 pins for 2 motors...   4 pins are dir, on/off, brake & sense. could get away wiht just dir and power. 
 
 
+
+
+// Pixy wiring:
+// Dont forget to set the dataout mode in the Pixymon app to 1 (I2C) !!!
+// IDC CAble Wiring
+// (red) 1 2 3 4 5 6 7 8 9 10
+// (red)
+//  ___|-|___  
+//  1 3 5 7 9
+//  2 4 6 8 10
+// ----------
+// 2 = 5v
+// 5 = SCL
+// 8 = GND
+// 9 = SDA
+//  ___|-|___  
+//  . . C . D
+//  V . . G .
+// ----------
+
+
+
+
 // BLE Settings
 
 // Connect CLK/MISO/MOSI to hardware SPI
@@ -59,7 +82,7 @@
 
 // AX12 Settings
 
-#define AX12_MAX_SERVOS 8
+#define AX12_MAX_SERVOS 4
 
 // Servo settings
 #define SERVO_MAX_SERVOS 2
@@ -87,6 +110,15 @@
 #define DIGITAL_REPORT_NUM 2
 #define AX12_REPORT_NUM 2
 
+// Pixy settings
+
+#define PIXY_CAM_WIDTH 320
+#define PIXY_CAM_X_MID 160
+#define PIXY_MARGIN 40
+
+
+
+// System setting
 
 // Data feedback rates
 #define MINIMUM_SAMPLE_DELAY 10 
@@ -97,4 +129,11 @@
 #include <Adafruit_BLE_UART.h>
 extern Adafruit_BLE_UART BLESerial;
 #endif
+
+
+#ifdef USE_PIXY
+#include <Wire.h>
+#include <PixyI2C.h>
+#endif
+
 

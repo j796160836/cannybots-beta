@@ -15,6 +15,8 @@ template<class T> inline Print &operator <<(Print &obj, T arg) {  obj.print(arg)
 // Debug
 void   debug_setup();
 void debug(char * format, ...);
+void debug(const __FlashStringHelper* format, ...);
+
 
 #ifdef DEBUG
 #ifdef USE_BLE
