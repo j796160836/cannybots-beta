@@ -56,8 +56,8 @@
 //                2  =  AX12 - Sensor readings
 //                3  =  Sensor Commands (e.g. sonar:  active/inactive, trigger one shot reading, contiuous ON/OFF)
 //                4  =  Sensor Readings (e.g. sonar, IR)
-//                5  =  Pixy Commands and Readings
-//                6  =  PWM Servo & Motor Commands and Readings
+//                5  =  Pixy Commands and Readings  + Other commands & readings (e.g. Tone, Mic)
+//                6  =  PWM Servo & Motor Commands and Readings 
 //                7  =  System commands (e.g. used for configuration, status reporting or system control)
 
 
@@ -182,8 +182,14 @@ extern uint8_t NT_lastError;
 
 #define NT_CAT_NOP   0
 #define NT_CAT_AX12  1
-#define NT_CAT_SONAR 4
-#define NT_CAT_IRRECV 4
+#define NT_CAT_SONAR 2
+
+#define NT_CAT_SENSOR 3
+#define NT_CAT_IRRECV 3
+#define NT_CAT_MIC    3
+
+#define NT_CAT_PIXY 4
+#define NT_CAT_TONE 6
 #define NT_CAT_SYSTEM  7
 
 
@@ -209,6 +215,15 @@ extern uint8_t NT_lastError;
 
 #define NT_CMD_SONAR_PING_RESULT  2
 #define NT_CMD_IRRECV_RESULT      3
+#define NT_CMD_MIC_RESULT      4
+         
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Tone 'Commands' (shared with Pixy + others
+
+#define NT_CMD_TONE_PLAY_DITTY    10
+#define NT_CMD_TONE_PLAY_TONE     11
          
 
 

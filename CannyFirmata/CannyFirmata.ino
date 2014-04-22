@@ -6,6 +6,11 @@
 #include "utils.h"
 #include "NTProtocol.h"
 
+
+
+  
+  
+
 #ifdef USE_BLE
 #include <SPI.h>
 // This lib had the .h and .cpp tweaked to disable debug and remove hard coded debug
@@ -88,6 +93,11 @@ uint8_t  processCategory(int cat, int cmd, int id, int p1) {
       status = sonar_processCommand(cmd, id, p1);
       break;
 #endif      
+#ifdef USE_TONE
+    case NT_CAT_TONE:
+      status = tone_processCommand(cmd, id, p1);
+      break;
+#endif
     case NT_CAT_SYSTEM:  
       // TODO: system commands
       break;
@@ -249,15 +259,15 @@ uint8_t  ax12_runTests(int id, int p1) {
   result = ax12_motors[0].readInfo (RETURN_DELAY_TIME);
   byte val = result.value;
   int  err = result.error;
-  debug(F("val=%x,err=%x"), val, err);
-  debug(F("ptr=%x,ax[0]=%x"), AX12::ax_rx_Pointer, AX12::ax_rx_buffer[0]);
+  debug("val=%x,err=%x", val, err);
+  debug("ptr=%x,ax[0]=%x", AX12::ax_rx_Pointer, AX12::ax_rx_buffer[0]);
 
 
   delay(15);
   // ping all +1 for an error ping value
   for (byte i = 0 ; i< 5; i++) {
     AX12 m = AX12(i+1);
-    debug(F("p(%d,%x)=%x"), i,  m.id,  m.ping());
+    debug("p(%d,%x)=%x", i,  m.id,  m.ping());
   }
 
 
@@ -339,8 +349,10 @@ uint8_t sonar_generateReadings(uint8_t id) {
 // Servos
 
 #ifdef USE_SERVOS
-#include <Servo.h>
-Servo servos[SERVO_MAX_SERVOS];
+// including Servo.h causes clash of timers with Tone lib!! 
+// even if USE_SERVO isnt defiend!!  Arduiono is scann thi ssource without accounting for that
+//#include <Servo.h>
+//Servo servos[SERVO_MAX_SERVOS];
 #endif
 
 
@@ -356,6 +368,9 @@ Servo servos[SERVO_MAX_SERVOS];
 // IR Receiver
 
 #ifdef USE_IRRECV
+
+// this library was moifed, name change to resolve conflit with standard library (which had classh with other lib..)
+// modief alto to use TIMER1 and not timer 2 in IRRemoteIntORG.h
 #include <IRremoteORG.h>
 
 IRrecv irrecv(IRRECV_RECV_PIN); 
@@ -425,6 +440,150 @@ void updatePixy() {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
+// Tone Commands
+
+
+
+#ifdef USE_TONE
+#include <avr/pgmspace.h>
+
+#include "pitches.h"
+PROGMEM prog_uint16_t melody[] = { NOTE_C4, NOTE_G3,NOTE_G3, NOTE_A3, NOTE_G3,0, NOTE_B3, NOTE_C4};
+// note durations: 4 = quarter note, 8 = eighth note, etc.:
+PROGMEM prog_uint16_t noteDurations[] = { 4, 8, 8, 4,4,4,4,4 };
+
+uint8_t tone_playDitty(int p1) {
+ for (int thisNote = 0; thisNote < 8; thisNote++) {
+
+    // to calculate the note duration, take one second 
+    // divided by the note type.
+    //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+    int noteDuration = 1000/pgm_read_word_near(noteDurations+thisNote);
+    tone(TONE_PIN, pgm_read_word_near(melody+thisNote),noteDuration);
+
+    // to distinguish the notes, set a minimum time between them.
+    // the note's duration + 30% seems to work well:
+    int pauseBetweenNotes = noteDuration * 1.30;
+    delay(pauseBetweenNotes);
+    // stop the tone playing:
+    noTone(TONE_PIN);
+  }  
+  return NT_STATUS_OK;
+}
+
+
+uint8_t tone_playTone(uint8_t id, int p1) {
+    int noteDuration = 1000/id; // 4 or 8 - see ply ditty
+    tone(TONE_PIN, p1, noteDuration);  // playDitt / pitces.h
+  return NT_STATUS_OK;
+}
+
+
+uint8_t  tone_processCommand(int cmd, int id, int p1) {
+  int status = NT_ERROR_CMD_INVALID;
+  switch (cmd) {
+    case NT_CMD_TONE_PLAY_DITTY:
+      status = tone_playDitty(id);
+      break;
+    case NT_CMD_TONE_PLAY_TONE:
+      status = tone_playTone(id, p1);
+      break;
+    default:
+      DBG("XX:NT_ERROR_CMD_INVALID!");
+      status = NT_ERROR_CMD_INVALID;
+  }
+  return status;
+}
+
+#endif 
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// XXX Commands
+
+
+/*
+#ifdef USE_XXX
+uint8_t  XXX_processCommand(int cmd, int id, int p1) {
+  int status = NT_ERROR_CMD_INVALID;
+  switch (cmd) {
+    case NT_CMD_XXXCAT_XXXMD:
+      status = XXCAT_XXX(id);
+      break;
+    default:
+      DBG("XX:NT_ERROR_CMD_INVALID!");
+      status = NT_ERROR_CMD_INVALID;
+  }
+  return status;
+}
+
+uint8_t XXX_cmd(uint8_t id) {
+  unsigned int uS = sonars[ id == 1 ? 0 : 1].ping();
+  return uS / US_ROUNDTRIP_CM;   // distance in whole CM's
+}
+
+
+// when id=0 => all sensors,
+uint8_t XXX_generateReadings(uint8_t id) {
+  uint8_t status;
+  if (0 == id) {
+    uint8_t msg[NT_MSG_SIZE] = {
+      NT_DEFAULT_MSG_HEADER(),
+      NT_CREATE_CMD1(NT_CAT_SONAR, NT_CMD_SONAR_PING_RESULT, 1, sonar_ping(1)),
+      NT_CREATE_CMD1(NT_CAT_SONAR, NT_CMD_SONAR_PING_RESULT, 2, sonar_ping(2)),
+      NT_CREATE_CMD_NOP,
+      NT_CREATE_CMD_NOP
+    };
+    NT_MSG_CALC_CRC(msg);
+    status = NT_scheduleMsg(msg);
+
+  } else {
+    uint8_t msg[NT_MSG_SIZE] = {
+      NT_DEFAULT_MSG_HEADER(),
+      NT_CREATE_CMD(NT_CAT_SONAR, NT_CMD_SONAR_PING_RESULT, NT_CMD_NO_CONT), id, bytesFromInt(sonar_ping(id)),
+      NT_CREATE_CMD_NOP,
+      NT_CREATE_CMD_NOP,
+      NT_CREATE_CMD_NOP
+    };
+    NT_MSG_CALC_CRC(msg);
+    status = NT_scheduleMsg(msg);
+
+  }
+  return status;
+}
+
+#endif
+*/
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Mic
+// when id=0 => all sensors,
+
+#ifdef USE_MIC
+uint8_t mic_generateReadings(uint8_t id) {
+  uint8_t status;
+  if (0 == id) {
+    uint8_t msg[NT_MSG_SIZE] = {
+      NT_DEFAULT_MSG_HEADER(),
+      NT_CREATE_CMD1(NT_CAT_MIC, NT_CMD_MIC_RESULT, 1, analogRead(MIC_PIN)),
+      NT_CREATE_CMD_NOP,
+      NT_CREATE_CMD_NOP,
+      NT_CREATE_CMD_NOP
+    };
+    NT_MSG_CALC_CRC(msg);
+    status = NT_scheduleMsg(msg);
+
+  } 
+  return status;
+}
+
+#endif
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
 // System Commands
 
 uint8_t  system_processCommand(int cmd, int id, int p1) {
@@ -484,6 +643,10 @@ void emitSensorData() {
 #ifdef USE_IRRECV
   irrecv_generateReadings(0); // 0 =all,  1 = 1st, 2 = 2nd
 
+#endif
+
+#ifdef USE_MIC
+  mic_generateReadings(0); // 0 =all,  1 = 1st, 2 = 2nd
 #endif
 }
 

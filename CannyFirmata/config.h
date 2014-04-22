@@ -5,12 +5,13 @@
 
 #define USE_BLE 1
 #define USE_AX12 1
-//#define USE_SONAR 1
+#define USE_SONAR 1
 //#define USE_PIXY 1
 //#define USE_SERVOS
 //#define USE_MOTORS
-//#define USE_IRRECV 1
-
+#define USE_IRRECV 1
+#define USE_TONE
+#define USE_MIC 1
 
 
 // Pin Info:
@@ -31,7 +32,8 @@
 // Servo:               5, 6
 // Sonar:         3, 4,       7, 8
 // Motor: ???
-// IR   : ??
+// IR   :                  6!
+// Tone:                5!
 // Free:    None
 
 // Note: the NewPing library used for sonar has a 1-pin mode, need to look at that!
@@ -41,12 +43,20 @@
 
 // Analog
 //
-// I2C:             4, 5, 
+// I2C*:              4, 5, 
+// MIC:    0,
+// FREE:      1, 2, 3,      6
 
-// FREE:    1, 2, 3,       6
+// I2C to support: 3/6/9 axis accelraometers, compass, pixy, etc
 
 
 // Motor: where to put up to 4 pins for 2 motors...   4 pins are dir, on/off, brake & sense. could get away wiht just dir and power. 
+
+// IR wiring
+
+// Spkr wiring:   100k resister between 
+
+// Mic wiring:  10k resister between 5v and vcc
 
 
 
@@ -96,7 +106,6 @@
 #define ECHO_PIN2     3  // Arduino pin tied to echo pin on the ultrasonic sensor.
 #define MAX_DISTANCE 200 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
 
-
 // IR  settings
 
 #ifdef USE_IRRECV
@@ -121,7 +130,7 @@
 // System setting
 
 // Data feedback rates
-#define MINIMUM_SAMPLE_DELAY 10 
+#define MINIMUM_SAMPLE_DELAY 150 
 #define ANALOG_SAMPLE_DELAY 0
 
 
@@ -136,4 +145,12 @@ extern Adafruit_BLE_UART BLESerial;
 #include <PixyI2C.h>
 #endif
 
+
+#ifdef USE_TONE
+#define TONE_PIN 5 
+#endif
+
+#ifdef USE_MIC
+#define MIC_PIN 0
+#endif
 
