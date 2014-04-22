@@ -181,12 +181,6 @@ UARTPeripheral      *currentPeripheral;
 
 - (void)uartDidEncounterError:(NSString*)error{
     
-    //Display error alert
-    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"Error"
-                                                   message:error
-                                                  delegate:nil
-                                         cancelButtonTitle:@"OK"
-                                         otherButtonTitles:nil];
     
     NSLog(@"%@", error);
     
@@ -227,22 +221,16 @@ UARTPeripheral      *currentPeripheral;
     
     //Respond to system's bluetooth disabled
     
-    NSString *title     = @"Bluetooth Power";
     NSString *message   = @"You must turn on Bluetooth in Settings in order to connect to a device";
-    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
     NSLog(@"%@", message);
-    
-    //[alertView show];
 }
 
 
 - (void)alertFailedConnection{
     
     //Respond to unsuccessful connection
-    
-    NSString *title     = @"Unable to connect";
     NSString *message   = @"Please check power & wiring,\nthen reset your Arduino";
-    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    NSLog(@"%@", message);
     //[alertView show];
     
     [self reconnectBLE];

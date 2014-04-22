@@ -17,11 +17,15 @@
 - (void)flipsideViewControllerDidFinish:(BrainDashFlipsideViewController *)controller;
 @end
 
-@interface BrainDashFlipsideViewController : UIViewController //<NTDebugReceiver>
+@interface BrainDashFlipsideViewController : UIViewController //<NTDebugReceiver, NTSonarReceiver, NTIRReceiver>
 
 @property (weak, nonatomic) id <BrainDashFlipsideViewControllerDelegate> delegate;
 @property (weak, nonatomic) IBOutlet UITextView *debugTextView;
 
 - (IBAction)done:(id)sender;
+@property (weak, nonatomic) IBOutlet UILabel *sonar1Label;
+@property (weak, nonatomic) IBOutlet UILabel *sonar2Label;
+@property (weak, nonatomic) IBOutlet UILabel *irLabel;
+@property (weak, nonatomic) IBOutlet UILabel *micLabel;
 
 @end

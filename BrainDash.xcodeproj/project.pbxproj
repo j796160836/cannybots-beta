@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		B916F51F190506920057388D /* TheBriain.m in Sources */ = {isa = PBXBuildFile; fileRef = B916F51E190506920057388D /* TheBriain.m */; };
 		B916F522190529B40057388D /* BrainSpeakBLE.m in Sources */ = {isa = PBXBuildFile; fileRef = B916F521190529B40057388D /* BrainSpeakBLE.m */; };
+		B92AB26A19055D0600A9556D /* libcocos2d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B9F68B3A19055C9F00F6654D /* libcocos2d.a */; };
 		B92C59DE18FEC8FE005EC882 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59DD18FEC8FE005EC882 /* Foundation.framework */; };
 		B92C59E018FEC8FE005EC882 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59DF18FEC8FE005EC882 /* CoreGraphics.framework */; };
 		B92C59E218FEC8FE005EC882 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59E118FEC8FE005EC882 /* UIKit.framework */; };
@@ -29,16 +30,38 @@
 		B92C5A6218FEFD1D005EC882 /* CBUUID+StringExtraction.m in Sources */ = {isa = PBXBuildFile; fileRef = B92C5A5C18FEFD1D005EC882 /* CBUUID+StringExtraction.m */; };
 		B92C5A6318FEFD1D005EC882 /* NSData+hex.m in Sources */ = {isa = PBXBuildFile; fileRef = B92C5A5E18FEFD1D005EC882 /* NSData+hex.m */; };
 		B92C5A6418FEFD1D005EC882 /* NSString+hex.m in Sources */ = {isa = PBXBuildFile; fileRef = B92C5A6018FEFD1D005EC882 /* NSString+hex.m */; };
+		B9A66007190561B9004869BF /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B9A66006190561B9004869BF /* libz.dylib */; };
+		B9A6600E1905AA07004869BF /* HelloWorldScene.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A660081905AA07004869BF /* HelloWorldScene.m */; };
+		B9A6600F1905AA07004869BF /* ColoredSquareSprite.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A6600A1905AA07004869BF /* ColoredSquareSprite.m */; };
+		B9A660101905AA07004869BF /* ColoredCircleSprite.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A6600C1905AA07004869BF /* ColoredCircleSprite.m */; };
+		B9A660151905AA35004869BF /* SneakyJoystickSkinnedBase.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A660111905AA35004869BF /* SneakyJoystickSkinnedBase.m */; };
+		B9A660161905AA35004869BF /* SneakyButtonSkinnedBase.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A660131905AA35004869BF /* SneakyButtonSkinnedBase.m */; };
+		B9A660191905AA82004869BF /* SneakyButton.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A660171905AA82004869BF /* SneakyButton.m */; };
 		B9AD38DB1900FDDE00FA9CD0 /* NTProtocol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B9AD38DA1900FDDE00FA9CD0 /* NTProtocol.cpp */; };
+		B9F68B2919055A0D00F6654D /* SneakyJoystick.m in Sources */ = {isa = PBXBuildFile; fileRef = B9F68B1C19055A0D00F6654D /* SneakyJoystick.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		B92AB26619055CE900A9556D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B9F68B3419055C9F00F6654D /* cocos2d-ios.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 5018F24C0DFDEAC400C013A5;
+			remoteInfo = cocos2d;
+		};
 		B92C5A0318FEC8FF005EC882 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = B92C59D218FEC8FE005EC882 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = B92C59D918FEC8FE005EC882;
 			remoteInfo = BrainDash;
+		};
+		B9F68B3919055C9F00F6654D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B9F68B3419055C9F00F6654D /* cocos2d-ios.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5018F24D0DFDEAC400C013A5;
+			remoteInfo = cocos2d;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -47,6 +70,7 @@
 		B916F51E190506920057388D /* TheBriain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TheBriain.m; sourceTree = "<group>"; };
 		B916F520190529B40057388D /* BrainSpeakBLE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrainSpeakBLE.h; sourceTree = "<group>"; };
 		B916F521190529B40057388D /* BrainSpeakBLE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrainSpeakBLE.m; sourceTree = "<group>"; };
+		B92AB26B19055D0600A9556D /* libObjectiveChipmunk-iPhone.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libObjectiveChipmunk-iPhone.a"; path = "Libraries/cocos2d-iphone/build/Debug-iphoneos/libObjectiveChipmunk-iPhone.a"; sourceTree = "<group>"; };
 		B92C59DA18FEC8FE005EC882 /* BrainDash.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BrainDash.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B92C59DD18FEC8FE005EC882 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		B92C59DF18FEC8FE005EC882 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -77,8 +101,24 @@
 		B92C5A5E18FEFD1D005EC882 /* NSData+hex.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+hex.m"; sourceTree = "<group>"; };
 		B92C5A5F18FEFD1D005EC882 /* NSString+hex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+hex.h"; sourceTree = "<group>"; };
 		B92C5A6018FEFD1D005EC882 /* NSString+hex.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+hex.m"; sourceTree = "<group>"; };
+		B9A66006190561B9004869BF /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
+		B9A660081905AA07004869BF /* HelloWorldScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HelloWorldScene.m; sourceTree = "<group>"; };
+		B9A660091905AA07004869BF /* HelloWorldScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelloWorldScene.h; sourceTree = "<group>"; };
+		B9A6600A1905AA07004869BF /* ColoredSquareSprite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ColoredSquareSprite.m; sourceTree = "<group>"; };
+		B9A6600B1905AA07004869BF /* ColoredSquareSprite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColoredSquareSprite.h; sourceTree = "<group>"; };
+		B9A6600C1905AA07004869BF /* ColoredCircleSprite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ColoredCircleSprite.m; sourceTree = "<group>"; };
+		B9A6600D1905AA07004869BF /* ColoredCircleSprite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColoredCircleSprite.h; sourceTree = "<group>"; };
+		B9A660111905AA35004869BF /* SneakyJoystickSkinnedBase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SneakyJoystickSkinnedBase.m; sourceTree = "<group>"; };
+		B9A660121905AA35004869BF /* SneakyJoystickSkinnedBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SneakyJoystickSkinnedBase.h; sourceTree = "<group>"; };
+		B9A660131905AA35004869BF /* SneakyButtonSkinnedBase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SneakyButtonSkinnedBase.m; sourceTree = "<group>"; };
+		B9A660141905AA35004869BF /* SneakyButtonSkinnedBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SneakyButtonSkinnedBase.h; sourceTree = "<group>"; };
+		B9A660171905AA82004869BF /* SneakyButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SneakyButton.m; sourceTree = "<group>"; };
+		B9A660181905AA82004869BF /* SneakyButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SneakyButton.h; sourceTree = "<group>"; };
 		B9AD38D9190030D900FA9CD0 /* NTProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NTProtocol.h; path = ../../../../../avr/CannyFirmata/NTProtocol.h; sourceTree = "<group>"; };
 		B9AD38DA1900FDDE00FA9CD0 /* NTProtocol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NTProtocol.cpp; path = ../../../../../avr/CannyFirmata/NTProtocol.cpp; sourceTree = "<group>"; };
+		B9F68B1B19055A0D00F6654D /* SneakyJoystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SneakyJoystick.h; sourceTree = "<group>"; };
+		B9F68B1C19055A0D00F6654D /* SneakyJoystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SneakyJoystick.m; sourceTree = "<group>"; };
+		B9F68B3419055C9F00F6654D /* cocos2d-ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cocos2d-ios.xcodeproj"; path = "Libraries/cocos2d-iphone/cocos2d-ios.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,6 +126,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B9A66007190561B9004869BF /* libz.dylib in Frameworks */,
+				B92AB26A19055D0600A9556D /* libcocos2d.a in Frameworks */,
 				B92C5A2418FECE96005EC882 /* CoreBluetooth.framework in Frameworks */,
 				B92C59E018FEC8FE005EC882 /* CoreGraphics.framework in Frameworks */,
 				B92C59E218FEC8FE005EC882 /* UIKit.framework in Frameworks */,
@@ -123,6 +165,8 @@
 		B92C59D118FEC8FE005EC882 = {
 			isa = PBXGroup;
 			children = (
+				B9F68B3419055C9F00F6654D /* cocos2d-ios.xcodeproj */,
+				B9F68B0E19055A0D00F6654D /* SneakyInput */,
 				B916F51C190506920057388D /* TheBrain */,
 				B92C5A5718FEFD1D005EC882 /* BLE_BlueFruit_UART */,
 				B92C5A5A18FEFD1D005EC882 /* Categories */,
@@ -145,6 +189,8 @@
 		B92C59DC18FEC8FE005EC882 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B9A66006190561B9004869BF /* libz.dylib */,
+				B92AB26B19055D0600A9556D /* libObjectiveChipmunk-iPhone.a */,
 				B92C5A2318FECE96005EC882 /* CoreBluetooth.framework */,
 				B92C59DD18FEC8FE005EC882 /* Foundation.framework */,
 				B92C59DF18FEC8FE005EC882 /* CoreGraphics.framework */,
@@ -157,9 +203,9 @@
 		B92C59E318FEC8FE005EC882 /* BrainDash */ = {
 			isa = PBXGroup;
 			children = (
+				B92C59EF18FEC8FE005EC882 /* Main.storyboard */,
 				B92C59EC18FEC8FE005EC882 /* BrainDashAppDelegate.h */,
 				B92C59ED18FEC8FE005EC882 /* BrainDashAppDelegate.m */,
-				B92C59EF18FEC8FE005EC882 /* Main.storyboard */,
 				B92C59F218FEC8FE005EC882 /* BrainDashMainViewController.h */,
 				B92C59F318FEC8FE005EC882 /* BrainDashMainViewController.m */,
 				B92C59F518FEC8FE005EC882 /* BrainDashFlipsideViewController.h */,
@@ -223,6 +269,36 @@
 			path = Libraries/Categories;
 			sourceTree = "<group>";
 		};
+		B9F68B0E19055A0D00F6654D /* SneakyInput */ = {
+			isa = PBXGroup;
+			children = (
+				B9F68B1B19055A0D00F6654D /* SneakyJoystick.h */,
+				B9F68B1C19055A0D00F6654D /* SneakyJoystick.m */,
+				B9A660171905AA82004869BF /* SneakyButton.m */,
+				B9A660181905AA82004869BF /* SneakyButton.h */,
+				B9A660111905AA35004869BF /* SneakyJoystickSkinnedBase.m */,
+				B9A660121905AA35004869BF /* SneakyJoystickSkinnedBase.h */,
+				B9A660131905AA35004869BF /* SneakyButtonSkinnedBase.m */,
+				B9A660141905AA35004869BF /* SneakyButtonSkinnedBase.h */,
+				B9A660081905AA07004869BF /* HelloWorldScene.m */,
+				B9A660091905AA07004869BF /* HelloWorldScene.h */,
+				B9A6600A1905AA07004869BF /* ColoredSquareSprite.m */,
+				B9A6600B1905AA07004869BF /* ColoredSquareSprite.h */,
+				B9A6600C1905AA07004869BF /* ColoredCircleSprite.m */,
+				B9A6600D1905AA07004869BF /* ColoredCircleSprite.h */,
+			);
+			name = SneakyInput;
+			path = Libraries/SneakyInput/Classes;
+			sourceTree = "<group>";
+		};
+		B9F68B3519055C9F00F6654D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B9F68B3A19055C9F00F6654D /* libcocos2d.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -237,6 +313,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				B92AB26719055CE900A9556D /* PBXTargetDependency */,
 			);
 			name = BrainDash;
 			productName = BrainDash;
@@ -287,6 +364,12 @@
 			mainGroup = B92C59D118FEC8FE005EC882;
 			productRefGroup = B92C59DB18FEC8FE005EC882 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = B9F68B3519055C9F00F6654D /* Products */;
+					ProjectRef = B9F68B3419055C9F00F6654D /* cocos2d-ios.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				B92C59D918FEC8FE005EC882 /* BrainDash */,
@@ -294,6 +377,16 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		B9F68B3A19055C9F00F6654D /* libcocos2d.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libcocos2d.a;
+			remoteRef = B9F68B3919055C9F00F6654D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		B92C59D818FEC8FE005EC882 /* Resources */ = {
@@ -321,16 +414,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B9A660101905AA07004869BF /* ColoredCircleSprite.m in Sources */,
 				B92C59EA18FEC8FE005EC882 /* main.m in Sources */,
 				B916F522190529B40057388D /* BrainSpeakBLE.m in Sources */,
+				B9A660161905AA35004869BF /* SneakyButtonSkinnedBase.m in Sources */,
+				B9A6600E1905AA07004869BF /* HelloWorldScene.m in Sources */,
 				B92C5A6418FEFD1D005EC882 /* NSString+hex.m in Sources */,
 				B9AD38DB1900FDDE00FA9CD0 /* NTProtocol.cpp in Sources */,
 				B92C5A6118FEFD1D005EC882 /* UARTPeripheral.m in Sources */,
 				B92C59F718FEC8FE005EC882 /* BrainDashFlipsideViewController.m in Sources */,
+				B9A660151905AA35004869BF /* SneakyJoystickSkinnedBase.m in Sources */,
 				B92C5A6218FEFD1D005EC882 /* CBUUID+StringExtraction.m in Sources */,
 				B916F51F190506920057388D /* TheBriain.m in Sources */,
 				B92C59EE18FEC8FE005EC882 /* BrainDashAppDelegate.m in Sources */,
+				B9F68B2919055A0D00F6654D /* SneakyJoystick.m in Sources */,
 				B92C59F418FEC8FE005EC882 /* BrainDashMainViewController.m in Sources */,
+				B9A6600F1905AA07004869BF /* ColoredSquareSprite.m in Sources */,
+				B9A660191905AA82004869BF /* SneakyButton.m in Sources */,
 				B92C5A6318FEFD1D005EC882 /* NSData+hex.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -346,6 +446,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		B92AB26719055CE900A9556D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = cocos2d;
+			targetProxy = B92AB26619055CE900A9556D /* PBXContainerItemProxy */;
+		};
 		B92C5A0418FEC8FF005EC882 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = B92C59D918FEC8FE005EC882 /* BrainDash */;
@@ -454,11 +559,21 @@
 		B92C5A1018FEC8FF005EC882 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "BrainDash/BrainDash-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"Libraries/cocos2d-iphone/**",
+				);
 				INFOPLIST_FILE = "BrainDash/BrainDash-Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Libraries/cocos2d-iphone/build/Debug-iphoneos",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -467,11 +582,21 @@
 		B92C5A1118FEC8FF005EC882 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "BrainDash/BrainDash-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"Libraries/cocos2d-iphone/**",
+				);
 				INFOPLIST_FILE = "BrainDash/BrainDash-Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Libraries/cocos2d-iphone/build/Debug-iphoneos",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
