@@ -223,10 +223,16 @@ uint8_t  ax12_processCommand(int cmd, int id, int p1) {
       motor->endlessTurn(p1);
       status = NT_STATUS_OK;
       break;
-    case NT_CMD_AX12_SET_VELPOS:
-      // TODO:
+    case NT_CMD_AX12_SET_POS:
       motor->setPos(p1);
+      status = NT_STATUS_OK;
+      break;
+    case NT_CMD_AX12_SET_VEL:
       motor->setVel(p1);
+      status = NT_STATUS_OK;
+      break;
+    case NT_CMD_AX12_SET_VELPOS:
+      // TODO: move to multi arg command..
       status = NT_STATUS_OK;
       break;
     case NT_CMD_AX12_SET_ID:
@@ -271,7 +277,7 @@ uint8_t  ax12_runTests(int id, int p1) {
   }
 
 
-  
+  ax12_defaults();
 }
 #endif
 

@@ -233,6 +233,8 @@ extern uint8_t NT_lastError;
 #define NT_CMD_AX12_TESTS         0
 #define NT_CMD_AX12_PING          1
 #define NT_CMD_AX12_RESET         2
+#define NT_CMD_AX12_SET_VEL       3
+#define NT_CMD_AX12_SET_POS       4
 #define NT_CMD_AX12_SET_ENDLESS_TURN_MODE   10
 #define NT_CMD_AX12_SET_ENDLESS_TURN_SPEED  11
 #define NT_CMD_AX12_SET_VELPOS    13
