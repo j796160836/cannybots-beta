@@ -1,10 +1,34 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="5053" systemVersion="12F45" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="rQl-PL-IFJ">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="5056" systemVersion="12F45" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="rV2-Ov-HP8">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3733"/>
     </dependencies>
     <scenes>
-        <!--Brain Dash Main View Controller-->
+        <!--Tab Bar Controller-->
+        <scene sceneID="cDO-2w-P0b">
+            <objects>
+                <tabBarController definesPresentationContext="YES" modalTransitionStyle="crossDissolve" id="rV2-Ov-HP8" sceneMemberID="viewController">
+                    <nil key="simulatedStatusBarMetrics"/>
+                    <nil key="simulatedTopBarMetrics"/>
+                    <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
+                    <simulatedOrientationMetrics key="simulatedOrientationMetrics"/>
+                    <tabBar key="tabBar" contentMode="scaleToFill" id="rKx-O1-a57">
+                        <rect key="frame" x="129" y="330" width="163" height="49"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    </tabBar>
+                    <connections>
+                        <segue destination="rQl-PL-IFJ" kind="relationship" relationship="viewControllers" id="FtP-br-sTZ"/>
+                        <segue destination="YuC-Cb-irg" kind="relationship" relationship="viewControllers" id="JIW-fj-qkT"/>
+                        <segue destination="UG3-Gk-tOv" kind="relationship" relationship="viewControllers" id="o2R-nm-47B"/>
+                        <segue destination="kIf-nA-PKG" kind="relationship" relationship="viewControllers" id="7zP-eW-tzM"/>
+                    </connections>
+                </tabBarController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="RLD-al-3vj" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1834" y="-104"/>
+        </scene>
+        <!--Brain Dash Main View Controller - Gun-->
         <scene sceneID="rV5-Y2-ghB">
             <objects>
                 <viewController wantsFullScreenLayout="YES" id="rQl-PL-IFJ" customClass="BrainDashMainViewController" sceneMemberID="viewController">
@@ -26,9 +50,6 @@
                                 <state key="highlighted">
                                     <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 </state>
-                                <connections>
-                                    <segue destination="kIf-nA-PKG" kind="modal" identifier="showAlternate" modalTransitionStyle="flipHorizontal" id="ZEO-Qe-X3j"/>
-                                </connections>
                             </button>
                             <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="XNT-NZ-6sT" userLabel="Joypad View">
                                 <rect key="frame" x="271" y="33" width="297" height="230"/>
@@ -61,6 +82,7 @@
                         </constraints>
                         <simulatedOrientationMetrics key="simulatedOrientationMetrics" orientation="landscapeRight"/>
                     </view>
+                    <tabBarItem key="tabBarItem" title="Gun" image="Arrow Up 3.png" id="tfe-Hv-0bI"/>
                     <simulatedOrientationMetrics key="simulatedOrientationMetrics" orientation="landscapeRight"/>
                     <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
                     <size key="freeformSize" width="568" height="320"/>
@@ -90,9 +112,35 @@
                     </connections>
                 </panGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="-51" y="182"/>
+            <point key="canvasLocation" x="-356" y="-621"/>
         </scene>
-        <!--Brain Dash Flipside View Controller-->
+        <!--View Controller - Item-->
+        <scene sceneID="Ngh-45-kgo">
+            <objects>
+                <viewController id="YuC-Cb-irg" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="M6h-sY-5am"/>
+                        <viewControllerLayoutGuide type="bottom" id="0KW-8i-xOL"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="t7x-xE-goY">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="J5G-rN-sWR">
+                                <rect key="frame" x="-86" y="-251" width="320" height="568"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Item" image="Game Pad.png" id="UfL-k4-uce"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="gry-5F-eW4" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-846" y="357"/>
+        </scene>
+        <!--Brain Dash Flipside View Controller - Config-->
         <scene sceneID="z9J-Vg-hzE">
             <objects>
                 <viewController id="kIf-nA-PKG" customClass="BrainDashFlipsideViewController" sceneMemberID="viewController">
@@ -305,6 +353,7 @@
                         </constraints>
                         <simulatedOrientationMetrics key="simulatedOrientationMetrics" orientation="landscapeRight"/>
                     </view>
+                    <tabBarItem key="tabBarItem" title="Config" image="Gears.png" id="Nmy-g0-hle"/>
                     <simulatedOrientationMetrics key="simulatedOrientationMetrics" orientation="landscapeRight"/>
                     <connections>
                         <outlet property="debugTextView" destination="3Va-1Z-ifc" id="cz5-Q9-flP"/>
@@ -316,9 +365,41 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="xlJ-1o-FvB" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="624" y="182"/>
+            <point key="canvasLocation" x="-365" y="-145"/>
+        </scene>
+        <!--View Controller - Item-->
+        <scene sceneID="asa-8Q-D8E">
+            <objects>
+                <viewController id="UG3-Gk-tOv" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Wto-Ez-32S"/>
+                        <viewControllerLayoutGuide type="bottom" id="iv6-oA-sfK"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="B1F-KF-dlC">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Iok-Zz-8WQ">
+                                <rect key="frame" x="-86" y="-251" width="320" height="568"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Item" image="Control Panel.png" id="LHb-ji-rgb"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Etv-5n-LI5" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1266" y="701"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="Arrow Up 3.png" width="128" height="128"/>
+        <image name="Control Panel.png" width="128" height="128"/>
+        <image name="Game Pad.png" width="128" height="128"/>
+        <image name="Gears.png" width="128" height="128"/>
+    </resources>
     <simulatedMetricsContainer key="defaultSimulatedMetrics">
         <simulatedStatusBarMetrics key="statusBar"/>
         <simulatedOrientationMetrics key="orientation"/>
