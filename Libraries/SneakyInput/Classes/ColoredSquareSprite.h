@@ -1,5 +1,6 @@
 #import "cocos2d.h"
 
+
 @interface ColoredSquareSprite : CCNode  {
 	CGSize		size_;
 	float		opacity_;

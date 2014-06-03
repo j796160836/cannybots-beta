@@ -45,9 +45,16 @@
 
 - (void) getInfo;
 - (void) ping:(uint8_t)_id;
-- (void) setServoSpeed:(int16_t)speed forId:(uint8_t)_id;
 - (void) playDitty:(uint8_t)_id;
 - (void) playTone:(uint8_t)duration tone:(int16_t)tone;
+
+// AX 12 interface
+
+- (void) setServoSpeed:(int16_t)speed forId:(uint8_t)_id;
+- (void) setServoVelocity:(int16_t)velocity forId:(uint8_t)_id;
+- (void) setServoPosition:(int16_t)position forId:(uint8_t)_id;
+- (void) setEndlessTurnMode:(uint8_t)endlessMode forId:(uint8_t)_id;
+
 
 @end
     

@@ -45,7 +45,7 @@
 		SneakyButtonSkinnedBase *rightBut = [[SneakyButtonSkinnedBase alloc] init];
 		rightBut.position = ccp(256,32*5);
         rightBut.defaultSprite = [ColoredCircleSprite circleWithColor:[CCColor colorWithRed:0.5 green:1 blue:0.5 alpha:0.5f] radius:32];
-        rightBut.activatedSprite = [ColoredCircleSprite circleWithColor:[CCColor colorWithRed:1 green:1 blue:1 alpha:1] radius:32];
+        rightBut.activatedSprite = [ColoredCircleSprite circleWithColor:[CCColor colorWithRed:1 green:0 blue:0 alpha:1] radius:32];
         rightBut.pressSprite = [ColoredCircleSprite circleWithColor:[CCColor colorWithRed:1 green:0 blue:0 alpha:1] radius:32];
 		rightBut.button = [[SneakyButton alloc] initWithRect:CGRectMake(0, 0, 64, 64)];
 		rightButton = rightBut.button;
@@ -65,6 +65,7 @@
 -(void)tick:(float)delta {
     TheBrain* tb = [TheBrain sharedInstance];
 
+
     if (rightButton.value) {
         [tb playTone:4 tone:415];
     }
@@ -79,30 +80,47 @@
     
     float maxSpeed   = 900;
     float deadzone  = 0.1f;
+    float pivotZone = 0.2f;
 
-
+    
     if ( ( fabs(x)<deadzone) && ( fabs(y)< deadzone) ){
         leftSpeed = rightSpeed = 0;
     } else if (x>deadzone) {
         // turn right
         //leftSpeed  = maxSpeed*(y *    x);
-        leftSpeed  = maxSpeed*(y);
-        rightSpeed = maxSpeed*(y * (1-x)); //TODO: support spinning on the spot.. make speed go negative when x passes 0.5
+        if (fabs(y) < pivotZone) {
+            // pivot right
+            leftSpeed  = maxSpeed*(x);
+            rightSpeed = maxSpeed*(-x);
+            
+        } else {
+            leftSpeed  = maxSpeed*(y);
+            rightSpeed = maxSpeed*(y * (1-x));
+        }
     } else if (x < -deadzone){
         // turn left
         //rightSpeed = maxSpeed*(y *    fabs(x)  );
-        rightSpeed = maxSpeed*(y *    fabs(x)  );
-        leftSpeed  = maxSpeed*(y * (1-fabs(x)) ); //TODO: support spinning on the spot.. make speed go negative when x passes 0.5
-
+        if (fabs(y) < pivotZone) {
+            // pivot left
+            leftSpeed  = maxSpeed*(x);
+            rightSpeed = maxSpeed*(-x);
+            
+        } else {
+            rightSpeed = maxSpeed*(y *    fabs(x)  );
+            leftSpeed  = maxSpeed*(y * (1-fabs(x)) );
+        }
     } else {
     
-        // straight
+        // straight bck/forward
         leftSpeed = rightSpeed = maxSpeed*y;
     }
     
     //NSLog(@"(x,y)=(%f,%f) |  (left, right)=(%d,%d)", x, y, leftSpeed, rightSpeed);
     if ( ( abs(leftSpeed-leftSpeedLast)>5) || ( abs(rightSpeed - rightSpeedLast)>5 )) {
-                [tb setServoSpeed:leftSpeed forId:1];
+        [tb setEndlessTurnMode:YES forId:1];
+        [tb setEndlessTurnMode:YES forId:2];
+
+        [tb setServoSpeed:leftSpeed forId:1];
         [tb setServoSpeed:rightSpeed forId:2];
         leftSpeedLast = leftSpeed;
         rightSpeedLast = rightSpeed;

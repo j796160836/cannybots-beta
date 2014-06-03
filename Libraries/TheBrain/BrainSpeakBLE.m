@@ -54,7 +54,7 @@ UARTPeripheral      *currentPeripheral;
 
 
 - (void)scanForPeripherals{
-    
+    NSLog(@"scanForPeripherals");
     if (_connectionStatus == ConnectionStatusConnected)
         return;
     
@@ -79,7 +79,8 @@ UARTPeripheral      *currentPeripheral;
 
 
 - (void)connectPeripheral:(CBPeripheral*)peripheral{
-    
+    NSLog(@"");
+
     //Connect Bluetooth LE device
     
     //Clear off any pending connections
@@ -93,7 +94,8 @@ UARTPeripheral      *currentPeripheral;
 
 
 - (void)disconnect{
-    
+    NSLog(@"");
+
     //Disconnect Bluetooth LE device
     
     _connectionStatus = ConnectionStatusDisconnected;
@@ -108,7 +110,8 @@ UARTPeripheral      *currentPeripheral;
 
 
 - (void) centralManagerDidUpdateState:(CBCentralManager*)central{
-    
+    NSLog(@"%x", central.state);
+
     if (central.state == CBCentralManagerStatePoweredOn){
         
         //respond to powered on
@@ -134,6 +137,8 @@ UARTPeripheral      *currentPeripheral;
 
 - (void) centralManager:(CBCentralManager*)central didConnectPeripheral:(CBPeripheral*)peripheral{
     
+    NSLog(@"");
+
     if ([currentPeripheral.peripheral isEqual:peripheral]){
         
         if(peripheral.services){
@@ -261,6 +266,15 @@ UARTPeripheral      *currentPeripheral;
     
 }
 
-
+#import "NTProtocol.h"
+#if __cplusplus
+extern "C" {
+#endif
+    uint8_t  NT_scheduleMsg(uint8_t* buffer) {
+        return NT_STATUS_OK;
+    }
+#if __cplusplus
+}
+#endif
 
 @end

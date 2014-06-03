@@ -1,5 +1,6 @@
 
 #import "ColoredSquareSprite.h"
+#import "CCDrawingPrimitives.h"
 
 @interface ColoredSquareSprite (privateMethods)
 - (void) updateContentSize;

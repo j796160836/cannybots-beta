@@ -116,12 +116,98 @@
 }
 
 
--(BOOL)shouldAutorotateToInterfaceOrientation: (UIInterfaceOrientation)interfaceOrientation
-
-{
-    
+-(BOOL)shouldAutorotateToInterfaceOrientation: (UIInterfaceOrientation)interfaceOrientation {
     return UIInterfaceOrientationIsLandscape(interfaceOrientation);
+}
+
+
+// Gesture recognisers
+
+- (IBAction)longPressDetected:(UIGestureRecognizer *)sender {
+    _statusLabel.text = @"Long Press";
+}
+
+
+- (IBAction)swipeDetected:(UIGestureRecognizer *)sender {
+    _statusLabel.text = @"Right Swipe";
+}
+
+- (IBAction)tapDetected:(UIGestureRecognizer *)sender {
+    _statusLabel.text = @"Double Tap";
+}
+
+- (IBAction)pinchDetected:(UIGestureRecognizer *)sender {
+    static double lastTime = 0;
+    
+    double CurrentTime = CFAbsoluteTimeGetCurrent();//CACurrentMediaTime();
+    if ( (CurrentTime - lastTime) < ((float)1/5)) {
+        return;
+    } else {
+        lastTime = CurrentTime;
+    }
+    
+    
+    CGFloat scale =    [(UIPinchGestureRecognizer *)sender scale];
+    CGFloat velocity = [(UIPinchGestureRecognizer *)sender velocity];
+    
+    NSString *resultString = [[NSString alloc] initWithFormat:
+                              @"Pinch - scale = %f, velocity = %f",
+                              scale, velocity];
+    _statusLabel.text = resultString;
+    
+    
+    TheBrain* tb = [TheBrain sharedInstance];
+
+    uint16_t vel =200;
+    uint16_t pos =500*scale;
+    
+    [tb setEndlessTurnMode:NO forId:1];
+    [tb setServoVelocity:vel forId:1];
+    [tb setServoPosition:pos forId:1];
     
 }
+
+#define RADIANS_TO_DEGREES(radians) ((radians) * (180.0 / M_PI))
+- (IBAction)rotationDetected:(UIGestureRecognizer *)sender {
+    static double lastTime = 0;
+    
+    double CurrentTime = CFAbsoluteTimeGetCurrent();//CACurrentMediaTime();
+    if ( (CurrentTime - lastTime) < ((float)1/5)) {
+        return;
+    } else {
+        lastTime = CurrentTime;
+    }
+    
+    CGFloat radians =  [(UIRotationGestureRecognizer *)sender rotation];
+    CGFloat velocity = [(UIRotationGestureRecognizer *)sender velocity];
+    
+    NSString *resultString = [[NSString alloc] initWithFormat:
+                              @"Rotation - Radians = %f, velocity = %f",
+                              radians, velocity];
+    _statusLabel.text = resultString;
+    
+    
+    TheBrain* tb = [TheBrain sharedInstance];
+    
+    uint16_t vel =200;
+    uint16_t pos =200 + RADIANS_TO_DEGREES(radians)*2;
+    
+    [tb setEndlessTurnMode:NO forId:2];
+    [tb setServoVelocity:vel forId:2];
+    [tb setServoPosition:pos forId:2];
+
+}
+
+- (IBAction)panDetected:(UIGestureRecognizer *)sender {
+    
+    CGPoint trans    = [(UIPanGestureRecognizer*)sender translationInView:_gestureView];
+    CGPoint velocity = [(UIPanGestureRecognizer*)sender velocityInView:_gestureView];
+
+    NSString *resultString = [[NSString alloc] initWithFormat:
+                              @"Pan - trans = %@, velocity = %@",
+                              NSStringFromCGPoint(trans), NSStringFromCGPoint(velocity)];
+    _statusLabel.text = resultString;
+}
+
 
 @end

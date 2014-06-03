@@ -153,22 +153,6 @@ void dumpCmd(const NT_cmd cmd) {
 
 
 
-
-- (void) setServoSpeed:(int16_t)speed forId:(uint8_t)sid {
-    
-    uint8_t msg[NT_MSG_SIZE] = {
-        NT_DEFAULT_MSG_HEADER(),
-        NT_CREATE_CMD1(NT_CAT_AX12, NT_CMD_AX12_SET_ENDLESS_TURN_SPEED, sid, speed),
-        NT_CREATE_CMD_NOP,
-        NT_CREATE_CMD_NOP,
-        NT_CREATE_CMD_NOP
-    };
-    NT_MSG_CALC_CRC(msg);
-    
-    NSData *data = [NSData dataWithBytesNoCopy:(void*)msg length:NT_MSG_SIZE freeWhenDone:NO];
-    [self sendData:data];
-}
-
 - (void) playDitty:(uint8_t)_id {
     uint8_t msg[NT_MSG_SIZE] = {
         NT_DEFAULT_MSG_HEADER(),
@@ -197,6 +181,73 @@ void dumpCmd(const NT_cmd cmd) {
     NSData *data = [NSData dataWithBytesNoCopy:(void*)msg length:NT_MSG_SIZE freeWhenDone:NO];
     [self sendData:data];
 }
+
+
+// AX12
+
+
+
+
+- (void) setServoSpeed:(int16_t)speed forId:(uint8_t)sid {
+    
+    uint8_t msg[NT_MSG_SIZE] = {
+        NT_DEFAULT_MSG_HEADER(),
+        NT_CREATE_CMD1(NT_CAT_AX12, NT_CMD_AX12_SET_ENDLESS_TURN_SPEED, sid, speed),
+        NT_CREATE_CMD_NOP,
+        NT_CREATE_CMD_NOP,
+        NT_CREATE_CMD_NOP
+    };
+    NT_MSG_CALC_CRC(msg);
+    
+    NSData *data = [NSData dataWithBytesNoCopy:(void*)msg length:NT_MSG_SIZE freeWhenDone:NO];
+    [self sendData:data];
+}
+
+- (void) setServoVelocity:(int16_t)velocity forId:(uint8_t)_id {
+    uint8_t msg[NT_MSG_SIZE] = {
+        NT_DEFAULT_MSG_HEADER(),
+        NT_CREATE_CMD1(NT_CAT_AX12, NT_CMD_AX12_SET_VEL, _id, velocity),
+        NT_CREATE_CMD_NOP,
+        NT_CREATE_CMD_NOP,
+        NT_CREATE_CMD_NOP
+    };
+    NT_MSG_CALC_CRC(msg);
+    
+    NSData *data = [NSData dataWithBytesNoCopy:(void*)msg length:NT_MSG_SIZE freeWhenDone:NO];
+    [self sendData:data];
+    
+}
+
+- (void) setServoPosition:(int16_t)position forId:(uint8_t)_id {
+    uint8_t msg[NT_MSG_SIZE] = {
+        NT_DEFAULT_MSG_HEADER(),
+        NT_CREATE_CMD1(NT_CAT_AX12, NT_CMD_AX12_SET_POS, _id, position),
+        NT_CREATE_CMD_NOP,
+        NT_CREATE_CMD_NOP,
+        NT_CREATE_CMD_NOP
+    };
+    NT_MSG_CALC_CRC(msg);
+    
+    NSData *data = [NSData dataWithBytesNoCopy:(void*)msg length:NT_MSG_SIZE freeWhenDone:NO];
+    [self sendData:data];
+    
+}
+
+- (void) setEndlessTurnMode:(uint8_t)endlessMode forId:(uint8_t)_id {
+    uint8_t msg[NT_MSG_SIZE] = {
+        NT_DEFAULT_MSG_HEADER(),
+        NT_CREATE_CMD1(NT_CAT_AX12, NT_CMD_AX12_SET_ENDLESS_TURN_MODE, _id, endlessMode),
+        NT_CREATE_CMD_NOP,
+        NT_CREATE_CMD_NOP,
+        NT_CREATE_CMD_NOP
+    };
+    NT_MSG_CALC_CRC(msg);
+    
+    NSData *data = [NSData dataWithBytesNoCopy:(void*)msg length:NT_MSG_SIZE freeWhenDone:NO];
+    [self sendData:data];
+
+}
+
 
 
 @end

@@ -1,5 +1,6 @@
 
 #import "ColoredCircleSprite.h"
+#import "CCDrawingPrimitives.h"
 
 @interface ColoredCircleSprite (privateMethods)
 - (void) updateContentSize;

@@ -14,6 +14,17 @@
 @interface BrainDashMainViewController : UIViewController <BrainDashFlipsideViewControllerDelegate, CCDirectorDelegate>
 
 @property (weak, nonatomic) IBOutlet UIView *joypadView;
+@property (weak, nonatomic) IBOutlet UIView *gestureView;
 
+@property (weak, nonatomic) IBOutlet UILabel *statusLabel;
+
+- (IBAction)tapDetected:(UITapGestureRecognizer *)sender;
+- (IBAction)rotationDetected:(UIRotationGestureRecognizer *)sender;
+- (IBAction)pinchDetected:(UIPinchGestureRecognizer *)sender;
+- (IBAction)swipeDetected:(UISwipeGestureRecognizer *)sender;
+- (IBAction)longPressDetected:(UILongPressGestureRecognizer *)sender;
+- (IBAction)panDetected:(UIPanGestureRecognizer *)sender;
+
+@property (strong, nonatomic) IBOutlet UIPinchGestureRecognizer *pinchRecognizer;
 
 @end

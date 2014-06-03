@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		B916F51F190506920057388D /* TheBriain.m in Sources */ = {isa = PBXBuildFile; fileRef = B916F51E190506920057388D /* TheBriain.m */; };
 		B916F522190529B40057388D /* BrainSpeakBLE.m in Sources */ = {isa = PBXBuildFile; fileRef = B916F521190529B40057388D /* BrainSpeakBLE.m */; };
-		B92AB26A19055D0600A9556D /* libcocos2d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B9F68B3A19055C9F00F6654D /* libcocos2d.a */; };
 		B92C59DE18FEC8FE005EC882 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59DD18FEC8FE005EC882 /* Foundation.framework */; };
 		B92C59E018FEC8FE005EC882 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59DF18FEC8FE005EC882 /* CoreGraphics.framework */; };
 		B92C59E218FEC8FE005EC882 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59E118FEC8FE005EC882 /* UIKit.framework */; };
@@ -30,6 +29,7 @@
 		B92C5A6218FEFD1D005EC882 /* CBUUID+StringExtraction.m in Sources */ = {isa = PBXBuildFile; fileRef = B92C5A5C18FEFD1D005EC882 /* CBUUID+StringExtraction.m */; };
 		B92C5A6318FEFD1D005EC882 /* NSData+hex.m in Sources */ = {isa = PBXBuildFile; fileRef = B92C5A5E18FEFD1D005EC882 /* NSData+hex.m */; };
 		B92C5A6418FEFD1D005EC882 /* NSString+hex.m in Sources */ = {isa = PBXBuildFile; fileRef = B92C5A6018FEFD1D005EC882 /* NSString+hex.m */; };
+		B95632901938B25F00F06E82 /* libcocos2d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B9F68B3A19055C9F00F6654D /* libcocos2d.a */; };
 		B9A66007190561B9004869BF /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B9A66006190561B9004869BF /* libz.dylib */; };
 		B9A6600E1905AA07004869BF /* HelloWorldScene.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A660081905AA07004869BF /* HelloWorldScene.m */; };
 		B9A6600F1905AA07004869BF /* ColoredSquareSprite.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A6600A1905AA07004869BF /* ColoredSquareSprite.m */; };
@@ -42,19 +42,19 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		B92AB26619055CE900A9556D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = B9F68B3419055C9F00F6654D /* cocos2d-ios.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 5018F24C0DFDEAC400C013A5;
-			remoteInfo = cocos2d;
-		};
 		B92C5A0318FEC8FF005EC882 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = B92C59D218FEC8FE005EC882 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = B92C59D918FEC8FE005EC882;
 			remoteInfo = BrainDash;
+		};
+		B956328E1938B25400F06E82 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B9F68B3419055C9F00F6654D /* cocos2d-ios.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 5018F24C0DFDEAC400C013A5;
+			remoteInfo = cocos2d;
 		};
 		B9F68B3919055C9F00F6654D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -126,8 +126,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B95632901938B25F00F06E82 /* libcocos2d.a in Frameworks */,
 				B9A66007190561B9004869BF /* libz.dylib in Frameworks */,
-				B92AB26A19055D0600A9556D /* libcocos2d.a in Frameworks */,
 				B92C5A2418FECE96005EC882 /* CoreBluetooth.framework in Frameworks */,
 				B92C59E018FEC8FE005EC882 /* CoreGraphics.framework in Frameworks */,
 				B92C59E218FEC8FE005EC882 /* UIKit.framework in Frameworks */,
@@ -313,7 +313,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				B92AB26719055CE900A9556D /* PBXTargetDependency */,
+				B956328F1938B25400F06E82 /* PBXTargetDependency */,
 			);
 			name = BrainDash;
 			productName = BrainDash;
@@ -446,15 +446,15 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		B92AB26719055CE900A9556D /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = cocos2d;
-			targetProxy = B92AB26619055CE900A9556D /* PBXContainerItemProxy */;
-		};
 		B92C5A0418FEC8FF005EC882 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = B92C59D918FEC8FE005EC882 /* BrainDash */;
 			targetProxy = B92C5A0318FEC8FF005EC882 /* PBXContainerItemProxy */;
+		};
+		B956328F1938B25400F06E82 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = cocos2d;
+			targetProxy = B956328E1938B25400F06E82 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

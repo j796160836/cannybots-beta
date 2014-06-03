@@ -275,8 +275,6 @@
 		B7EE69E31819E75700B983FE /* CCLayoutBox.m in Sources */ = {isa = PBXBuildFile; fileRef = B7EE69DF1819E75700B983FE /* CCLayoutBox.m */; };
 		B7EE6A1E181AE34600B983FE /* CCSlider.h in Headers */ = {isa = PBXBuildFile; fileRef = B7EE6A1C181AE34600B983FE /* CCSlider.h */; };
 		B7EE6A1F181AE34600B983FE /* CCSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = B7EE6A1D181AE34600B983FE /* CCSlider.m */; };
-		B9F6712A190552A000F6654D /* MyCocos2DClass.h in Headers */ = {isa = PBXBuildFile; fileRef = B9F67128190552A000F6654D /* MyCocos2DClass.h */; };
-		B9F6712B190552A000F6654D /* MyCocos2DClass.m in Sources */ = {isa = PBXBuildFile; fileRef = B9F67129190552A000F6654D /* MyCocos2DClass.m */; };
 		D2CB8493187F80EF006820BE /* kazmath.h in Headers */ = {isa = PBXBuildFile; fileRef = A015BFB213B826D800C73E76 /* kazmath.h */; };
 		D2CB8494187F80EF006820BE /* mat3.h in Headers */ = {isa = PBXBuildFile; fileRef = A015BFB313B826D800C73E76 /* mat3.h */; };
 		D2CB8495187F80EF006820BE /* mat4.h in Headers */ = {isa = PBXBuildFile; fileRef = A015BFB413B826D800C73E76 /* mat4.h */; };
@@ -656,8 +654,6 @@
 		B7EE69DF1819E75700B983FE /* CCLayoutBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCLayoutBox.m; sourceTree = "<group>"; };
 		B7EE6A1C181AE34600B983FE /* CCSlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CCSlider.h; path = "cocos2d-ui/CCSlider.h"; sourceTree = "<group>"; };
 		B7EE6A1D181AE34600B983FE /* CCSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CCSlider.m; path = "cocos2d-ui/CCSlider.m"; sourceTree = "<group>"; };
-		B9F67128190552A000F6654D /* MyCocos2DClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MyCocos2DClass.h; path = ../../../../../../../../Downloads/MyCocos2DClass.h; sourceTree = "<group>"; };
-		B9F67129190552A000F6654D /* MyCocos2DClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyCocos2DClass.m; path = ../../../../../../../../Downloads/MyCocos2DClass.m; sourceTree = "<group>"; };
 		D33803DC18032E4F0072D8FE /* CCPhysics+ObjectiveChipmunk.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CCPhysics+ObjectiveChipmunk.h"; sourceTree = "<group>"; };
 		D33803E218032ECE0072D8FE /* CCPhysicsBody.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCPhysicsBody.m; sourceTree = "<group>"; };
 		D33803E418032F250072D8FE /* CCPhysicsBody.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CCPhysicsBody.h; sourceTree = "<group>"; };
@@ -733,8 +729,6 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
-				B9F67128190552A000F6654D /* MyCocos2DClass.h */,
-				B9F67129190552A000F6654D /* MyCocos2DClass.m */,
 				A07EC9B2141A8D32008C1F12 /* README.md */,
 				501A7CAC0EBC97BA005BC158 /* AUTHORS */,
 				508A4A2310B47A46004B9CC3 /* RELEASE_NOTES */,
@@ -1439,7 +1433,6 @@
 				5018F2770DFDEAFF00C013A5 /* CCScene.h in Headers */,
 				5018F27D0DFDEAFF00C013A5 /* CCTextureCache.h in Headers */,
 				B77060051831A07B0043CC67 /* OALNotifications.h in Headers */,
-				B9F6712A190552A000F6654D /* MyCocos2DClass.h in Headers */,
 				B7705FFA1831A07B0043CC67 /* ARCSafe_MemMgmt.h in Headers */,
 				B7705FFE1831A07B0043CC67 /* mach_timing.h in Headers */,
 				50B2CCCE0E119B8E00AE9530 /* CCDrawingPrimitives.h in Headers */,
@@ -1749,7 +1742,6 @@
 				5015043C113300F900A9CA65 /* CCActionProgressTimer.m in Sources */,
 				B7705FF51831A07B0043CC67 /* OpenALManager.m in Sources */,
 				50FBB2DB117613F500150761 /* CCActionTween.m in Sources */,
-				B9F6712B190552A000F6654D /* MyCocos2DClass.m in Sources */,
 				B7705FD71831A07B0043CC67 /* OALAudioTrack.m in Sources */,
 				E0C3655C11F0AE9B001C08F9 /* CCSpriteBatchNode.m in Sources */,
 				D2CB84A9187F80FD006820BE /* vec4.c in Sources */,
