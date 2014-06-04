@@ -1,5 +1,6 @@
 
 #include "NTProtocol.h"
+#include "NTUtils.h"
 
 uint8_t NT_lastError;
 
@@ -17,6 +18,26 @@ void NT_sendError(uint8_t err) {
   NT_scheduleMsg(msg);
 }
 
+void NT_sendCommand(int8_t cat, uint8_t cmd, uint8_t _id, uint16_t p1) {
+  uint8_t msg[NT_MSG_SIZE] = {
+    NT_DEFAULT_MSG_HEADER(),
+    NT_CREATE_CMD_NOP,//NT_CREATE_CMD(cat, cmd, NT_CMD_NO_CONT), _id, bytesFromInt(p1),
+    NT_CREATE_CMD_NOP,
+    NT_CREATE_CMD_NOP,
+    NT_CREATE_CMD_NOP
+  };
+  NT_CREATE_CMD_WITH_ARG1((&msg[NT_MSG_HEADER_BYTES]), cat, cmd, _id, p1);
+  
+  /*
+  msg[NT_MSG_HEADER_BYTES]=NT_CREATE_CMD(cat, cmd, 0);
+  msg[NT_MSG_HEADER_BYTES+1]=_id;
+  msg[NT_MSG_HEADER_BYTES+2]=hiByteFromInt(p1);
+  msg[NT_MSG_HEADER_BYTES+3]=hiByteFromInt(p1);
+  */
+  NT_MSG_CALC_CRC(msg);
+
+  NT_scheduleMsg(msg);
+}
 
 
 uint8_t NT_validateMsg(uint8_t *buffer, uint8_t len) {

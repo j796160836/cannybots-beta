@@ -2,13 +2,27 @@
   Copyright (C) 2014 Wayne Keenan  All rights reserved.
 */
 
-#include "config.h"
-#include "utils.h"
+#include "NTUtils.h"
 #include "NTProtocol.h"
 
+#include <Arduino.h>
+#include <EEPROM.h>
 
 
-  
+// Inbound & outbound FIFO's
+#include "SimpleFIFO.h"
+class BLEMessage {
+  public:
+    BLEMessage(uint8_t* buffer, uint16_t len) {
+      memcpy(payload, buffer, NT_MSG_SIZE);
+      size=len;
+    };
+  uint8_t payload[NT_MSG_SIZE];
+  uint16_t size;
+};
+
+SimpleFIFO<BLEMessage*, 32> inboundMsgFIFO;
+SimpleFIFO<BLEMessage*, 32> outboundMsgFIFO;  
   
 
 #ifdef USE_BLE
@@ -48,7 +62,10 @@ void aciCallback(aci_evt_opcode_t event)
 
 void rxCallback(uint8_t *buffer, uint8_t len) {
   //MAYBE- TODO: toggle command processing on/off for temporary actions, such as raw data transfer?
-  processMessage(buffer, len);
+  //
+  BLEMessage* msg = new BLEMessage(buffer, len);
+  
+  inboundMsgFIFO.enqueue(msg);
 }
 
 
@@ -57,16 +74,30 @@ void rxCallback(uint8_t *buffer, uint8_t len) {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // NT Implementation specifics
 
-// add a message to be sent to the client, currently sends immediately
-// MAYBE-TODO: q it?
-uint8_t msgQ[NT_MSG_SIZE];
+
+
 uint8_t  NT_scheduleMsg(uint8_t* buffer) {
-#ifdef USE_BLE
-  BLESerial.write(buffer, NT_MSG_SIZE);
-#endif
+  BLEMessage* msg = new BLEMessage(buffer, NT_MSG_SIZE);
+  outboundMsgFIFO.enqueue(msg);
+
 }
 
-
+void NT_processOutboundMessageQueue() {
+  
+  for (int i=0; i<outboundMsgFIFO.count(); i++) {
+    BLEMessage* msg = outboundMsgFIFO.dequeue();
+#ifdef USE_BLE
+    BLESerial.write(msg->payload, NT_MSG_SIZE);
+#endif
+    delete msg;
+  }
+  
+  for (int i=0; i<inboundMsgFIFO.count(); i++) {
+    BLEMessage* msg = inboundMsgFIFO.dequeue();
+    processMessage(msg->payload, msg->size);
+    delete msg;
+  }
+}
 
 
 
@@ -98,8 +129,10 @@ uint8_t  processCategory(int cat, int cmd, int id, int p1) {
       status = tone_processCommand(cmd, id, p1);
       break;
 #endif
-    case NT_CAT_SYSTEM:  
-      // TODO: system commands
+    //case NT_CAT_APP:  
+    case NT_CAT_APP_LINEFOLLOW:
+      status = linefollow_processCommand(cmd, id, p1);
+      
       break;
     case NT_CAT_NOP:  
       break;
@@ -387,9 +420,10 @@ void irrecv_init() {
 
 
 void irrecv_dump(decode_results *results);
-decode_results irrecv_results;
-uint8_t irrecv_generateReadings(uint8_t id)  {     // 0 =all,  1 = 1st, 2 = 2nd etc
+  decode_results irrecv_results;
+  uint8_t irrecv_generateReadings(uint8_t id)  {     // 0 =all,  1 = 1st, 2 = 2nd etc
   uint8_t status = NT_STATUS_OK;
+
   
   if (irrecv.decode(&irrecv_results)) {
     //int count = irrecv_results.rawlen;
@@ -397,7 +431,7 @@ uint8_t irrecv_generateReadings(uint8_t id)  {     // 0 =all,  1 = 1st, 2 = 2nd 
     //3irrecv_results.value;          // key press (
     //irrecv_results.panasonicAddress
     
-    //debug("v=%x t=%x", irrecv_results.value, irrecv_results.decode_type, irrecv_results.panasonicAddress);
+    debug("v=%x t=%x\n", irrecv_results.value, irrecv_results.decode_type, irrecv_results.panasonicAddress);
     irrecv.resume(); // Receive the next value
   
     uint8_t msg[NT_MSG_SIZE] = {
@@ -588,6 +622,8 @@ uint8_t mic_generateReadings(uint8_t id) {
 
 #endif
 
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // System Commands
@@ -619,26 +655,15 @@ uint8_t  system_processCommand(int cmd, int id, int p1) {
 // System Events
 
 void brainAwake() {
+  //DBG("brainAwake\n");
 }
 
 void clientConnected() {
-  INFO_PRINTLN((""));
-  INFO_PRINTLN(("        **** CANNY BRAIN V2 ****"));
-  INFO_PRINTLN(("  2K RAM SYSTEM  "));
-  INFO_PRINTLN(freeRam());
-  INFO_PRINTLN((" BRAIN BYTES FREE"));
-  INFO_PRINTLN((""));
-  INFO_PRINTLN(("READY."));
-  
-/*
-#ifdef USE_AX12  
-  ax12_autodetect();
-  ax12_defaults();
-#endif
-*/
+  //DBG("clientConnected\n");
 }
 
 void clientDisconnected() {
+  //DBG("clientDisconnected\n");
 }
 
 void emitSensorData() {
@@ -669,10 +694,12 @@ int samplingInterval = 200;          // how often to run the main loop (in ms)
 
 void sys_setup() {
   voltage = readVcc();
+
 }
 
 
 void setup() {
+  
   sys_setup();
 #ifdef USE_AX12  
   ax12_setup();
@@ -685,12 +712,22 @@ void setup() {
 #ifdef USE_BLE
   ble_setup();
 #endif
-
+  
 #ifdef USE_PIXY
   setup_pixy();
 #endif
 
   debug_setup();
+  NT_nv_init();
+ 
+  INFO_PRINTLN(F(""));
+  INFO_PRINTLN(F("        **** CANNY BRAIN V2 ****"));
+  INFO_PRINT(F("  2K RAM SYSTEM  "));
+  INFO_PRINT(freeRam());
+  INFO_PRINTLN(F(" BRAIN BYTES FREE"));
+  INFO_PRINTLN(F(""));
+  INFO_PRINTLN(F("READY."));
+  
 }
 
 
@@ -698,6 +735,8 @@ void loop() {
 #ifdef USE_BLE
   BLESerial.pollACI();
 #endif
+  NT_processOutboundMessageQueue();
+
 #ifdef USE_PIXY
    updatePixy();
 #endif

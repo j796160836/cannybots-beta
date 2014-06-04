@@ -1,29 +1,46 @@
 #ifndef utils_h
 #define utils_h
+
+#include "NT_myconfig.h"
+
+#define bytesFromInt(x)   (uint8_t)(x & 0xff), (uint8_t)((x &0xff00) >>8)
+#define hiByteFromInt(x)  (uint8_t)((x &0xff00) >>8)
+#define loByteFromInt(x)  (uint8_t)(x & 0xff)
+#define mk16bit(x,y) ( (x&0xFFFF) + (y<<8))
+
+#if defined(NT_PLATFORM_AVR)
 #include <Arduino.h>
-
-#include "config.h"
-
+#include <EEPROM.h>
 template<class T> inline Print &operator <<(Print &obj, T arg) {  obj.print(arg);  return obj; }
 
+void debug(const __FlashStringHelper* format, ...);
 
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 #define ATMEGA 1
 #endif
 
+void NT_nv_init();
+bool NT_nv_setupConfig();
+bool NT_nv_isValidConfig();
+bool NT_nv_setByte(uint16_t address, uint8_t b);
+uint8_t NT_nv_getByte(uint16_t address);
+bool NT_nv_setInt(uint16_t address, uint16_t b);
+uint16_t NT_nv_getInt(uint16_t address);
+
+
+#endif
+
+
+
 /////////////////////////////////////////////////////
 // Debug
 void   debug_setup();
 void debug(char * format, ...);
-void debug(const __FlashStringHelper* format, ...);
+
+#ifdef DEBUG_LEVEL
 
 
-#ifdef DEBUG
-#ifdef USE_BLE
-#define DBG(x) BLESerial.println(x);
-#else
-#define DBG(x) Serial.println(x);
-#endif
+
 #define DBG_PRINT(x) DBG_OUT << x
 #define DBG_PRINT_DETAILED(x) DBG_OUT <<  " : " << __PRETTY_FUNCTION__ << ' ' << __FILE__ << ":" << __LINE__  << " - "  << x
 #define DBG_PRINT_SIMPLE(x) DBG_OUT << x
@@ -34,7 +51,7 @@ void debug(const __FlashStringHelper* format, ...);
 #define DBG_PRINTLN(x)
 #endif
 
-#ifdef INFO
+#ifdef INFO_LEVEL
 #define INFO(x) INFO_PRINT(x)
 #define INFO_PRINT(x) INFO_OUT << x
 #define INFO_PRINT_DETAILED(x) INFO_OUT <<  " : " << __PRETTY_FUNCTION__ << ' ' << __FILE__ << ":" << __LINE__  << " - "  << x
@@ -46,11 +63,12 @@ void debug(const __FlashStringHelper* format, ...);
 #define INFO_PRINTLN(x)
 #endif
 
-#define mk16bit(x,y) ( x + (y<<8))
+
 
 extern int voltage;
 
 long readVcc();
 int freeRam ();
 
-#endif;
+#endif
+

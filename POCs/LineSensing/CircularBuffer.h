@@ -5,44 +5,33 @@
 template <typename T, uint16_t Size>
 class CircularBuffer {
 public:
-  enum {
-    Empty = 0,
-    Half = Size / 2,
-    Full = Size,
-  };
- 
+
   CircularBuffer() :
-    wp_(buf_), rp_(buf_), tail_(buf_+Size),  remain_(0) {}
-  ~CircularBuffer() {}
+    writePtr(buf), 
+    tail(buf+Size) {
+  }
+
+  ~CircularBuffer() {
+  }
+
   void push(T value) {
-    *wp_++ = value;
-    remain_++;
-    if (wp_ == tail_) wp_ = buf_;
-  }
-  T pop() {
-    T result = *rp_++;
-    remain_--;
-    if (rp_ == tail_) rp_ = buf_;
-    return result;
-  }
-  int remain() const {
-    return remain_;
+    *writePtr++ = value;
+    if (writePtr == tail) 
+      writePtr = buf;
   }
   
   int average() {
     int total = 0;
-    for (T* i=buf_; i<buf_+Size; i++) {
-       total += *i; 
+    for (int i=0; i<Size; i++) {
+       total += buf[i]; 
     }
     return ( total / Size );
   }
  
 private:
-  T buf_[Size];
-  T *wp_;
-  T *rp_;
-  T *tail_;
-  uint16_t remain_;
+  T buf[Size];
+  T *writePtr;
+  T *tail;
 };
  
 #endif

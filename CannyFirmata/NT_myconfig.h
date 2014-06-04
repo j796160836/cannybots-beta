@@ -1,17 +1,77 @@
 
+#include "NT_APP_LineFollowing.h"
 
-#define DEBUG 1
-//#define INFO
 
 #define USE_BLE 1
-#define USE_AX12 1
-#define USE_SONAR 1
+//#define USE_AX12 1
+//#define USE_SONAR 1
 //#define USE_PIXY 1
 //#define USE_SERVOS
 //#define USE_MOTORS
-#define USE_IRRECV 1
-#define USE_TONE
-#define USE_MIC 1
+//#define USE_IRRECV 1
+//#define USE_TONE
+//#define USE_MIC 1
+
+
+//#define NT_PLATFORM_MBED 1
+
+
+
+#ifdef _WIN64
+  #define NT_PLATFORM_WIN64 1
+#elif _WIN32
+  #define NT_PLATFORM_WIN32 1
+#elif __APPLE__
+    #include "TargetConditionals.h"
+    #if TARGET_OS_IPHONE && TARGET_IPHONE_SIMULATOR
+        #define NT_PLATFORM_IOS 1
+        #define NT_PLATFORM_IOS_SIM 1
+    #elif TARGET_OS_IPHONE
+        #define NT_PLATFORM_IOS 1
+    #else
+        #define NT_PLATFORM_OSX 1
+    #endif
+#elif __linux
+        #define NT_PLATFORM_LINUX 1
+#elif __unix // all unices not caught above
+        #define NT_PLATFORM_UNIX 1
+#elif __posix
+        #define NT_PLATFORM_POSIX 1
+#else
+#define NT_PLATFORM_AVR 1
+#endif
+
+
+
+#define DEBUG_LEVEL 1
+#define INFO_LEVEL 1
+
+
+#if defined(NT_PLATFORM_AVR)
+
+#define INFO_OUT_TARGET_UART 1
+#define DEBUG_OUT_TARGET_UART 1
+
+//#define INFO_OUT_TARGET_BLE 1
+//#define DEBUG_OUT_TARGET_BLE 1
+
+#if defined(INFO_OUT_TARGET_UART)
+#define INFO_OUT Serial
+#define INFO_OUT_TARGET_UART_BAUD 9600
+#endif
+
+
+
+#ifdef DEBUG_OUT_TARGET_BLE
+// doenst support streams...
+#define DBG_OUT BLESerial  
+#define DBG(x) BLESerial.println(x);
+#else
+#define DBG_OUT Serial
+#define DBG(x) DBG_OUT << x;
+#endif
+
+
 
 
 // Pin Info:
@@ -52,7 +112,7 @@
 
 // Motor: where to put up to 4 pins for 2 motors...   4 pins are dir, on/off, brake & sense. could get away wiht just dir and power. 
 
-// IR wiring
+// IR wiring:    
 
 // Spkr wiring:   100k resister between 
 
@@ -153,4 +213,10 @@ extern Adafruit_BLE_UART BLESerial;
 #ifdef USE_MIC
 #define MIC_PIN 0
 #endif
+
+
+#endif
+
+////////////////////////////
+
 

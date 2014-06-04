@@ -2,7 +2,7 @@
 #define NTProtocol_h
 
 
-
+#include "NT_APP_LineFollowing.h"
 
 // protocol is 'fire and forget' asyncronous.  no DACK and no correlated PACK
 // The BlueFruit UART service has the RX characteristic defined to be to 'write with no reply'
@@ -116,7 +116,7 @@ extern "C" {
 #define NT_CMD_NO_CONT 0
 #define NT_CMD_CONT 1
 
-#define bytesFromInt(x)   (uint8_t)(x & 0xff), (uint8_t)((x &0xff00) >>8)
+
 
 //#define copy_bytes16(x, adr) *(adr) =
 #define NT_CREATE_CMD(cat, cmd, cont)   ( (cat & 0x7) << 5 )  +  ( (cont & 1) << 4 ) + ( cmd & 0xF)
@@ -181,6 +181,8 @@ extern uint8_t NT_lastError;
 
 
 #define NT_CAT_NOP   0
+#define NT_CAT_SYSTEM   0
+
 #define NT_CAT_AX12  1
 #define NT_CAT_SONAR 2
 
@@ -190,7 +192,8 @@ extern uint8_t NT_lastError;
 
 #define NT_CAT_PIXY 4
 #define NT_CAT_TONE 6
-#define NT_CAT_SYSTEM  7
+#define NT_CAT_APP  7
+// CAT_APP are user defined for the 'current' app. (will provide 'get_current_app_id' command to interogate firmware)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -267,5 +270,7 @@ extern uint8_t NT_lastError;
 // 42  setMultiPosVel
 
 
+
+void NT_sendCommand(int8_t cat, uint8_t cmd, uint8_t _id, uint16_t p1);
 
 #endif
