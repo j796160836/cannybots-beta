@@ -29,18 +29,24 @@
 {
 	if( (self=[super init] )) {
         
-        // Create a colored background (Dark Grey)
         CCNodeColor *background =[CCNodeColor nodeWithColor:[CCColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:1.0f]];
         [self addChild:background];
-
+        
+        int w = [[CCDirector sharedDirector] viewSize].width;
+        int h = [[CCDirector sharedDirector] viewSize].height;
+        
 		SneakyJoystickSkinnedBase *leftJoy = [[SneakyJoystickSkinnedBase alloc] init];
-		leftJoy.position = ccp([[CCDirector sharedDirector] viewSize].width/2,64*2);
-        leftJoy.backgroundSprite = [ColoredCircleSprite circleWithColor:[CCColor colorWithRed:1 green:0 blue:0 alpha:0.5] radius:64];
-        leftJoy.thumbSprite = [ColoredCircleSprite circleWithColor:[CCColor colorWithRed:0 green:0 blue:1 alpha:0.8f] radius:32];
-		leftJoy.joystick = [[SneakyJoystick alloc] initWithRect:CGRectMake(0,0,128,128)];
+		leftJoy.position = ccp(w/2,h/2);
+        leftJoy.backgroundSprite = [CCSprite spriteWithImageNamed:@"joystick.png"];
+
+        
+        leftJoy.thumbSprite =  [CCSprite spriteWithImageNamed:@"knob.png"];
+		leftJoy.joystick = [[SneakyJoystick alloc] initWithRect:CGRectMake(0,0,180,180)];
 		leftJoystick = leftJoy.joystick;
 		[self addChild:leftJoy];
 		
+        
+        
 		SneakyButtonSkinnedBase *rightBut = [[SneakyButtonSkinnedBase alloc] init];
 		rightBut.position = ccp(256,32*5);
         rightBut.defaultSprite = [ColoredCircleSprite circleWithColor:[CCColor colorWithRed:0.5 green:1 blue:0.5 alpha:0.5f] radius:32];
@@ -116,11 +122,13 @@
     
     //NSLog(@"(x,y)=(%f,%f) |  (left, right)=(%d,%d)", x, y, leftSpeed, rightSpeed);
     if ( ( abs(leftSpeed-leftSpeedLast)>5) || ( abs(rightSpeed - rightSpeedLast)>5 )) {
+        //Dynamixels:
         //[tb setEndlessTurnMode:YES forId:1];
         //[tb setEndlessTurnMode:YES forId:2];
-
         //[tb setServoSpeed:leftSpeed forId:1];
         //[tb setServoSpeed:rightSpeed forId:2];
+        
+        // Line folllowing motors
         [tb lf_setMotorSpeed:leftSpeed forId:1];
         [tb lf_setMotorSpeed:rightSpeed forId:2];
         leftSpeedLast = leftSpeed;

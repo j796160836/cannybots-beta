@@ -58,7 +58,13 @@
 
 // APP:  Line following
 //TODO: move this to seprate class
+// Config
 
+- (void) lf_cfg_get_pid_p;
+- (void) lf_cfg_get_pid_i;
+- (void) lf_cfg_get_pid_d;
+
+// Actions
 - (void) lf_go;
 - (void) lf_stop;
 - (void) lf_left;

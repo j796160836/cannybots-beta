@@ -1,4 +1,5 @@
 #import "TheBrain.h"
+#import "NTUtils.h"
 #import "NT_APP_LineFollowing.h"
 
 #import "BrainSpeakBLE.h"
@@ -266,6 +267,24 @@ void dumpCmd(const NT_cmd cmd) {
     [self sendData:data];
     
 }
+
+
+// Config
+
+- (void) lf_cfg_get_pid_p {
+    [self lf_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_CONFIG_GET id:LINEFOLLOW_CFG_PID_P p1:0];
+}
+
+- (void) lf_cfg_get_pid_i {
+    [self lf_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_CONFIG_GET id:LINEFOLLOW_CFG_PID_I p1:0];
+}
+
+- (void) lf_cfg_get_pid_d {
+    [self lf_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_CONFIG_GET id:LINEFOLLOW_CFG_PID_D p1:0];
+}
+
+
+// Actions
 
 
 - (void) lf_go {
