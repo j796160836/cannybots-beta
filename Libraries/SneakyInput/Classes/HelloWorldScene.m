@@ -30,12 +30,11 @@
 	if( (self=[super init] )) {
         
         // Create a colored background (Dark Grey)
-        //CCNodeColor *background = [[CCNodeColor ]]//[CCNodeColor nodeWithColor:[CCColor colorWithRed:0.2f green:0.2f blue:0.2f alpha:0.0f]];
-        //[self addChild:background];
+        CCNodeColor *background =[CCNodeColor nodeWithColor:[CCColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:1.0f]];
+        [self addChild:background];
 
-		
 		SneakyJoystickSkinnedBase *leftJoy = [[SneakyJoystickSkinnedBase alloc] init];
-		leftJoy.position = ccp(64*2,64*2);
+		leftJoy.position = ccp([[CCDirector sharedDirector] viewSize].width/2,64*2);
         leftJoy.backgroundSprite = [ColoredCircleSprite circleWithColor:[CCColor colorWithRed:1 green:0 blue:0 alpha:0.5] radius:64];
         leftJoy.thumbSprite = [ColoredCircleSprite circleWithColor:[CCColor colorWithRed:0 green:0 blue:1 alpha:0.8f] radius:32];
 		leftJoy.joystick = [[SneakyJoystick alloc] initWithRect:CGRectMake(0,0,128,128)];
@@ -51,7 +50,7 @@
 		rightButton = rightBut.button;
 		rightButton.isToggleable = YES;
         //rightButton.isHoldable = YES;
-		[self addChild:rightBut];
+		//[self addChild:rightBut];
 		
 		[[CCDirector sharedDirector] setAnimationInterval:1.0f/60.0f];
 		
@@ -117,11 +116,13 @@
     
     //NSLog(@"(x,y)=(%f,%f) |  (left, right)=(%d,%d)", x, y, leftSpeed, rightSpeed);
     if ( ( abs(leftSpeed-leftSpeedLast)>5) || ( abs(rightSpeed - rightSpeedLast)>5 )) {
-        [tb setEndlessTurnMode:YES forId:1];
-        [tb setEndlessTurnMode:YES forId:2];
+        //[tb setEndlessTurnMode:YES forId:1];
+        //[tb setEndlessTurnMode:YES forId:2];
 
-        [tb setServoSpeed:leftSpeed forId:1];
-        [tb setServoSpeed:rightSpeed forId:2];
+        //[tb setServoSpeed:leftSpeed forId:1];
+        //[tb setServoSpeed:rightSpeed forId:2];
+        [tb lf_setMotorSpeed:leftSpeed forId:1];
+        [tb lf_setMotorSpeed:rightSpeed forId:2];
         leftSpeedLast = leftSpeed;
         rightSpeedLast = rightSpeed;
     }

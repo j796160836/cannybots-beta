@@ -1,4 +1,5 @@
 #import "TheBrain.h"
+#import "NT_APP_LineFollowing.h"
 
 #import "BrainSpeakBLE.h"
 #import "NTProtocol.h"
@@ -168,7 +169,7 @@ void dumpCmd(const NT_cmd cmd) {
     
     
 }
-- (void) playTone:(uint8_t)duration tone:(uint16_t)tone {
+- (void) playTone:(uint8_t)duration tone:(int16_t)tone {
     uint8_t msg[NT_MSG_SIZE] = {
         NT_DEFAULT_MSG_HEADER(),
         NT_CREATE_CMD1(NT_CAT_TONE, NT_CMD_TONE_PLAY_TONE, duration, tone),
@@ -248,6 +249,64 @@ void dumpCmd(const NT_cmd cmd) {
 
 }
 
+////////////////////////////////////////
+//// Line following
 
+- (void) lf_util:(uint8_t)cat cmd:(uint8_t)cmd id:(uint8_t)_id p1:(int16_t)p1 {
+    uint8_t msg[NT_MSG_SIZE] = {
+        NT_DEFAULT_MSG_HEADER(),
+        NT_CREATE_CMD1(cat, cmd, _id, p1),
+        NT_CREATE_CMD_NOP,
+        NT_CREATE_CMD_NOP,
+        NT_CREATE_CMD_NOP
+    };
+    NT_MSG_CALC_CRC(msg);
+    
+    NSData *data = [NSData dataWithBytesNoCopy:(void*)msg length:NT_MSG_SIZE freeWhenDone:NO];
+    [self sendData:data];
+    
+}
+
+
+- (void) lf_go {
+    [self lf_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_MOVE id:LINEFOLLOW_GO p1:0];
+}
+
+- (void) lf_stop {
+    [self lf_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_MOVE id:LINEFOLLOW_STOP p1:0];
+}
+
+- (void) lf_left {
+    [self lf_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_MOVE id:LINEFOLLOW_LEFT p1:0];
+}
+
+- (void) lf_right {
+    [self lf_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_MOVE id:LINEFOLLOW_RIGHT p1:0];
+}
+
+- (void) lf_switchNextJunction {
+    [self lf_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_MOVE id:LINEFOLLOW_SWITCH_NEXT_JUNCTION p1:0];
+}
+
+
+- (void) lf_speed:(int16_t)speed {
+    [self lf_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_MOVE id:LINEFOLLOW_SPEED p1:speed];
+}
+
+
+- (void) lf_setMotorSpeed:(int16_t)speed forId:(uint8_t)sid {
+    
+    uint8_t msg[NT_MSG_SIZE] = {
+        NT_DEFAULT_MSG_HEADER(),
+        NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_MOTOR_SPEED, sid, speed),
+        NT_CREATE_CMD_NOP,
+        NT_CREATE_CMD_NOP,
+        NT_CREATE_CMD_NOP
+    };
+    NT_MSG_CALC_CRC(msg);
+    
+    NSData *data = [NSData dataWithBytesNoCopy:(void*)msg length:NT_MSG_SIZE freeWhenDone:NO];
+    [self sendData:data];
+}
 
 @end

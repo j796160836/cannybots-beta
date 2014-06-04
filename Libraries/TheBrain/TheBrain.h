@@ -56,5 +56,16 @@
 - (void) setEndlessTurnMode:(uint8_t)endlessMode forId:(uint8_t)_id;
 
 
+// APP:  Line following
+//TODO: move this to seprate class
+
+- (void) lf_go;
+- (void) lf_stop;
+- (void) lf_left;
+- (void) lf_right;
+- (void) lf_switchNextJunction;
+- (void) lf_speed:(int16_t)speed;
+- (void) lf_setMotorSpeed:(int16_t)speed forId:(uint8_t)sid;
+
 @end
     

@@ -63,6 +63,12 @@
 		B9AD5E50193E64C800BC9631 /* Search.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E37193E64C800BC9631 /* Search.png */; };
 		B9AD5E51193E64C800BC9631 /* Traffic Cone.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E38193E64C800BC9631 /* Traffic Cone.png */; };
 		B9AD5E52193E64C800BC9631 /* Traffic Lights.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E39193E64C800BC9631 /* Traffic Lights.png */; };
+		B9AD5E56193EEBEF00BC9631 /* Arrow Right 3.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E54193EEBEF00BC9631 /* Arrow Right 3.png */; };
+		B9AD5E57193EEBEF00BC9631 /* Arrow Left 3.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E55193EEBEF00BC9631 /* Arrow Left 3.png */; };
+		B9AD5E5A193EF35800BC9631 /* Speed Low.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E58193EF35800BC9631 /* Speed Low.png */; };
+		B9AD5E5B193EF35800BC9631 /* Speed High.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E59193EF35800BC9631 /* Speed High.png */; };
+		B9AD5E5F193EF58A00BC9631 /* Cannybots_Logo_2000x446.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E5E193EF58A00BC9631 /* Cannybots_Logo_2000x446.png */; };
+		B9AD5E62193EF9D400BC9631 /* BrainDashLineFollowingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9AD5E61193EF9D400BC9631 /* BrainDashLineFollowingViewController.m */; };
 		B9F68B2919055A0D00F6654D /* SneakyJoystick.m in Sources */ = {isa = PBXBuildFile; fileRef = B9F68B1C19055A0D00F6654D /* SneakyJoystick.m */; };
 /* End PBXBuildFile section */
 
@@ -166,6 +172,14 @@
 		B9AD5E37193E64C800BC9631 /* Search.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Search.png; sourceTree = "<group>"; };
 		B9AD5E38193E64C800BC9631 /* Traffic Cone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Traffic Cone.png"; sourceTree = "<group>"; };
 		B9AD5E39193E64C800BC9631 /* Traffic Lights.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Traffic Lights.png"; sourceTree = "<group>"; };
+		B9AD5E54193EEBEF00BC9631 /* Arrow Right 3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Arrow Right 3.png"; sourceTree = "<group>"; };
+		B9AD5E55193EEBEF00BC9631 /* Arrow Left 3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Arrow Left 3.png"; sourceTree = "<group>"; };
+		B9AD5E58193EF35800BC9631 /* Speed Low.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Speed Low.png"; sourceTree = "<group>"; };
+		B9AD5E59193EF35800BC9631 /* Speed High.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Speed High.png"; sourceTree = "<group>"; };
+		B9AD5E5E193EF58A00BC9631 /* Cannybots_Logo_2000x446.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Cannybots_Logo_2000x446.png; sourceTree = "<group>"; };
+		B9AD5E60193EF9D400BC9631 /* BrainDashLineFollowingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrainDashLineFollowingViewController.h; sourceTree = "<group>"; };
+		B9AD5E61193EF9D400BC9631 /* BrainDashLineFollowingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrainDashLineFollowingViewController.m; sourceTree = "<group>"; };
+		B9AD5E63193F0D6200BC9631 /* NT_APP_LineFollowing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NT_APP_LineFollowing.h; path = ../../../../../avr/CannyFirmata/NT_APP_LineFollowing.h; sourceTree = "<group>"; };
 		B9F68B1B19055A0D00F6654D /* SneakyJoystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SneakyJoystick.h; sourceTree = "<group>"; };
 		B9F68B1C19055A0D00F6654D /* SneakyJoystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SneakyJoystick.m; sourceTree = "<group>"; };
 		B9F68B3419055C9F00F6654D /* cocos2d-ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cocos2d-ios.xcodeproj"; path = "Libraries/cocos2d-iphone/cocos2d-ios.xcodeproj"; sourceTree = "<group>"; };
@@ -201,6 +215,7 @@
 		B916F51C190506920057388D /* TheBrain */ = {
 			isa = PBXGroup;
 			children = (
+				B9AD5E63193F0D6200BC9631 /* NT_APP_LineFollowing.h */,
 				B9AD38DA1900FDDE00FA9CD0 /* NTProtocol.cpp */,
 				B9AD38D9190030D900FA9CD0 /* NTProtocol.h */,
 				B916F51D190506920057388D /* TheBrain.h */,
@@ -215,6 +230,7 @@
 		B92C59D118FEC8FE005EC882 = {
 			isa = PBXGroup;
 			children = (
+				B9AD5E5C193EF58A00BC9631 /* graphics */,
 				B9AD5E1D193E64C800BC9631 /* icons */,
 				B9F68B3419055C9F00F6654D /* cocos2d-ios.xcodeproj */,
 				B9F68B0E19055A0D00F6654D /* SneakyInput */,
@@ -263,6 +279,8 @@
 				B92C59F618FEC8FE005EC882 /* BrainDashFlipsideViewController.m */,
 				B92C59F818FEC8FE005EC882 /* Images.xcassets */,
 				B92C59E418FEC8FE005EC882 /* Supporting Files */,
+				B9AD5E60193EF9D400BC9631 /* BrainDashLineFollowingViewController.h */,
+				B9AD5E61193EF9D400BC9631 /* BrainDashLineFollowingViewController.m */,
 			);
 			path = BrainDash;
 			sourceTree = "<group>";
@@ -334,6 +352,8 @@
 		B9AD5E1E193E64C800BC9631 /* motion */ = {
 			isa = PBXGroup;
 			children = (
+				B9AD5E54193EEBEF00BC9631 /* Arrow Right 3.png */,
+				B9AD5E55193EEBEF00BC9631 /* Arrow Left 3.png */,
 				B9AD5E1F193E64C800BC9631 /* Button Pause.png */,
 				B9AD5E20193E64C800BC9631 /* Button Play.png */,
 				B9AD5E21193E64C800BC9631 /* Button Shuffle.png */,
@@ -358,6 +378,8 @@
 		B9AD5E2A193E64C800BC9631 /* ui */ = {
 			isa = PBXGroup;
 			children = (
+				B9AD5E58193EF35800BC9631 /* Speed Low.png */,
+				B9AD5E59193EF35800BC9631 /* Speed High.png */,
 				B9AD5E2B193E64C800BC9631 /* Button Add.png */,
 				B9AD5E2C193E64C800BC9631 /* Button Check.png */,
 				B9AD5E2D193E64C800BC9631 /* Button Delete.png */,
@@ -375,6 +397,23 @@
 				B9AD5E39193E64C800BC9631 /* Traffic Lights.png */,
 			);
 			path = ui;
+			sourceTree = "<group>";
+		};
+		B9AD5E5C193EF58A00BC9631 /* graphics */ = {
+			isa = PBXGroup;
+			children = (
+				B9AD5E5D193EF58A00BC9631 /* logos */,
+			);
+			name = graphics;
+			path = BrainDash/graphics;
+			sourceTree = "<group>";
+		};
+		B9AD5E5D193EF58A00BC9631 /* logos */ = {
+			isa = PBXGroup;
+			children = (
+				B9AD5E5E193EF58A00BC9631 /* Cannybots_Logo_2000x446.png */,
+			);
+			path = logos;
 			sourceTree = "<group>";
 		};
 		B9F68B0E19055A0D00F6654D /* SneakyInput */ = {
@@ -503,6 +542,7 @@
 			files = (
 				B9AD5E40193E64C800BC9631 /* Cursor Move Alt.png in Resources */,
 				B9AD5E3C193E64C800BC9631 /* Button Shuffle.png in Resources */,
+				B9AD5E56193EEBEF00BC9631 /* Arrow Right 3.png in Resources */,
 				B9AD5E3D193E64C800BC9631 /* Button Stop.png in Resources */,
 				B9AD5E4E193E64C800BC9631 /* Plug.png in Resources */,
 				B9AD5E49193E64C800BC9631 /* Heart.png in Resources */,
@@ -516,10 +556,14 @@
 				B9AD5E4C193E64C800BC9631 /* Magic Wand.png in Resources */,
 				B9AD5E45193E64C800BC9631 /* Button Check.png in Resources */,
 				B9AD5E48193E64C800BC9631 /* Flag.png in Resources */,
+				B9AD5E5A193EF35800BC9631 /* Speed Low.png in Resources */,
 				B9AD5E4F193E64C800BC9631 /* Question 2.png in Resources */,
+				B9AD5E5B193EF35800BC9631 /* Speed High.png in Resources */,
 				B9AD5E51193E64C800BC9631 /* Traffic Cone.png in Resources */,
 				B9AD5E3E193E64C800BC9631 /* Arrow Up 3.png in Resources */,
+				B9AD5E5F193EF58A00BC9631 /* Cannybots_Logo_2000x446.png in Resources */,
 				B92C59E818FEC8FE005EC882 /* InfoPlist.strings in Resources */,
+				B9AD5E57193EEBEF00BC9631 /* Arrow Left 3.png in Resources */,
 				B9AD5E52193E64C800BC9631 /* Traffic Lights.png in Resources */,
 				B9AD5E47193E64C800BC9631 /* Exclamation 2.png in Resources */,
 				B9AD5E4B193E64C800BC9631 /* Link.png in Resources */,
@@ -550,6 +594,7 @@
 				B9A660101905AA07004869BF /* ColoredCircleSprite.m in Sources */,
 				B92C59EA18FEC8FE005EC882 /* main.m in Sources */,
 				B916F522190529B40057388D /* BrainSpeakBLE.m in Sources */,
+				B9AD5E62193EF9D400BC9631 /* BrainDashLineFollowingViewController.m in Sources */,
 				B9A660161905AA35004869BF /* SneakyButtonSkinnedBase.m in Sources */,
 				B9A6600E1905AA07004869BF /* HelloWorldScene.m in Sources */,
 				B92C5A6418FEFD1D005EC882 /* NSString+hex.m in Sources */,
