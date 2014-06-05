@@ -259,7 +259,7 @@ void dumpCmd(const NT_cmd cmd) {
 ////////////////////////////////////////
 //// Line following
 
-- (void) lf_util:(uint8_t)cat cmd:(uint8_t)cmd id:(uint8_t)_id p1:(int16_t)p1 {
+- (void) send_1cmd_util:(uint8_t)cat cmd:(uint8_t)cmd id:(uint8_t)_id p1:(int16_t)p1 {
     uint8_t msg[NT_MSG_SIZE] = {
         NT_DEFAULT_MSG_HEADER(),
         NT_CREATE_CMD1(cat, cmd, _id, p1),
@@ -309,35 +309,42 @@ void dumpCmd(const NT_cmd cmd) {
 
 
 
+// generic config
 
+- (void) lf_get_device_id {
+    [self send_1cmd_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_CONFIG_GET id:LINEFOLLOW_CFG_DEVICE_ID p1:0];
+}
 
+- (void) lf_set_device_id:(uint16_t) did {
+    [self send_1cmd_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_CONFIG_SET id:LINEFOLLOW_CFG_DEVICE_ID p1:did];
+}
 
 // Actions
 
 
 - (void) lf_go {
-    [self lf_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_MOVE id:LINEFOLLOW_GO p1:0];
+    [self send_1cmd_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_MOVE id:LINEFOLLOW_GO p1:0];
 }
 
 - (void) lf_stop {
-    [self lf_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_MOVE id:LINEFOLLOW_STOP p1:0];
+    [self send_1cmd_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_MOVE id:LINEFOLLOW_STOP p1:0];
 }
 
 - (void) lf_left {
-    [self lf_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_MOVE id:LINEFOLLOW_LEFT p1:0];
+    [self send_1cmd_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_MOVE id:LINEFOLLOW_LEFT p1:0];
 }
 
 - (void) lf_right {
-    [self lf_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_MOVE id:LINEFOLLOW_RIGHT p1:0];
+    [self send_1cmd_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_MOVE id:LINEFOLLOW_RIGHT p1:0];
 }
 
 - (void) lf_switchNextJunction {
-    [self lf_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_MOVE id:LINEFOLLOW_SWITCH_NEXT_JUNCTION p1:0];
+    [self send_1cmd_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_MOVE id:LINEFOLLOW_SWITCH_NEXT_JUNCTION p1:0];
 }
 
 
 - (void) lf_speed:(int16_t)speed {
-    [self lf_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_MOVE id:LINEFOLLOW_SPEED p1:speed];
+    [self send_1cmd_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_MOVE id:LINEFOLLOW_SPEED p1:speed];
 }
 
 

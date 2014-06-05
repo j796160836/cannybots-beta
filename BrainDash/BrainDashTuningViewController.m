@@ -40,7 +40,7 @@
     theBrain = [TheBrain sharedInstance];
     theBrain.appDelegate = self;
     [theBrain lf_cfg_get_config];
-
+    [theBrain lf_get_device_id];
 
 }
 
@@ -103,6 +103,11 @@
 
 }
 
+
+- (IBAction)deviceIdValueChanged:(id)sender {
+}
+
+
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
     self.currentResponder = textField;
 }
@@ -123,9 +128,13 @@
     cfg.rgbBrightness = 255;
     
     [theBrain lf_cfg_write_config:cfg];
+    
+    [theBrain lf_set_device_id:[[_deviceIdTextField text] intValue]];
+
 }
 - (IBAction)revertPressed:(id)sender {
     [theBrain lf_cfg_get_config];
+    [theBrain lf_get_device_id];
 
 
 }
@@ -144,6 +153,10 @@
         } else if (LINEFOLLOW_CFG_PID_D == _id){
             _dTExtField.text = [NSString stringWithFormat:@"%d", arg1];
             _iStepper.value = arg1;
+        } else if ( LINEFOLLOW_CFG_DEVICE_ID == _id){
+            NSLog(@"device id = %d", arg1);
+            _deviceIdTextField.text = [NSString stringWithFormat:@"%d", arg1];
+            
         }
     }
     

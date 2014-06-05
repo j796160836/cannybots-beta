@@ -283,20 +283,20 @@
 			isa = PBXGroup;
 			children = (
 				B92C59EF18FEC8FE005EC882 /* Main.storyboard */,
+				B92C59F818FEC8FE005EC882 /* Images.xcassets */,
 				B92C59EC18FEC8FE005EC882 /* BrainDashAppDelegate.h */,
 				B92C59ED18FEC8FE005EC882 /* BrainDashAppDelegate.m */,
 				B92C59F218FEC8FE005EC882 /* BrainDashMainViewController.h */,
 				B92C59F318FEC8FE005EC882 /* BrainDashMainViewController.m */,
 				B92C59F518FEC8FE005EC882 /* BrainDashFlipsideViewController.h */,
 				B92C59F618FEC8FE005EC882 /* BrainDashFlipsideViewController.m */,
-				B92C59F818FEC8FE005EC882 /* Images.xcassets */,
-				B92C59E418FEC8FE005EC882 /* Supporting Files */,
 				B9AD5E60193EF9D400BC9631 /* BrainDashLineFollowingViewController.h */,
 				B9AD5E61193EF9D400BC9631 /* BrainDashLineFollowingViewController.m */,
 				B9AD5E71193F66E800BC9631 /* BrainDashTuningViewController.h */,
 				B9AD5E72193F66E800BC9631 /* BrainDashTuningViewController.m */,
 				B9AD5E74194071DA00BC9631 /* BrainDashSettingsViewController.h */,
 				B9AD5E75194071DA00BC9631 /* BrainDashSettingsViewController.m */,
+				B92C59E418FEC8FE005EC882 /* Supporting Files */,
 			);
 			path = BrainDash;
 			sourceTree = "<group>";

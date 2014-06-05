@@ -79,7 +79,7 @@ UARTPeripheral      *currentPeripheral;
 
 
 - (void)connectPeripheral:(CBPeripheral*)peripheral{
-    NSLog(@"");
+    NSLog(@"connectPeripheral");
 
     //Connect Bluetooth LE device
     
@@ -94,7 +94,7 @@ UARTPeripheral      *currentPeripheral;
 
 
 - (void)disconnect{
-    NSLog(@"");
+    NSLog(@"disconnect");
 
     //Disconnect Bluetooth LE device
     
@@ -110,7 +110,7 @@ UARTPeripheral      *currentPeripheral;
 
 
 - (void) centralManagerDidUpdateState:(CBCentralManager*)central{
-    NSLog(@"%x", central.state);
+    NSLog(@"centralManagerDidUpdateState: %x", central.state);
 
     if (central.state == CBCentralManagerStatePoweredOn){
         
@@ -127,8 +127,9 @@ UARTPeripheral      *currentPeripheral;
 
 - (void) centralManager:(CBCentralManager*)central didDiscoverPeripheral:(CBPeripheral*)peripheral advertisementData:(NSDictionary*)advertisementData RSSI:(NSNumber*)RSSI{
     
-    NSLog(@"Did discover peripheral %@", peripheral.name);
+    NSLog(@"Did discover peripheral %@  UUID=%@", peripheral.name, peripheral.UUID);
     
+    NSLog(@"!!!!!!!!!!!!!! change this fucntion to get ALL devices .... BrainSpeakBLE.didDiscoverPeripheral");
     [cm stopScan];
     
     [self connectPeripheral:peripheral];
@@ -137,7 +138,7 @@ UARTPeripheral      *currentPeripheral;
 
 - (void) centralManager:(CBCentralManager*)central didConnectPeripheral:(CBPeripheral*)peripheral{
     
-    NSLog(@"");
+    NSLog(@"didConnectPeripheral");
 
     if ([currentPeripheral.peripheral isEqual:peripheral]){
         

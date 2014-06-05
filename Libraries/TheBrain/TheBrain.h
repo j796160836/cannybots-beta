@@ -79,6 +79,9 @@ typedef struct lfconfig_t {
 - (void) lf_cfg_get_config;
 
 
+- (void) lf_get_device_id;
+- (void) lf_set_device_id:(uint16_t) did;
+
 // Actions
 - (void) lf_go;
 - (void) lf_stop;

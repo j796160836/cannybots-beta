@@ -18,6 +18,7 @@
 @property (weak, nonatomic) IBOutlet UIStepper *dStepper;
 @property (weak, nonatomic) IBOutlet UITextField *ledBrightnessTextField;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *ledColourSegment;
+@property (weak, nonatomic) IBOutlet UITextField *deviceIdTextField;
 - (IBAction)ledColourSelected:(id)sender;
 
 -(IBAction)textFieldReturn:(id)sender;
