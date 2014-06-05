@@ -11,10 +11,10 @@ void lf_cfg_set_pid_p(int16_t p) {
    NT_nv_setInt(NT_NV_CFG_APP_LINEFOLLOWING_BASE + NT_NV_CFG_APP_LINEFOLLOWING_P_VAL, p);
 }
 void lf_cfg_set_pid_i(int16_t i) {
-   NT_nv_setInt(NT_NV_CFG_APP_LINEFOLLOWING_BASE + NT_NV_CFG_APP_LINEFOLLOWING_P_VAL, i);
+   NT_nv_setInt(NT_NV_CFG_APP_LINEFOLLOWING_BASE + NT_NV_CFG_APP_LINEFOLLOWING_I_VAL, i);
 }
 void lf_cfg_set_pid_d(int16_t d) {
-     NT_nv_setInt(NT_NV_CFG_APP_LINEFOLLOWING_BASE + NT_NV_CFG_APP_LINEFOLLOWING_P_VAL, d);
+     NT_nv_setInt(NT_NV_CFG_APP_LINEFOLLOWING_BASE + NT_NV_CFG_APP_LINEFOLLOWING_D_VAL, d);
 }
 
 void lf_cfg_set_led_col(int8_t col) {
@@ -58,33 +58,44 @@ void NT_nv_configDefaults_LineFollowing() {
 
 
 void lf_go() {
+  INFO_PRINTLN("Go!");
 }
 
 void lf_stop() {
+  INFO_PRINTLN("Stop!");
 }
 
 void lf_left() {
+  INFO_PRINTLN("Move to line on the LEFT");
 }
 
 void lf_right() {
+  INFO_PRINTLN("Move to line on the RIGHT");
 }
 
 void lf_switch() {
+    INFO_PRINTLN("Switch lanes and next junction.");
 }
 
 void lf_speed(int16_t speed) {
+    INFO_PRINT("Set line following speed to:");
+    INFO_PRINTLN(speed);
 }
 
 
 void lf_motor_speed(uint8_t motor, int16_t speed) {
+    INFO_PRINT("Set motor speed for motor # ");
+    INFO_PRINT(motor);
+    INFO_PRINT(" to ");
+    INFO_PRINTLN(speed);
 }
 
 
 #define F(x) x
 uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
-  debug(F("linefollow:CMD=%d\n"), cmd);
-  debug(F("linefollow:ID =%d\n"), id);
-  int status = NT_ERROR_CMD_INVALID;
+  //debug(F("linefollow:CMD=%d\n"), cmd);
+  //debug(F("linefollow:ID =%d\n"), id);
+  int status = NT_STATUS_OK;
   switch (cmd) {
     case NT_CMD_LINEFOLLOW_MOVE:
       //debug(F("linefollow:MOVE_TYPE=%d\n"), id);
@@ -112,6 +123,7 @@ uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
           DBG(F("linefollow:NT_ERROR_CMD_INVALID for NT_CMD_LINEFOLLOW_CONFIG_SET"));
           status = NT_ERROR_CMD_INVALID;
       }       
+      break;
     case NT_CMD_LINEFOLLOW_CONFIG_GET:
       
       switch (id) {
@@ -134,6 +146,7 @@ uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
           DBG(F("linefollow:NT_ERROR_CMD_INVALID for NT_CMD_LINEFOLLOW_CONFIG_SET"));
           status = NT_ERROR_CMD_INVALID;
       }       
+      break;
     case NT_CMD_LINEFOLLOW_MOTOR_SPEED:
         lf_motor_speed(id,p1); 
         break;

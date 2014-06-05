@@ -6,7 +6,7 @@
 #define bytesFromInt(x)   (uint8_t)(x & 0xff), (uint8_t)((x &0xff00) >>8)
 #define hiByteFromInt(x)  (uint8_t)((x &0xff00) >>8)
 #define loByteFromInt(x)  (uint8_t)(x & 0xff)
-#define mk16bit(x,y) ( (x&0xFFFF) + (y<<8))
+#define mk16bit(lo,hi) ( (lo&0xFF) + ((hi&0xFF)<<8))
 
 #if defined(NT_PLATFORM_AVR)
 #include <Arduino.h>

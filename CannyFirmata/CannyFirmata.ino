@@ -18,11 +18,11 @@ class BLEMessage {
       size=len;
     };
   uint8_t payload[NT_MSG_SIZE];
-  uint16_t size;
+  uint8_t size;
 };
 
-SimpleFIFO<BLEMessage*, 32> inboundMsgFIFO;
-SimpleFIFO<BLEMessage*, 32> outboundMsgFIFO;  
+SimpleFIFO<BLEMessage*, 4> inboundMsgFIFO;
+SimpleFIFO<BLEMessage*, 4> outboundMsgFIFO;  
   
 
 #ifdef USE_BLE
@@ -91,6 +91,10 @@ void NT_processOutboundMessageQueue() {
 #endif
     delete msg;
   }
+}
+
+
+void NT_processInboundMessageQueue() {
   
   for (int i=0; i<inboundMsgFIFO.count(); i++) {
     BLEMessage* msg = inboundMsgFIFO.dequeue();
@@ -137,7 +141,7 @@ uint8_t  processCategory(int cat, int cmd, int id, int p1) {
     case NT_CAT_NOP:  
       break;
     default:
-      debug(F("Invalid category: %x"), cat);
+      //debug(F("Invalid category: %x"), cat);
       status=NT_ERROR_CAT_INVALID;
   }
   return status;
@@ -720,22 +724,25 @@ void setup() {
   debug_setup();
   NT_nv_init();
  
+ /*
   INFO_PRINTLN(F(""));
-  INFO_PRINTLN(F("        **** CANNY BRAIN V2 ****"));
+  INFO_PRINTLN(F("    **** CANNYBOTS BRAIN V2 ****"));
   INFO_PRINT(F("  2K RAM SYSTEM  "));
   INFO_PRINT(freeRam());
   INFO_PRINTLN(F(" BRAIN BYTES FREE"));
   INFO_PRINTLN(F(""));
   INFO_PRINTLN(F("READY."));
-  
+  */
 }
 
 
 void loop() {
-#ifdef USE_BLE
+  NT_processOutboundMessageQueue();
+
+  #ifdef USE_BLE
   BLESerial.pollACI();
 #endif
-  NT_processOutboundMessageQueue();
+  NT_processInboundMessageQueue();
 
 #ifdef USE_PIXY
    updatePixy();

@@ -42,9 +42,14 @@ int NT_nv_writesSinceBoot=0;
 bool NT_nv_setByte(uint16_t address, uint8_t b) {
   NT_nv_writesSinceBoot++;
   if (NT_nv_writesSinceBoot < 1000) {
+    INFO_PRINT("eeprom[");
+    INFO_PRINT(address);
+    INFO_PRINT("]=");
+    INFO_PRINTLN(b);
+
     EEPROM.write(address, b);
   } else {
-    debug("exceeded max EEPROM writes for this session");
+    INFO_PRINTLN("exceeded max EEPROM writes for this session");
   }
 }
 
@@ -56,6 +61,17 @@ uint8_t NT_nv_getByte(uint16_t address) {
 bool NT_nv_setInt(uint16_t address, uint16_t b) {
     uint8_t b1 = hiByteFromInt(b);
     uint8_t b2 = loByteFromInt(b);
+/*    
+    INFO_PRINTLN("-----");
+    INFO_PRINT("NV write 16 bit:");
+    INFO_PRINT(address);
+    INFO_PRINT("=");
+    INFO_PRINTLN(b);
+    INFO_PRINT("HI=");
+    INFO_PRINTLN(b1);
+    INFO_PRINT("LO=");
+    INFO_PRINTLN(b2);
+*/
     NT_nv_setByte(address,b1);
     NT_nv_setByte(address+1,b2);
 }
@@ -63,7 +79,21 @@ bool NT_nv_setInt(uint16_t address, uint16_t b) {
 uint16_t NT_nv_getInt(uint16_t address) {
     uint8_t b1 = NT_nv_getByte(address);
     uint8_t b2 = NT_nv_getByte(address+1);
-    return mk16bit(b1,b2);
+    int16_t b = mk16bit(b2,b1);
+    
+/*
+    INFO_PRINTLN("-----");
+    INFO_PRINT("NV READ 16bit:");
+    INFO_PRINT(address);
+    INFO_PRINT("=");
+    
+    INFO_PRINTLN(b);
+    INFO_PRINT("HI=");
+    INFO_PRINTLN(b1);
+    INFO_PRINT("LO=");
+    INFO_PRINTLN(b2);
+ */
+    return b;
 }
 
 
@@ -86,15 +116,15 @@ bool NT_nv_isValidConfig() {
 void NT_nv_configDefaults_LineFollowing();
 
 void NT_nv_init() {
-    debug("NV INIT\n");
+ //   debug("NV INIT\n");
 
    if (!NT_nv_isValidConfig()) {
      //delay(5000);
-     debug("NVsetup\n");
+  //   debug("NVsetup\n");
      NT_nv_setupConfig();
      NT_nv_configDefaults_LineFollowing();
    } else {
-      debug("NV is CNYB\n");
+//      debug("NV is CNYB\n");
    }
 }
 
