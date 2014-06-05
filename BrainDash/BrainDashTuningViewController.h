@@ -7,15 +7,22 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "TheBrain.h"
 
-@interface BrainDashTuningViewController : UIViewController
+@interface BrainDashTuningViewController : UIViewController <NTCommandReceiver, UITextFieldDelegate>
 @property (weak, nonatomic) IBOutlet UITextField *pTextField;
 @property (weak, nonatomic) IBOutlet UITextField *iTextField;
 @property (weak, nonatomic) IBOutlet UITextField *dTExtField;
+@property (weak, nonatomic) IBOutlet UIStepper *pStepper;
+@property (weak, nonatomic) IBOutlet UIStepper *iStepper;
+@property (weak, nonatomic) IBOutlet UIStepper *dStepper;
 @property (weak, nonatomic) IBOutlet UITextField *ledBrightnessTextField;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *ledColourSegment;
 - (IBAction)ledColourSelected:(id)sender;
 
 -(IBAction)textFieldReturn:(id)sender;
+- (IBAction)pStepperValueChanged:(UIStepper*)sender;
+- (IBAction)iStepperValueChanged:(UIStepper*)sender;
+- (IBAction)dStepperValueChanged:(UIStepper *)sender;
 
 @end

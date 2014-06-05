@@ -73,6 +73,7 @@
 		B9AD5E6F193F481300BC9631 /* joystick.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E6C193F481300BC9631 /* joystick.png */; };
 		B9AD5E70193F481300BC9631 /* knob.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E6D193F481300BC9631 /* knob.png */; };
 		B9AD5E73193F66E800BC9631 /* BrainDashTuningViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9AD5E72193F66E800BC9631 /* BrainDashTuningViewController.m */; };
+		B9AD5E76194071DA00BC9631 /* BrainDashSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9AD5E75194071DA00BC9631 /* BrainDashSettingsViewController.m */; };
 		B9F68B2919055A0D00F6654D /* SneakyJoystick.m in Sources */ = {isa = PBXBuildFile; fileRef = B9F68B1C19055A0D00F6654D /* SneakyJoystick.m */; };
 /* End PBXBuildFile section */
 
@@ -189,6 +190,8 @@
 		B9AD5E6D193F481300BC9631 /* knob.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = knob.png; sourceTree = "<group>"; };
 		B9AD5E71193F66E800BC9631 /* BrainDashTuningViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrainDashTuningViewController.h; sourceTree = "<group>"; };
 		B9AD5E72193F66E800BC9631 /* BrainDashTuningViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrainDashTuningViewController.m; sourceTree = "<group>"; };
+		B9AD5E74194071DA00BC9631 /* BrainDashSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrainDashSettingsViewController.h; sourceTree = "<group>"; };
+		B9AD5E75194071DA00BC9631 /* BrainDashSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrainDashSettingsViewController.m; sourceTree = "<group>"; };
 		B9F68B1B19055A0D00F6654D /* SneakyJoystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SneakyJoystick.h; sourceTree = "<group>"; };
 		B9F68B1C19055A0D00F6654D /* SneakyJoystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SneakyJoystick.m; sourceTree = "<group>"; };
 		B9F68B3419055C9F00F6654D /* cocos2d-ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cocos2d-ios.xcodeproj"; path = "Libraries/cocos2d-iphone/cocos2d-ios.xcodeproj"; sourceTree = "<group>"; };
@@ -292,6 +295,8 @@
 				B9AD5E61193EF9D400BC9631 /* BrainDashLineFollowingViewController.m */,
 				B9AD5E71193F66E800BC9631 /* BrainDashTuningViewController.h */,
 				B9AD5E72193F66E800BC9631 /* BrainDashTuningViewController.m */,
+				B9AD5E74194071DA00BC9631 /* BrainDashSettingsViewController.h */,
+				B9AD5E75194071DA00BC9631 /* BrainDashSettingsViewController.m */,
 			);
 			path = BrainDash;
 			sourceTree = "<group>";
@@ -623,6 +628,7 @@
 				B9A660161905AA35004869BF /* SneakyButtonSkinnedBase.m in Sources */,
 				B9A6600E1905AA07004869BF /* HelloWorldScene.m in Sources */,
 				B92C5A6418FEFD1D005EC882 /* NSString+hex.m in Sources */,
+				B9AD5E76194071DA00BC9631 /* BrainDashSettingsViewController.m in Sources */,
 				B9AD38DB1900FDDE00FA9CD0 /* NTProtocol.cpp in Sources */,
 				B92C5A6118FEFD1D005EC882 /* UARTPeripheral.m in Sources */,
 				B92C59F718FEC8FE005EC882 /* BrainDashFlipsideViewController.m in Sources */,

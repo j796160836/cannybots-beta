@@ -7,7 +7,8 @@
 //
 
 #import "BrainDashTuningViewController.h"
-#import "TheBrain.h"
+
+#import "NT_APP_LineFollowing.h"
 
 @interface BrainDashTuningViewController () {
     TheBrain            *theBrain;
@@ -37,6 +38,9 @@
     [singleTap setNumberOfTouchesRequired:1];
     [self.view addGestureRecognizer:singleTap];
     theBrain = [TheBrain sharedInstance];
+    theBrain.appDelegate = self;
+    [theBrain lf_cfg_get_config];
+
 
 }
 
@@ -63,6 +67,42 @@
     [sender resignFirstResponder];
 }
 
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
+    NSLog(@"shouldChangeCharactersInRange");
+    if (textField==_pTextField) {
+        _pStepper.value = [[textField text] intValue];
+    } else if (textField==_iTextField) {
+        _iStepper.value = [[textField text] intValue];
+    } else if (textField==_dTExtField) {
+        _dStepper.value = [[textField text] intValue];
+    }
+    return true;
+}
+
+///
+
+- (IBAction)pStepperValueChanged:(UIStepper *)sender {
+    _pTextField.text = [NSString stringWithFormat:@"%d",(int16_t)sender.value];
+}
+
+/*
+- (IBAction)pTextFIeldValueChanged:(UITextField *)sender {
+    NSLog(@"pTextFIeldValueChanged");
+    _pStepper.value = [[sender text] intValue];
+}
+*/
+
+
+- (IBAction)iStepperValueChanged:(UIStepper *)sender {
+    _iTextField.text = [NSString stringWithFormat:@"%d",(int16_t)sender.value];
+
+}
+
+- (IBAction)dStepperValueChanged:(UIStepper *)sender {
+    _dTExtField.text = [NSString stringWithFormat:@"%d",(int16_t)sender.value];
+
+}
+
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
     self.currentResponder = textField;
 }
@@ -74,11 +114,40 @@
 - (IBAction)ledColourSelected:(id)sender {
 }
 - (IBAction)savePressed:(id)sender {
+    
+    lfconfig cfg;
+    cfg.p = [[_pTextField text] intValue];
+    cfg.i = [[_iTextField text] intValue];
+    cfg.d = [[_dTExtField text] intValue];
+    cfg.rgbCol = LINEFOLLOW_RGB_COLOUR_RED;
+    cfg.rgbBrightness = 255;
+    
+    [theBrain lf_cfg_write_config:cfg];
 }
 - (IBAction)revertPressed:(id)sender {
-    [theBrain lf_cfg_get_pid_p];
-    [theBrain lf_cfg_get_pid_i];
-    [theBrain lf_cfg_get_pid_d];
+    [theBrain lf_cfg_get_config];
+
 
 }
+
+- (void) didReceiveCommand:(uint8_t)cmd forId:(uint8_t)_id withArg:(int16_t)arg1 {
+    
+    NSLog(@"CMD=%d, id=%d, arg=%d", cmd, _id, arg1);
+    if (NT_CMD_LINEFOLLOW_CONFIG_GET == cmd) {
+        if (LINEFOLLOW_CFG_PID_P == _id){
+            _pTextField.text = [NSString stringWithFormat:@"%d", arg1];
+            _pStepper.value = arg1;
+
+        } else if (LINEFOLLOW_CFG_PID_I == _id){
+            _iTextField.text = [NSString stringWithFormat:@"%d", arg1];
+            _iStepper.value = arg1;
+        } else if (LINEFOLLOW_CFG_PID_D == _id){
+            _dTExtField.text = [NSString stringWithFormat:@"%d", arg1];
+            _iStepper.value = arg1;
+        }
+    }
+    
+}
+
+
 @end

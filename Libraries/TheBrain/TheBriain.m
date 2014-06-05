@@ -86,6 +86,12 @@ void dumpCmd(const NT_cmd cmd) {
     // TODO: iterate the cmd[0...2] to reduce logic
     // TODO: cat/cmd macros
     // TODO: i
+    if (cmd0.category==NT_CAT_APP){
+        if (_appDelegate) {
+            [self.appDelegate didReceiveCommand:cmd0.command forId:cmd0.id withArg:cmd0.arg1];
+        }
+    }
+    
     if (cmd0.category==NT_CAT_SONAR && cmd0.command==NT_CMD_SONAR_PING_RESULT) {
         if (_sonarDelegate)
             [self.sonarDelegate didReceiveSonarPing:cmd0.arg1  forId:cmd0.id];
@@ -104,7 +110,7 @@ void dumpCmd(const NT_cmd cmd) {
     }
     
     dumpCmd(cmd0);
-    dumpCmd(cmd1);
+    //dumpCmd(cmd1);
 
 }
 
@@ -271,17 +277,39 @@ void dumpCmd(const NT_cmd cmd) {
 
 // Config
 
-- (void) lf_cfg_get_pid_p {
-    [self lf_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_CONFIG_GET id:LINEFOLLOW_CFG_PID_P p1:0];
+
+- (void) lf_cfg_write_config:(lfconfig)config {
+    uint8_t msg[NT_MSG_SIZE] = {
+        NT_DEFAULT_MSG_HEADER(),
+        NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_CONFIG_SET, LINEFOLLOW_CFG_PID_P, config.p),
+        NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_CONFIG_SET, LINEFOLLOW_CFG_PID_I, config.i),
+        NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_CONFIG_SET, LINEFOLLOW_CFG_PID_D, config.d),
+        NT_CREATE_CMD_NOP
+    };
+    NT_MSG_CALC_CRC(msg);
+    
+    NSData *data = [NSData dataWithBytesNoCopy:(void*)msg length:NT_MSG_SIZE freeWhenDone:NO];
+    [self sendData:data];
 }
 
-- (void) lf_cfg_get_pid_i {
-    [self lf_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_CONFIG_GET id:LINEFOLLOW_CFG_PID_I p1:0];
+- (void) lf_cfg_get_config {
+    
+    uint8_t msg[NT_MSG_SIZE] = {
+        NT_DEFAULT_MSG_HEADER(),
+        NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_CONFIG_GET, LINEFOLLOW_CFG_PID_P, 0),
+        NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_CONFIG_GET, LINEFOLLOW_CFG_PID_I, 0),
+        NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_CONFIG_GET, LINEFOLLOW_CFG_PID_D, 0),
+        NT_CREATE_CMD_NOP
+    };
+    NT_MSG_CALC_CRC(msg);
+    
+    NSData *data = [NSData dataWithBytesNoCopy:(void*)msg length:NT_MSG_SIZE freeWhenDone:NO];
+    [self sendData:data];
 }
 
-- (void) lf_cfg_get_pid_d {
-    [self lf_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_CONFIG_GET id:LINEFOLLOW_CFG_PID_D p1:0];
-}
+
+
+
 
 
 // Actions

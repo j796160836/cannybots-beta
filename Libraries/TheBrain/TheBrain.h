@@ -15,6 +15,11 @@
 - (void) didReceiveData:(NSData*)data;
 @end
 
+@protocol NTCommandReceiver
+- (void) didReceiveCommand:(uint8_t)cmd forId:(uint8_t)_id withArg:(int16_t)arg1;
+@end
+
+
 @protocol NTSonarReceiver
 - (void) didReceiveSonarPing:(int16_t) distance forId:(uint8_t)_id;
 @end
@@ -36,6 +41,7 @@
 @property(nonatomic, retain)    id<NTSender>        writer;
 
 @property(nonatomic, retain)    id<NTDebugReceiver> debugDelegate;
+@property(nonatomic, retain)    id<NTCommandReceiver> appDelegate;
 @property(nonatomic, retain)    id<NTSonarReceiver> sonarDelegate;
 @property(nonatomic, retain)    id<NTIRReceiver>    infraRedDelegate;
 @property(nonatomic, retain)    id<NTMicrophoneReceiver>    microphoneDelegate;
@@ -63,6 +69,15 @@
 - (void) lf_cfg_get_pid_p;
 - (void) lf_cfg_get_pid_i;
 - (void) lf_cfg_get_pid_d;
+
+typedef struct lfconfig_t {
+    int16_t p,i,d;
+    uint8_t rgbCol, rgbBrightness;
+} lfconfig;
+
+- (void) lf_cfg_write_config:(lfconfig)config;
+- (void) lf_cfg_get_config;
+
 
 // Actions
 - (void) lf_go;
