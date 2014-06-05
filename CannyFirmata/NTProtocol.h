@@ -273,4 +273,7 @@ extern uint8_t NT_lastError;
 
 void NT_sendCommand(int8_t cat, uint8_t cmd, uint8_t _id, uint16_t p1);
 
+
+
+
 #endif

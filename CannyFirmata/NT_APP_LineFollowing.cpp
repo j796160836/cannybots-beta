@@ -6,7 +6,10 @@
 #include "NTUtils.h"
 
 
+
 // Config 
+
+
 void lf_cfg_set_pid_p(int16_t p) {
    NT_nv_setInt(NT_NV_CFG_APP_LINEFOLLOWING_BASE + NT_NV_CFG_APP_LINEFOLLOWING_P_VAL, p);
 }
@@ -66,27 +69,27 @@ void lf_stop() {
 }
 
 void lf_left() {
-  INFO_PRINTLN("Move to line on the LEFT");
+  INFO_PRINTLN("LEFT");
 }
 
 void lf_right() {
-  INFO_PRINTLN("Move to line on the RIGHT");
+  INFO_PRINTLN("RIGHT");
 }
 
 void lf_switch() {
-    INFO_PRINTLN("Switch lanes and next junction.");
+    INFO_PRINTLN("Switch");
 }
 
 void lf_speed(int16_t speed) {
-    INFO_PRINT("Set line following speed to:");
+    INFO_PRINT("LS:");
     INFO_PRINTLN(speed);
 }
 
 
 void lf_motor_speed(uint8_t motor, int16_t speed) {
-    INFO_PRINT("Set motor speed for motor # ");
+    INFO_PRINT("M");
     INFO_PRINT(motor);
-    INFO_PRINT(" to ");
+    INFO_PRINT("=");
     INFO_PRINTLN(speed);
 }
 
@@ -127,6 +130,9 @@ uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
     case NT_CMD_LINEFOLLOW_CONFIG_GET:
       
       switch (id) {
+        case LINEFOLLOW_CFG_DEVICE_ID:  
+          NT_sendCommand(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_CONFIG_GET, LINEFOLLOW_CFG_DEVICE_ID, nv_cfg_get_deviceId()); 
+          break;
         case LINEFOLLOW_CFG_PID_P:  
           NT_sendCommand(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_CONFIG_GET, LINEFOLLOW_CFG_PID_P, lf_cfg_get_pid_p()); 
           break;

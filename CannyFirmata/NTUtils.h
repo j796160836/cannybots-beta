@@ -19,6 +19,12 @@ void debug(const __FlashStringHelper* format, ...);
 #define ATMEGA 1
 #endif
 
+// EEPROM (NV) 
+
+#define NT_NV_CFG_BASE 10
+#define NT_NV_CFG_DEVICE_ID 0
+
+
 void NT_nv_init();
 bool NT_nv_setupConfig();
 bool NT_nv_isValidConfig();
@@ -27,6 +33,9 @@ uint8_t NT_nv_getByte(uint16_t address);
 bool NT_nv_setInt(uint16_t address, uint16_t b);
 uint16_t NT_nv_getInt(uint16_t address);
 
+
+void nv_cfg_set_deviceId(int16_t p);
+int16_t nv_cfg_get_deviceId();
 
 #endif
 

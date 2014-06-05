@@ -42,11 +42,11 @@ int NT_nv_writesSinceBoot=0;
 bool NT_nv_setByte(uint16_t address, uint8_t b) {
   NT_nv_writesSinceBoot++;
   if (NT_nv_writesSinceBoot < 1000) {
-    INFO_PRINT("eeprom[");
+/*    INFO_PRINT("eeprom[");
     INFO_PRINT(address);
     INFO_PRINT("]=");
     INFO_PRINTLN(b);
-
+*/
     EEPROM.write(address, b);
   } else {
     INFO_PRINTLN("exceeded max EEPROM writes for this session");
@@ -127,6 +127,16 @@ void NT_nv_init() {
 //      debug("NV is CNYB\n");
    }
 }
+
+
+void nv_cfg_set_deviceId(int16_t p) {
+   NT_nv_setInt(NT_NV_CFG_BASE + NT_NV_CFG_DEVICE_ID, p);
+}
+int16_t nv_cfg_get_deviceId() {
+   NT_nv_getInt(NT_NV_CFG_BASE + NT_NV_CFG_DEVICE_ID);
+}
+
+
 
 #else
 
