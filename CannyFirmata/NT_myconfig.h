@@ -64,8 +64,15 @@
 
 #ifdef DEBUG_OUT_TARGET_BLE
 // doenst support streams...
+
+#ifdef RFDUINO
+#define DBG_OUT Serial
+#define DBG(x) DBG_OUT << x;
+#else
 #define DBG_OUT BLESerial  
 #define DBG(x) BLESerial.println(x);
+#endif
+
 #else
 #define DBG_OUT Serial
 #define DBG(x) DBG_OUT << x;
@@ -194,10 +201,7 @@
 #define ANALOG_SAMPLE_DELAY 0
 
 
-#ifdef USE_BLE
-#include <Adafruit_BLE_UART.h>
-extern Adafruit_BLE_UART BLESerial;
-#endif
+
 
 
 #ifdef USE_PIXY

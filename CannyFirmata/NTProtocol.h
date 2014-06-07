@@ -1,6 +1,7 @@
 #ifndef NTProtocol_h
 #define NTProtocol_h
 
+#include "NT_myconfig.h"
 
 #include "NT_APP_LineFollowing.h"
 
@@ -269,6 +270,9 @@ extern uint8_t NT_lastError;
 // 41  syncInfo...
 // 42  setMultiPosVel
 
+
+
+void processMessage(uint8_t *buffer, uint8_t len);
 
 
 void NT_sendCommand(int8_t cat, uint8_t cmd, uint8_t _id, uint16_t p1);

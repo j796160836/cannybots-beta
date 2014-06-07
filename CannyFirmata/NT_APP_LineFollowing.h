@@ -1,4 +1,8 @@
+#ifndef NT_APP_LineFollowing_h
+#define NT_APP_LineFollowing_h
 
+#include "NTProtocol.h"
+#include "NTUtils.h"
 #include <stdint.h> 
 
 // EEPROM settings 
@@ -60,7 +64,10 @@
 #define LINEFOLLOW_RGB_COLOUR_WHITE  4
 
 
-# 
 
+void lf_init();
+void lf_loop();
 uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1);
 
+
+#endif

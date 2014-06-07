@@ -1,10 +1,13 @@
+#include <Arduino.h>
+
 #include <stdarg.h>
-
 #include "NTUtils.h"
-
-
+#ifdef RFDUINO
+#else
+    #include <Arduino.h>
+    #include <EEPROM.h>
+#endif
 int voltage=0;
-
 
 
 void   debug_setup() {
@@ -12,29 +15,6 @@ void   debug_setup() {
    Serial.begin(INFO_OUT_TARGET_UART_BAUD);
 #endif
    
-}
-
-
-
-#if defined (NT_PLATFORM_AVR)
-void debug(char * format, ...)
-{
-  char buffer[32];
-  va_list args;
-  va_start (args, format);
-  vsnprintf (buffer, 31, format, args);
-  va_end (args);
-  DBG(buffer);
-}
-
-void debug(const __FlashStringHelper* format, ...)
-{
-  char buffer[32];
-  va_list args;
-  va_start (args, format);
-  vsnprintf (buffer, 31, reinterpret_cast<const char*>(format), args);
-  va_end (args);
-  DBG(buffer);
 }
 
 // limit the number of writes, just in case we get stuck in a loop during dev!
@@ -47,14 +27,24 @@ bool NT_nv_setByte(uint16_t address, uint8_t b) {
     INFO_PRINT("]=");
     INFO_PRINTLN(b);
 */
+
+#ifdef RFDUINO
+
+// see:  https://github.com/RFduino/RFduino/tree/master/libraries/RFduinoNonBLE/examples/Flash/FlashInteger
+#else
     EEPROM.write(address, b);
+#endif
   } else {
     INFO_PRINTLN("exceeded max EEPROM writes for this session");
   }
 }
 
 uint8_t NT_nv_getByte(uint16_t address) {
+#ifdef RFDUINO
+// see:  https://github.com/RFduino/RFduino/tree/master/libraries/RFduinoNonBLE/examples/Flash/FlashInteger
+#else
   EEPROM.read(address);
+#endif
 }
 
 
@@ -137,30 +127,35 @@ int16_t nv_cfg_get_deviceId() {
 }
 
 
+#if defined (NT_PLATFORM_AVR)
 
-#else
-
-void debug(char * format, ...)
+void debug(const __FlashStringHelper* format, ...)
 {
-    
+  char buffer[32];
+  va_list args;
+  va_start (args, format);
+  vsnprintf (buffer, 31, reinterpret_cast<const char*>(format), args);
+  va_end (args);
+  DBG(buffer);
 }
+
 #endif
 
 void hexDump(uint8_t *data, uint16_t len) {
   uint8_t cnt = 0;
   for (int i = 0; i < len; i++) {
-    printf("%.2x ", data[i]);
+    debug("%.2x ", data[i]);
     cnt++;
     if (cnt == 8) {
-      printf(" ");
+      debug(" ");
     }
     if (cnt == 16) {
-      printf("\n");
+      debug("\n");
       cnt = 0;
     }
   }
   if (cnt != 0) {
-    printf("\n");
+    debug("\n");
   }
 }
 
