@@ -35,7 +35,7 @@ void clientDisconnected() {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// RFDuino Specifics
+// RFDuino CAllbacks
 #ifdef RFDUINO
 
 void RFduinoBLE_onAdvertisement(bool start) {
@@ -50,6 +50,11 @@ void RFduinoBLE_onDisconnect() {
   clientDisconnected();
 }
 
+
+void RFduinoBLE_onReceive(char *data, int len){ 
+  BLEMessage* msg = new BLEMessage((uint8_t*)data, len);
+  inboundMsgFIFO.enqueue(msg);
+}
 
 #else
 //////////////////////////////////////////////////////////////////////////////////////////////////
