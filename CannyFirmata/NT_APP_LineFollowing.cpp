@@ -177,37 +177,37 @@ void printvalues ()
 // Actions
 
 void lf_go() {
-  INFO_PRINTLN("Go!");
+  DBG("Go!");
+  pinMode(3, OUTPUT);
+  digitalWrite(3, HIGH);
 }
 
 void lf_stop() {
-  INFO_PRINTLN("Stop!");
+  DBG("Stop!");
+  pinMode(3, OUTPUT);
+  digitalWrite(3, LOW);
 }
 
 void lf_left() {
-  INFO_PRINTLN("LEFT");
+  DBG("LEFT");
 }
 
 void lf_right() {
-  INFO_PRINTLN("RIGHT");
+  DBG("RIGHT");
 }
 
 void lf_switch() {
-    INFO_PRINTLN("Switch");
+    DBG("Switch");
 }
 
 void lf_speed(int16_t speed) {
-    INFO_PRINT("LS=");
-    INFO_PRINTLN(speed);
+    //DBG("LS=%d", speed);
     cruiseSpeed=speed;
 }
 
 
 void lf_motor_speed(uint8_t motor, int16_t speed) {
-    INFO_PRINT("M");
-    INFO_PRINT(motor);
-    INFO_PRINT("=");
-    INFO_PRINTLN(speed);
+    //DBG("M, %d=%d", motor, speed);
     if (2==motor) {
       //speedA=speed;
       if (speed>=0)
@@ -220,28 +220,23 @@ void lf_motor_speed(uint8_t motor, int16_t speed) {
 }
 
 void lf_pid_p(int16_t v) {
-    INFO_PRINT("P=");
-    INFO_PRINTLN(v);
+    //DBG("%d", v);
     Kp=v;
 }
 void lf_pid_i(int16_t v) {
-    INFO_PRINT("I=");
-    INFO_PRINTLN(v);
+    //DBG("%d", v);
     Ki=v;
 }
 void lf_pid_d(int16_t v) {
-    INFO_PRINT("D=");
-    INFO_PRINTLN(v);
+    //DBG("%d", v);
     Kd=v;
 }
 void lf_rgb_colour(uint8_t v) {
-    INFO_PRINT("L=");
-    INFO_PRINTLN(v);
+    //DBG("%d", v);
 }
 
 void lf_rgb_brightness(uint8_t v) {
-    INFO_PRINT("B=");
-    INFO_PRINTLN(v);
+    //DBG("%d", v);
 }
 
 

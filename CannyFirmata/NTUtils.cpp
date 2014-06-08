@@ -1,32 +1,20 @@
 #include <Arduino.h>
-
 #include <stdarg.h>
 #include "NTUtils.h"
+#include "NT_myconfig.h"
+
 #ifdef RFDUINO
 #else
-    #include <Arduino.h>
-    #include <EEPROM.h>
+#include <EEPROM.h>
 #endif
+
 int voltage=0;
-
-
-void   debug_setup() {
-#if defined(INFO_OUT_TARGET_UART)
-   Serial.begin(INFO_OUT_TARGET_UART_BAUD);
-#endif
-   
-}
 
 // limit the number of writes, just in case we get stuck in a loop during dev!
 int NT_nv_writesSinceBoot=0;
 bool NT_nv_setByte(uint16_t address, uint8_t b) {
   NT_nv_writesSinceBoot++;
   if (NT_nv_writesSinceBoot < 1000) {
-/*    INFO_PRINT("eeprom[");
-    INFO_PRINT(address);
-    INFO_PRINT("]=");
-    INFO_PRINTLN(b);
-*/
 
 #ifdef RFDUINO
 
@@ -35,7 +23,7 @@ bool NT_nv_setByte(uint16_t address, uint8_t b) {
     EEPROM.write(address, b);
 #endif
   } else {
-    INFO_PRINTLN("exceeded max EEPROM writes for this session");
+    //WARN("exceeded max EEPROM writes for this session");
   }
 }
 
@@ -51,17 +39,7 @@ uint8_t NT_nv_getByte(uint16_t address) {
 bool NT_nv_setInt(uint16_t address, uint16_t b) {
     uint8_t b1 = hiByteFromInt(b);
     uint8_t b2 = loByteFromInt(b);
-/*    
-    INFO_PRINTLN("-----");
-    INFO_PRINT("NV write 16 bit:");
-    INFO_PRINT(address);
-    INFO_PRINT("=");
-    INFO_PRINTLN(b);
-    INFO_PRINT("HI=");
-    INFO_PRINTLN(b1);
-    INFO_PRINT("LO=");
-    INFO_PRINTLN(b2);
-*/
+
     NT_nv_setByte(address,b1);
     NT_nv_setByte(address+1,b2);
 }
@@ -70,19 +48,6 @@ uint16_t NT_nv_getInt(uint16_t address) {
     uint8_t b1 = NT_nv_getByte(address);
     uint8_t b2 = NT_nv_getByte(address+1);
     int16_t b = mk16bit(b2,b1);
-    
-/*
-    INFO_PRINTLN("-----");
-    INFO_PRINT("NV READ 16bit:");
-    INFO_PRINT(address);
-    INFO_PRINT("=");
-    
-    INFO_PRINTLN(b);
-    INFO_PRINT("HI=");
-    INFO_PRINTLN(b1);
-    INFO_PRINT("LO=");
-    INFO_PRINTLN(b2);
- */
     return b;
 }
 
@@ -127,38 +92,6 @@ int16_t nv_cfg_get_deviceId() {
 }
 
 
-#if defined (NT_PLATFORM_AVR)
-
-void debug(const __FlashStringHelper* format, ...)
-{
-  char buffer[32];
-  va_list args;
-  va_start (args, format);
-  vsnprintf (buffer, 31, reinterpret_cast<const char*>(format), args);
-  va_end (args);
-  DBG(buffer);
-}
-
-#endif
-
-void hexDump(uint8_t *data, uint16_t len) {
-  uint8_t cnt = 0;
-  for (int i = 0; i < len; i++) {
-    debug("%.2x ", data[i]);
-    cnt++;
-    if (cnt == 8) {
-      debug(" ");
-    }
-    if (cnt == 16) {
-      debug("\n");
-      cnt = 0;
-    }
-  }
-  if (cnt != 0) {
-    debug("\n");
-  }
-}
-
 
 long readVcc() {
   long result = -1;
@@ -195,5 +128,17 @@ int freeRam () {
 #else 
     return -1;
 #endif
+}
+
+void sysbanner(){
+   /*
+  INFO_PRINTLN(F(""));
+  INFO_PRINTLN(F("    **** CANNYBOTS BRAIN V2 ****"));
+  INFO_PRINT(F("  2K RAM SYSTEM  "));
+  INFO_PRINT(freeRam());
+  INFO_PRINTLN(F(" BRAIN BYTES FREE"));
+  INFO_PRINTLN(F(""));
+  INFO_PRINTLN(F("READY."));
+  */
 }
 

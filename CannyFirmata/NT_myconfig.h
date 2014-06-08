@@ -1,6 +1,7 @@
+#ifndef NT_myconfig_h
+#define NT_myconfig_h
 
 #include "NT_APP_LineFollowing.h"
-
 
 #define USE_BLE 1
 //#define USE_AX12 1
@@ -11,9 +12,6 @@
 //#define USE_IRRECV 1
 //#define USE_TONE
 //#define USE_MIC 1
-
-
-//#define NT_PLATFORM_MBED 1
 
 
 
@@ -40,43 +38,12 @@
 #else
 #define NT_PLATFORM_AVR 1
 #endif
+//#define NT_PLATFORM_MBED 1
+
+#define DEBUG_OUT Serial
+#define DEBUG_OUT_TARGET_UART_BAUD 9600
 
 
-
-//#define DEBUG_LEVEL 1
-#define INFO_LEVEL 1
-
-
-#if defined(NT_PLATFORM_AVR)
-
-#define INFO_OUT_TARGET_UART 1
-#define DEBUG_OUT_TARGET_UART 1
-
-//#define INFO_OUT_TARGET_BLE 1
-//#define DEBUG_OUT_TARGET_BLE 1
-
-#if defined(INFO_OUT_TARGET_UART)
-#define INFO_OUT Serial
-#define INFO_OUT_TARGET_UART_BAUD 9600
-#endif
-
-
-
-#ifdef DEBUG_OUT_TARGET_BLE
-// doenst support streams...
-
-#ifdef RFDUINO
-#define DBG_OUT Serial
-#define DBG(x) DBG_OUT << x;
-#else
-#define DBG_OUT BLESerial  
-#define DBG(x) BLESerial.println(x);
-#endif
-
-#else
-#define DBG_OUT Serial
-#define DBG(x) DBG_OUT << x;
-#endif
 
 
 
