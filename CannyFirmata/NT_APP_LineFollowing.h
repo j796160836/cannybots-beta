@@ -69,5 +69,6 @@ void lf_init();
 void lf_loop();
 uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1);
 
-
+// private
+void lf_report_stopped();
 #endif
