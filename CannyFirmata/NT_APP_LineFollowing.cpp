@@ -45,11 +45,15 @@ int speedB = 0;
 int manualA = 0;
 int manualB = 0;
 
-int cruiseSpeedManual=0;
+int cruiseSpeedManual=50;
 
 double Setpoint, Input, Output;
 int Kp = 0, Ki = 0, Kd = 0;
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
+
+
+double setpointB, inputB, outputB;
+PID pidB(&inputB, &outputB, &setpointB, Kp, Ki, Kd, DIRECT);
 
 int printdelay = 1; //counter to slow print rate
 
@@ -79,15 +83,21 @@ void read_ir_sensors(){
   IR3_val = analogRead(IR3);
   IR3_val = constrain (analogRead(IR3) - IR3_bias, 0, IR_MAX); //right
   
-  Input = -IR1_val + IR3_val;
+//  Input = -IR1_val + IR3_val;
+  Input = IR1_val;
+  inputB = IR3_val;
 }
 
 void lf_pid_setup(){
    read_ir_sensors();
-   Setpoint = 0; 
+   Setpoint = 25; 
+   setpointB = 25; 
    myPID.SetSampleTime(50);
    myPID.SetOutputLimits(-MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
    myPID.SetMode(AUTOMATIC);
+   pidB.SetSampleTime(50);
+   pidB.SetOutputLimits(-MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
+   pidB.SetMode(AUTOMATIC);
 }
 
 void lf_loop()
@@ -122,8 +132,9 @@ void lf_loop()
   }
   */
   myPID.Compute(); 
+  pidB.Compute(); 
   speedA = cruiseSpeedManual + Output;
-  speedB = cruiseSpeedManual - Output;
+  speedB = cruiseSpeedManual - outputB;
   motor(speedA, speedB);
 }
 
