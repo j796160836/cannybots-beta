@@ -35,7 +35,7 @@ void printvalues ();
 
 //reading from IR sensors
 int IR1_val = 0, IR2_val = 0, IR3_val = 0;
-
+bool ir1on = 0, ir2on = 0, ir3on = 0;
 int IR1_bias = 4;
 int IR2_bias = 0;
 int IR3_bias = -3;
@@ -48,12 +48,9 @@ int manualB = 0;
 int cruiseSpeedManual=50;
 
 double Setpoint, Input, Output;
-int Kp = 0, Ki = 0, Kd = 0;
+double Kp = 0.0, Ki = 0.0, Kd = 0.0;
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
-
-double setpointB, inputB, outputB;
-PID pidB(&inputB, &outputB, &setpointB, Kp, Ki, Kd, DIRECT);
 
 int printdelay = 1; //counter to slow print rate
 
@@ -76,28 +73,25 @@ void lf_setup()
 void read_ir_sensors(){
   IR1_val = analogRead(IR1);
   IR1_val = constrain(analogRead(IR1) - IR1_bias, 0, IR_MAX); //left looking from behind
+  ir1on = IR1_val>=IR_MAX;
   
   IR2_val = analogRead(IR2);
   IR2_val = constrain(analogRead(IR2) - IR2_bias, 0, IR_MAX); //centre
+  ir2on   = IR2_val>=IR_MAX;
   
   IR3_val = analogRead(IR3);
   IR3_val = constrain (analogRead(IR3) - IR3_bias, 0, IR_MAX); //right
+  ir3on   = IR3_val>=IR_MAX;
   
-//  Input = -IR1_val + IR3_val;
-  Input = IR1_val;
-  inputB = IR3_val;
+  Input =  2 - ( ( !ir1on + 2*(ir2on) + 3*!ir3on )  / ( !ir1on + ir2on + !ir3on) );
 }
 
 void lf_pid_setup(){
    read_ir_sensors();
-   Setpoint = 25; 
-   setpointB = 25; 
-   myPID.SetSampleTime(50);
-   myPID.SetOutputLimits(-MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
+   Setpoint = 0;
+   myPID.SetSampleTime(1);
+   myPID.SetOutputLimits(-MOTOR_MAX_SPEED+105, MOTOR_MAX_SPEED-105);
    myPID.SetMode(AUTOMATIC);
-   pidB.SetSampleTime(50);
-   pidB.SetOutputLimits(-MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
-   pidB.SetMode(AUTOMATIC);
 }
 
 void lf_loop()
@@ -132,9 +126,8 @@ void lf_loop()
   }
   */
   myPID.Compute(); 
-  pidB.Compute(); 
   speedA = cruiseSpeedManual + Output;
-  speedB = cruiseSpeedManual - outputB;
+  speedB = cruiseSpeedManual - Output;
   motor(speedA, speedB);
 }
 
@@ -246,19 +239,19 @@ void lf_motor_speed(uint8_t motorNum, int16_t speed) {
 
 void lf_pid_p(int16_t v) {
     //DBG("%d", v);
-    Kp=v;
+    Kp=((double)v)/100.0;
     myPID.SetTunings(Kp, Ki, Kd);
 
 }
 void lf_pid_i(int16_t v) {
     //DBG("%d", v);
-    Ki=v;
+    Ki=((double)v)/100.0;
     myPID.SetTunings(Kp, Ki, Kd);
 
 }
 void lf_pid_d(int16_t v) {
     //DBG("%d", v);
-    Kd=v;
+    Kd=((double)v)/100.0;
     myPID.SetTunings(Kp, Ki, Kd);
 
 }
