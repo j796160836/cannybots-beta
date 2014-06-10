@@ -10,7 +10,7 @@
 #include "NT_App_LineFollowing.h"
 
 
-#define MOTOR_MAX_SPEED 100
+#define MOTOR_MAX_SPEED 255
 
 #define IR_MAX 100
 #define WHITE_THRESHOLD 100
