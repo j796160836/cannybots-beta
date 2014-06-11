@@ -3,11 +3,11 @@
 // Line Following
 
 
-// 1. eeprom values for bias, initail cruids speed
-// 2. send initial bot runtime state (inc. curernt speed) to app
 // 3. UI: break out of line mod e using joypad
 // 4. Put cruis speed on joypad screen.
 // 5. connection status icon
+// 1. eeprom values for bias, initail cruids speed
+// 2. send initial bot runtime state (inc. curernt speed) to app
 
 
 #import <Arduino.h>
@@ -488,8 +488,12 @@ int16_t lf_cfg_get_led_brightness() {
 
 void lf_cfg_set_ir_bias(uint8_t ir, int8_t val) {
   int nvOffset = NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_BASE + ir;
-
-  if ( (nvOffset > NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_BASE ) && ( nvOffset < NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_MAX)) {
+  DBG("1");
+  if ( (nvOffset >= NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_BASE ) && ( nvOffset < NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_MAX)) {
+    DBG("2= (ir, offset, val)");
+    DBG(ir);
+    DBG(nvOffset);
+    DBG(val);
     lf_ir_bias(ir, val);
     NT_nv_setByte(nvOffset, val);
   }
@@ -497,10 +501,18 @@ void lf_cfg_set_ir_bias(uint8_t ir, int8_t val) {
 
 int16_t lf_cfg_get_ir_bias(uint8_t ir) {
   int nvOffset = NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_BASE + ir;
-  if ( (nvOffset > NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_BASE ) && ( nvOffset < NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_MAX)) {
-    return NT_nv_getByte(nvOffset);
+  DBG("3");
+  DBG("2= (ir, offset, val)");
+  DBG(ir);
+  DBG(nvOffset);
+
+  if ( (nvOffset >= NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_BASE ) && ( nvOffset < NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_MAX)) {
+    int v = (int8_t)NT_nv_getByte(nvOffset);
+    DBG(v);
+    return v;
   } else {
-    return 0;
+    DBG("err");
+    return -2;
   }
 }
 
@@ -521,7 +533,8 @@ void lf_init() {
   lf_pid_d(lf_cfg_get_pid_d());
   lf_rgb_colour(lf_cfg_get_led_col());
   lf_rgb_brightness(lf_cfg_get_led_brightness());
-  for (int i = 0; i < IR_BIAS_NUM_SENSORS; i++);
+  int i;
+  for (i = 0; i < IR_BIAS_NUM_SENSORS; i++);
     lf_ir_bias(i, lf_cfg_get_ir_bias(i));
   
    pinMode(enableA, OUTPUT);
@@ -534,7 +547,6 @@ void lf_init() {
 
 
 
-#define F(x) x
 uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
   //debug(F("linefollow:CMD=%d\n"), cmd);
   //debug(F("linefollow:ID =%d\n"), id);
@@ -550,7 +562,7 @@ uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
         case LINEFOLLOW_SWITCH_NEXT_JUNCTION:lf_switch(); break;
         case LINEFOLLOW_SPEED:lf_speed(p1); break;
         default:
-          DBG(F("linefollow:NT_ERROR_CMD_INVALID for NT_CMD_LINEFOLLOW_MOVE"));
+          DBG("linefollow:NT_ERROR_CMD_INVALID for NT_CMD_LINEFOLLOW_MOVE");
           status = NT_ERROR_CMD_INVALID;
       }       
       break;    
@@ -562,9 +574,21 @@ uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
         case LINEFOLLOW_CFG_RGB_COLOUR: lf_cfg_set_led_col(p1); break;
         case LINEFOLLOW_CFG_RGB_BRIGHTNESS: lf_cfg_set_led_bri(p1); break;
         case LINEFOLLOW_CFG_DEVICE_ID: nv_cfg_set_deviceId(p1); break;
+        case LINEFOLLOW_CFG_IR_BIAS_1: 
+        case LINEFOLLOW_CFG_IR_BIAS_2: 
+        case LINEFOLLOW_CFG_IR_BIAS_3: 
+        case LINEFOLLOW_CFG_IR_BIAS_4: 
+        case LINEFOLLOW_CFG_IR_BIAS_5: 
+        case LINEFOLLOW_CFG_IR_BIAS_6: 
+        case LINEFOLLOW_CFG_IR_BIAS_7: 
+        case LINEFOLLOW_CFG_IR_BIAS_8: 
+        case LINEFOLLOW_CFG_IR_BIAS_9: 
+        case LINEFOLLOW_CFG_IR_BIAS_10: 
+          lf_cfg_set_ir_bias(id-LINEFOLLOW_CFG_IR_BIAS_1, p1);
+          break;
         
         default:
-          DBG(F("linefollow:NT_ERROR_CMD_INVALID for NT_CMD_LINEFOLLOW_CONFIG_SET"));
+          DBG("linefollow:NT_ERROR_CMD_INVALID for NT_CMD_LINEFOLLOW_CONFIG_SET");
           status = NT_ERROR_CMD_INVALID;
       }       
       break;
@@ -589,8 +613,21 @@ uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
         case LINEFOLLOW_CFG_RGB_BRIGHTNESS: 
           NT_sendCommand(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_CONFIG_GET, LINEFOLLOW_CFG_RGB_BRIGHTNESS, lf_cfg_get_led_brightness()); 
           break;
+        case LINEFOLLOW_CFG_IR_BIAS_1: 
+        case LINEFOLLOW_CFG_IR_BIAS_2: 
+        case LINEFOLLOW_CFG_IR_BIAS_3: 
+        case LINEFOLLOW_CFG_IR_BIAS_4: 
+        case LINEFOLLOW_CFG_IR_BIAS_5: 
+        case LINEFOLLOW_CFG_IR_BIAS_6: 
+        case LINEFOLLOW_CFG_IR_BIAS_7: 
+        case LINEFOLLOW_CFG_IR_BIAS_8: 
+        case LINEFOLLOW_CFG_IR_BIAS_9: 
+        case LINEFOLLOW_CFG_IR_BIAS_10: 
+        
+          NT_sendCommand(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_CONFIG_GET, id, lf_cfg_get_ir_bias(id-LINEFOLLOW_CFG_IR_BIAS_1)); 
+          break;
         default:
-          DBG(F("linefollow:NT_ERROR_CMD_INVALID for NT_CMD_LINEFOLLOW_CONFIG_SET"));
+          DBG("linefollow:NT_ERROR_CMD_INVALID for NT_CMD_LINEFOLLOW_CONFIG_SET");
           status = NT_ERROR_CMD_INVALID;
       }       
       break;
