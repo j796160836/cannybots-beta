@@ -45,16 +45,14 @@ int speedB = 0;
 int manualA = 0;
 int manualB = 0;
 
-int cruiseSpeedManual=50;
-
-double Setpoint, Input, Output;
-double Kp = 0.0, Ki = 0.0, Kd = 0.0;
-PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
-
+int cruiseSpeed=50;
 
 int printdelay = 1; //counter to slow print rate
 
 boolean isHalted = false;
+
+
+
 
 void lf_setup()
 {
@@ -83,8 +81,179 @@ void read_ir_sensors(){
   IR3_val = constrain (analogRead(IR3) - IR3_bias, 0, IR_MAX); //right
   ir3on   = IR3_val>=IR_MAX;
   
-  Input =  2 - ( ( !ir1on + 2*(ir2on) + 3*!ir3on )  / ( !ir1on + ir2on + !ir3on) );
+  
 }
+
+
+#define PID_METHOD1
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+#ifdef PID_METHOD1
+int Kp = 0, Ki = 0, Kd = 0;
+
+int I_limit = 100;
+
+int P_error = 0;
+int I_error = 0;
+int D_error = 0;
+int error = 0;
+int error_last = 0; // to calculate D_error = error - error_last
+int correction = 0; //error after PID filter
+
+
+void lf_pid_setup(){
+}
+
+void lf_loop()
+{
+  // read the IR sensors:
+  IR1_val = analogRead(IR1);
+  IR1_val = analogRead(IR1) - IR1_bias; //left looking from behind
+  //set limit on reading. The reading can be very high and inaccurate on pitch black
+  if (IR1_val > 100)
+  IR1_val = 100;
+  
+  IR2_val = analogRead(IR2);
+  IR2_val = analogRead(IR2) - IR2_bias; //centre
+  if (IR2_val > 100)
+  IR2_val = 100;
+  
+  IR3_val = analogRead(IR3);
+  IR3_val = analogRead(IR3) - IR3_bias; //right
+  if (IR3_val > 100)
+  IR3_val = 100;
+
+  // process IR readings
+  error_last = error; //store previous error before new one is caluclated
+  //set bounds for error
+  error = constrain(IR1_val - IR3_val, -30, 30);
+  
+  // calculate proportional term
+  P_error = error * Kp;
+
+  // calculate differential term
+  D_error = (error - error_last)*Kd;
+
+  correction = P_error + D_error;
+
+  static bool reportSent = false;
+    
+  //if sernsor 2 is on white, set spped to zero
+  if (IR2_val >= IR_MAX) {
+    // set by app
+    //cruiseSpeed = 100;
+      // Set motor speed
+      // If correction is > 0, increase the speed of motor A and 
+      //decrease speed of motor B. If correction is < 0,  
+      // decrease speed of A and increase speedB.
+      speedA = constrain(cruiseSpeed + correction, -150, 150);
+      speedB = constrain(cruiseSpeed - correction, -150, 150);
+     reportSent = false;
+  }
+  else
+  {
+    if (!reportSent) {
+      lf_report_stopped();
+    }
+    reportSent=true;
+    speedA = manualA;
+    speedB = manualB;
+  }
+
+  motor(speedA, speedB);
+
+  printvalues();
+}
+
+
+// motor controller function
+void motor(int _speedA, int _speedB)
+{
+  _speedA=constrain(_speedA, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
+  _speedB=constrain(_speedB, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
+  
+  digitalWrite(phaseA, ( _speedA >= 0 ) ? HIGH:LOW);
+  digitalWrite(phaseB, ( _speedB >= 0 ) ? HIGH:LOW);
+  
+  // map from the max range to a smaller subset
+  _speedA=MOTOR_MAX_SPEED-abs(_speedA);
+  _speedB=MOTOR_MAX_SPEED-abs(_speedB);
+  //Serial.print("A=");  Serial.print(_speedA);  Serial.print(", B=");  Serial.println(_speedB);
+  analogWrite(enableA, _speedA);
+  analogWrite(enableB, _speedB);
+
+}
+
+void halt_motors() {
+   isHalted = true;
+   manualB = manualA = 0;
+   motor(0,0);
+}
+void resume_motors() {
+   isHalted = false;
+   manualB = manualA = 0;
+   motor(0,0);
+}
+
+
+
+void lf_pid_p(int16_t v) {
+    Kp=v;
+}
+void lf_pid_i(int16_t v) {
+    Ki=v;
+}
+void lf_pid_d(int16_t v) {
+    Kd=v;
+}
+
+
+void printvalues ()
+{
+  if ( printdelay++ % 100 )
+    return;
+  Serial.print(IR1_val);
+  Serial.print(", ");
+  Serial.print(IR2_val);
+  Serial.print(", ");
+  Serial.print(IR3_val);
+  Serial.print(", Kp=");
+  Serial.print(Kp);
+  Serial.print(", Kd=");
+  Serial.print(Kd);
+  Serial.print(", e=");
+  Serial.print(error);
+  Serial.print(", pe");
+  Serial.print(P_error);
+  Serial.print(", de=");
+  Serial.print(D_error);
+  Serial.print(", A=");
+  Serial.print(speedA);
+  Serial.print(", B=");
+  Serial.println(speedB);
+}
+
+#endif
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#ifdef PID_METHOD2
+double Setpoint, Input, Output;
+double Kp = 0.0, Ki = 0.0, Kd = 0.0;
+PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
+
+
 
 void lf_pid_setup(){
    read_ir_sensors();
@@ -125,9 +294,10 @@ void lf_loop()
      speedB = cruiseSpeedManual - Output;
   }
   */
+  Input =  2 - ( ( !ir1on + 2*(ir2on) + 3*!ir3on )  / ( !ir1on + ir2on + !ir3on) );
   myPID.Compute(); 
-  speedA = cruiseSpeedManual + Output;
-  speedB = cruiseSpeedManual - Output;
+  speedA = cruiseSpeed + Output;
+  speedB = cruiseSpeed - Output;
   motor(speedA, speedB);
 }
 
@@ -166,6 +336,28 @@ void resume_motors() {
    motor(0,0);
 }
 
+
+
+void lf_pid_p(int16_t v) {
+    //DBG("%d", v);
+    Kp=((double)v)/100.0;
+    myPID.SetTunings(Kp, Ki, Kd);
+
+}
+void lf_pid_i(int16_t v) {
+    //DBG("%d", v);
+    Ki=((double)v)/100.0;
+    myPID.SetTunings(Kp, Ki, Kd);
+
+}
+void lf_pid_d(int16_t v) {
+    //DBG("%d", v);
+    Kd=((double)v)/100.0;
+    myPID.SetTunings(Kp, Ki, Kd);
+
+}
+
+
 void printvalues ()
 {
   if ( printdelay++ % 100 )
@@ -185,7 +377,7 @@ void printvalues ()
   Serial.print(", Output=");
   Serial.print(Output);
   Serial.print(", cruiseSpeed=");
-  Serial.print(cruiseSpeedManual);
+  Serial.print(cruiseSpeed);
   
   Serial.print(", A=");
   Serial.print(speedA);
@@ -194,7 +386,7 @@ void printvalues ()
   
 }
 
-
+#endif
 
 //////////////////////////////////////////
 // Actions
@@ -223,7 +415,7 @@ void lf_switch() {
 
 void lf_speed(int16_t speed) {
     //DBG("LS=%d", speed);
-    cruiseSpeedManual=speed;
+    cruiseSpeed=speed;
 }
 
 
@@ -237,24 +429,6 @@ void lf_motor_speed(uint8_t motorNum, int16_t speed) {
      }
 }
 
-void lf_pid_p(int16_t v) {
-    //DBG("%d", v);
-    Kp=((double)v)/100.0;
-    myPID.SetTunings(Kp, Ki, Kd);
-
-}
-void lf_pid_i(int16_t v) {
-    //DBG("%d", v);
-    Ki=((double)v)/100.0;
-    myPID.SetTunings(Kp, Ki, Kd);
-
-}
-void lf_pid_d(int16_t v) {
-    //DBG("%d", v);
-    Kd=((double)v)/100.0;
-    myPID.SetTunings(Kp, Ki, Kd);
-
-}
 void lf_rgb_colour(uint8_t v) {
     //DBG("%d", v);
 }
