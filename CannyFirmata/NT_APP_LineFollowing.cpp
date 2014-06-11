@@ -1,6 +1,15 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Line Following
+
+
+// 1. eeprom values for bias, initail cruids speed
+// 2. send initial bot runtime state (inc. curernt speed) to app
+// 3. UI: break out of line mod e using joypad
+// 4. Put cruis speed on joypad screen.
+// 5. connection status icon
+
+
 #import <Arduino.h>
 #include <PID_v1.h>
 
@@ -36,49 +45,45 @@ void printvalues ();
 //reading from IR sensors
 int IR1_val = 0, IR2_val = 0, IR3_val = 0;
 bool ir1on = 0, ir2on = 0, ir3on = 0;
-int IR1_bias = 4;
+
+
+#if 1
+// Leebo
+int IRbias[3] = {3, 0, -2};
+#else 
+// el  dho
+int IR1_bias = -2;
 int IR2_bias = 0;
-int IR3_bias = -3;
+int IR3_bias = 1;
+#endif
 
 int speedA = 0;
 int speedB = 0;
 int manualA = 0;
 int manualB = 0;
 
-int cruiseSpeed=50;
+int cruiseSpeed=50;  //50;
 
 int printdelay = 1; //counter to slow print rate
 
 boolean isHalted = false;
 
 
-
-
-void lf_setup()
-{
-  // initialize serial communications at 9600 bps:
-  Serial.begin(9600);
-  pinMode(enableA, OUTPUT);
-  pinMode(enableB, OUTPUT);
-  pinMode(phaseA, OUTPUT);
-  pinMode(phaseB, OUTPUT);
-}
-
 // read the IR sensors:
 //set limit on reading. The reading can be very high and inaccurate on pitch black
 
 
 void read_ir_sensors(){
-  IR1_val = analogRead(IR1);
-  IR1_val = constrain(analogRead(IR1) - IR1_bias, 0, IR_MAX); //left looking from behind
+  //IR1_val = analogRead(IR1);
+  IR1_val = constrain(analogRead(IR1) - IRbias[0], 0, IR_MAX); //left looking from behind
   ir1on = IR1_val>=IR_MAX;
   
-  IR2_val = analogRead(IR2);
-  IR2_val = constrain(analogRead(IR2) - IR2_bias, 0, IR_MAX); //centre
+  //IR2_val = analogRead(IR2);
+  IR2_val = constrain(analogRead(IR2) - IRbias[1], 0, IR_MAX); //centre
   ir2on   = IR2_val>=IR_MAX;
   
-  IR3_val = analogRead(IR3);
-  IR3_val = constrain (analogRead(IR3) - IR3_bias, 0, IR_MAX); //right
+  //IR3_val = analogRead(IR3);
+  IR3_val = constrain (analogRead(IR3) - IRbias[2], 0, IR_MAX); //right
   ir3on   = IR3_val>=IR_MAX;
   
   
@@ -112,22 +117,7 @@ void lf_pid_setup(){
 
 void lf_loop()
 {
-  // read the IR sensors:
-  IR1_val = analogRead(IR1);
-  IR1_val = analogRead(IR1) - IR1_bias; //left looking from behind
-  //set limit on reading. The reading can be very high and inaccurate on pitch black
-  if (IR1_val > 100)
-  IR1_val = 100;
-  
-  IR2_val = analogRead(IR2);
-  IR2_val = analogRead(IR2) - IR2_bias; //centre
-  if (IR2_val > 100)
-  IR2_val = 100;
-  
-  IR3_val = analogRead(IR3);
-  IR3_val = analogRead(IR3) - IR3_bias; //right
-  if (IR3_val > 100)
-  IR3_val = 100;
+  read_ir_sensors();
 
   // process IR readings
   error_last = error; //store previous error before new one is caluclated
@@ -178,8 +168,8 @@ void motor(int _speedA, int _speedB)
   _speedA=constrain(_speedA, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
   _speedB=constrain(_speedB, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
   
-  digitalWrite(phaseA, ( _speedA >= 0 ) ? HIGH:LOW);
-  digitalWrite(phaseB, ( _speedB >= 0 ) ? HIGH:LOW);
+  digitalWrite(phaseA, (_speedA >= 0 ) ? HIGH:LOW);
+  digitalWrite(phaseB, (_speedB >= 0 ) ? HIGH:LOW);
   
   // map from the max range to a smaller subset
   _speedA=MOTOR_MAX_SPEED-abs(_speedA);
@@ -438,6 +428,10 @@ void lf_rgb_brightness(uint8_t v) {
 }
 
 
+void lf_ir_bias(uint8_t ir, int8_t val) {
+   IRbias[ir] = val;
+}
+
 // Client Feedbak
 
 void lf_report_stopped() {
@@ -490,6 +484,28 @@ int16_t lf_cfg_get_led_brightness() {
 }
 
 
+// IR BIAS cfg
+
+void lf_cfg_set_ir_bias(uint8_t ir, int8_t val) {
+  int nvOffset = NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_BASE + ir;
+
+  if ( (nvOffset > NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_BASE ) && ( nvOffset < NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_MAX)) {
+    lf_ir_bias(ir, val);
+    NT_nv_setByte(nvOffset, val);
+  }
+}
+
+int16_t lf_cfg_get_ir_bias(uint8_t ir) {
+  int nvOffset = NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_BASE + ir;
+  if ( (nvOffset > NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_BASE ) && ( nvOffset < NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_MAX)) {
+    return NT_nv_getByte(nvOffset);
+  } else {
+    return 0;
+  }
+}
+
+
+
 void NT_nv_configDefaults_LineFollowing() {
   for (int a = NT_NV_CFG_APP_LINEFOLLOWING_BASE; a<8; a++) {
     NT_nv_setByte(a,0);
@@ -504,11 +520,14 @@ void lf_init() {
   lf_pid_i(lf_cfg_get_pid_i());
   lf_pid_d(lf_cfg_get_pid_d());
   lf_rgb_colour(lf_cfg_get_led_col());
-  lf_cfg_set_led_bri(lf_cfg_get_led_brightness());
+  lf_rgb_brightness(lf_cfg_get_led_brightness());
+  for (int i = 0; i < IR_BIAS_NUM_SENSORS; i++);
+    lf_ir_bias(i, lf_cfg_get_ir_bias(i));
   
-  // TODO:  Setup motor driver
    pinMode(enableA, OUTPUT);
    pinMode(enableB, OUTPUT);
+   pinMode(phaseA, OUTPUT);
+   pinMode(phaseB, OUTPUT);
    
    lf_pid_setup();
 }
