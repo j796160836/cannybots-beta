@@ -3,13 +3,19 @@
 
 
 #include <Arduino.h>
-#include "NT_myconfig.h"
-#include "NTUtils.h"
-#include "NTProtocol.h"
-#include "NT_App_LineFollowing.h"
-#include "NT_MOD_SensorCommon.h"
+// NT & Line following deps.
+#include <SimpleFIFO.h>
 #include <PID_v1.h>
 
+#include "NT_myconfig.h"
+#include "NT_App_LineFollowing.h"
+#include <NTUtils.h>
+#include <NTProtocol.h>
+#include <NTBLE.h>
+
+
+
+#ifdef CANNY_RADIO_ROLE
 // Arduiono C pre-processing makes it necessary to manually commont and uncomment RFDuiono or Adafriot  (I suppose we could install the adafruit BLE lib in the RFDuiono toolchain, odd!)
 #ifdef RFDUINO
 #include <RFduinoBLE.h>
@@ -20,7 +26,8 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 // This lib had the .h and .cpp tweaked to disable debug and remove hard coded debug
-#include <Adafruit_BLE_UART.h>
+//#include <Adafruit_BLE_UART.h>
+#endif
 #endif
 
 #ifdef USE_BLE
@@ -30,8 +37,12 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 void setup() {  
-  Serial.begin(9600 );
-  DBG("started\n");
+#ifdef RFDUINO
+  Serial.begin(9600, 5, 6); 
+#else
+  Serial.begin(9600);
+#endif
+  Serial.println("CB!\n");
   
   //voltage = readVcc();
   
@@ -63,9 +74,15 @@ void setup() {
 //////////////////////////////
 
 void loop() {
-#ifdef USE_BLE
+//#ifdef USE_BLE
+#ifdef CANNY_UC_ROLE
+  uart_loop();
+#elif defined(CANNY_RADIO_ROLE)
   ble_loop();
+#else
+#error neither UC or RADIO role set for target compilation
 #endif
+//#endif
 
 #ifdef USE_PIXY
    updatePixy();

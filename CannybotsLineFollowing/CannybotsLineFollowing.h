@@ -1,7 +1,5 @@
-#ifndef NT_APP_LineFollowing_h
-#define NT_APP_LineFollowing_h
 
-#include <stdint.h> 
+
 
 #define IR_BIAS_NUM_SENSORS 3
 
@@ -21,9 +19,6 @@
 #define NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_MAX  (NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_BASE+IR_BIAS_NUM_SENSORS)
 // leave space for 10 sensors
 #define NT_NV_CFG_APP_LINEFOLLOWING_MAX_SPEED 21
-
-
-
 
 
 
@@ -85,11 +80,8 @@
 #define LINEFOLLOW_CFG_IR_BIAS_10  15
 
 
+#define MOTOR_MAX_SPEED 255
 
-void lf_init();
-void lf_loop();
-uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1);
+#define IR_MAX 100
+#define WHITE_THRESHOLD 100
 
-// private
-void lf_report_stopped();
-#endif

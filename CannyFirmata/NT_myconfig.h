@@ -3,7 +3,19 @@
 
 #include "NT_APP_LineFollowing.h"
 
+#if defined(ARDUINO_AVR_A_STAR_32U4) || defined(ARDUINO_AVR_LEONARDO)
+#define CANNY_UC_ROLE 1
+#endif
+
+#ifdef __RFduino__
+#define CANNY_RADIO_ROLE
+#endif
+
+#ifdef CANNY_RADIO_ROLE
 #define USE_BLE 1
+#else
+#define USE_UART
+#endif
 //#define USE_AX12 1
 //#define USE_SONAR 1
 //#define USE_PIXY 1

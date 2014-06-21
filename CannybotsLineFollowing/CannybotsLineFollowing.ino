@@ -3,25 +3,42 @@
 // Line Following
 
 
-// 3. UI: break out of line mod e using joypad
-// 4. Put cruis speed on joypad screen.
-// 5. connection status icon
-// 1. eeprom values for bias, initail cruids speed
-// 2. send initial bot runtime state (inc. curernt speed) to app
+// MUST HAVE!!!
+
+// TODO:  DONE!  0) uC to remote control (app) data flow 
+// TODO:  1) line following mode - increase and decrease cruise speed from the app joystick. 
+// TODO:  2) autonomous switch to manual mode when out of line (that is enabling steering, just like you had before).
+// TODO:  4) manual/line following button switch.
+// TODO:  5)uncomment lf_report_stopped
 
 
+// nice to have:
+
+// 1. connection status icon on app
+// 2. connection mangement screen
+// 3. cruise speed in EEPROM and iOS app (note : IR sensor bias in eeprom and in app has been done) 
+// 4. current settings (e.g. cruise speed), not just EEPROM values, sent to app on connection
+
+
+#include "CannybotsLineFollowing.h"
+
+//#define DEBUG 1
+//#define DEBUG_OUT Serial
+//#define DEBUG_OUT_TARGET_UART_BAUD 9600
+//#define NT_PLATFORM_AVR 1
+
+#include <stdint.h> 
 #include <Arduino.h>
-#include <PID_v1.h>
+#include <EEPROM.h>
 
-#include "NT_myconfig.h"
+// NT & Line following deps.
+#include <SimpleFIFO.h>
+#include <PID_v1.h>
 #include <NTUtils.h>
 #include <NTProtocol.h>
+#include <NTMessaging.h>
 
 
-#define MOTOR_MAX_SPEED 255
-
-#define IR_MAX 100
-#define WHITE_THRESHOLD 100
 
 void motor(int speedA, int speedB);
 void printvalues ();
@@ -148,7 +165,7 @@ void lf_loop()
   else
   {
     if (!reportSent) {
-      lf_report_stopped();
+      //lf_report_stopped();
     }
     reportSent=true;
     speedA = manualA;
@@ -207,6 +224,7 @@ void printvalues ()
 {
   if ( printdelay++ % 100 )
     return;
+   
   Serial.print(IR1_val);
   Serial.print(", ");
   Serial.print(IR2_val);
@@ -403,13 +421,18 @@ void lf_switch() {
 }
 
 void lf_speed(int16_t speed) {
-    //DBG("LS=%d", speed);
+    Serial.print("LS=");
+    Serial.println(speed,DEC);
     cruiseSpeed=speed;
 }
 
 
 void lf_motor_speed(uint8_t motorNum, int16_t speed) {
-    //DBG("M, %d=%d", motor, speed);
+    Serial.print("M");
+    Serial.print(motorNum, DEC);
+    Serial.print("=");
+    Serial.println(speed, DEC);
+
     if (2==motorNum) {
         manualA=speed;
     }
@@ -525,25 +548,6 @@ void NT_nv_configDefaults_LineFollowing() {
   NT_nv_setByte(NT_NV_CFG_APP_LINEFOLLOWING_BASE + NT_NV_CFG_APP_LINEFOLLOWING_RGBBRI_VAL, 255);  
 }
 
-void lf_init() {
-  // restore config values
-  lf_pid_p(lf_cfg_get_pid_p());
-  lf_pid_i(lf_cfg_get_pid_i());
-  lf_pid_d(lf_cfg_get_pid_d());
-  lf_rgb_colour(lf_cfg_get_led_col());
-  lf_rgb_brightness(lf_cfg_get_led_brightness());
-  int i;
-  for (i = 0; i < IR_BIAS_NUM_SENSORS; i++);
-    lf_ir_bias(i, lf_cfg_get_ir_bias(i));
-  
-   pinMode(enableA, OUTPUT);
-   pinMode(enableB, OUTPUT);
-   pinMode(phaseA, OUTPUT);
-   pinMode(phaseB, OUTPUT);
-   
-   lf_pid_setup();
-}
-
 
 
 uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
@@ -638,6 +642,48 @@ uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
       status = NT_ERROR_CMD_INVALID;
   }
   return status;
+}
+
+
+
+
+void setup() {
+  Serial.begin(9600);
+  Serial1.begin(9600);
+#ifdef ARDUINO_AVR_LEONARDO  
+// while (!Serial) {
+//    ; // wait for serial port to connect. Needed for Leonardo only
+//}
+#endif  
+  Serial.println("UC_START");
+  
+  // restore config values
+  lf_pid_p(lf_cfg_get_pid_p());
+  lf_pid_i(lf_cfg_get_pid_i());
+  lf_pid_d(lf_cfg_get_pid_d());
+  lf_rgb_colour(lf_cfg_get_led_col());
+  lf_rgb_brightness(lf_cfg_get_led_brightness());
+  int i;
+  for (i = 0; i < IR_BIAS_NUM_SENSORS; i++);
+    lf_ir_bias(i, lf_cfg_get_ir_bias(i));
+  
+   pinMode(enableA, OUTPUT);
+   pinMode(enableB, OUTPUT);
+   pinMode(phaseA, OUTPUT);
+   pinMode(phaseB, OUTPUT);
+   
+   lf_pid_setup();
+   
+   // TODO: setup NT with callback to linefollow_processCommand() above.
+}
+
+
+void loop() {
+  NT_UART_parseIntoQueue(Serial1, inboundMsgFIFO);
+  
+  NT_processOutboundMessageQueue();
+  lf_loop();
+  NT_processInboundMessageQueue();
 }
 
 
