@@ -27,8 +27,8 @@ device_t role = DEVICE0;
 #define YAXIS_PIN 3
 #define BUTTON_PIN 4
 
-#define AXIS_DEADZONE 15
-#define AXIS_MIN_DELTA 3
+#define AXIS_DEADZONE 5
+#define AXIS_MIN_DELTA 2
 
 
 // Axis state
@@ -89,7 +89,7 @@ void loop()
 
   if ( ( abs(xAxisValue) < AXIS_DEADZONE) && ( abs(yAxisValue) < AXIS_DEADZONE) ) {
     xAxisValue = yAxisValue = 0;
-    if (xAxisLastValue!=0 && yAxisLastValue!=0) {
+    if (xAxisLastValue != 0 && yAxisLastValue != 0) {
       sendUpdate = true;
     }
   } else {
@@ -106,22 +106,67 @@ void loop()
   yAxisLastValue = yAxisValue;
 
 
-
   if (sendUpdate) {
     sendUpdate = false;
-    Serial.println("SendUpdate required");
+
+    //Serial.println("SendUpdate required");
+
+    //throttle (Y axis) and direction (X axis)
+    int throttle = -yAxisValue;
+    int direction = xAxisValue;
+    int leftMotor,leftMotorScaled = 0; //left Motor helper variables
+    float leftMotorScale = 0;
+
+    int rightMotor,rightMotorScaled = 0; //right Motor helper variables
+    float rightMotorScale = 0;
+
+    float maxMotorScale = 0; //holds the mixed output scaling factor
+
+
+    //mix throttle and direction
+    leftMotor = throttle + direction;
+    rightMotor = throttle - direction;
+
+    //print the initial mix results
+    Serial.print("LIN:"); Serial.print( leftMotor, DEC);
+    Serial.print(", RIN:"); Serial.print( rightMotor, DEC);
+
+    //calculate the scale of the results in comparision base 8 bit PWM resolution
+    leftMotorScale =  leftMotor / 255.0;
+    leftMotorScale = abs(leftMotorScale);
+    rightMotorScale =  rightMotor / 255.0;
+    rightMotorScale = abs(rightMotorScale);
+
+    Serial.print("| LSCALE:"); Serial.print( leftMotorScale, 2);
+    Serial.print(", RSCALE:"); Serial.print( rightMotorScale, 2);
+
+    //choose the max scale value if it is above 1
+    maxMotorScale = max(leftMotorScale, rightMotorScale);
+    maxMotorScale = max(1, maxMotorScale);
+
+    //and apply it to the mixed values
+    leftMotorScaled = constrain(leftMotor / maxMotorScale, -255, 255);
+    rightMotorScaled = constrain(rightMotor / maxMotorScale, -255, 255);
+
+    Serial.print("| LOUT:"); Serial.print( leftMotorScaled);
+    Serial.print(", ROUT:"); Serial.print( rightMotorScaled);
+
+    Serial.println(" |");
+
+
+
     uint8_t msg[NT_MSG_SIZE] = {
       NT_DEFAULT_MSG_HEADER(),
-      NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_MOTOR_SPEED, 1, xAxisValue),
-      NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_MOTOR_SPEED, 2, yAxisValue),
-      NT_CREATE_CMD_NOP,
-      NT_CREATE_CMD_NOP
+      NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_MOTOR_SPEED, 3, xAxisValue),
+      NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_MOTOR_SPEED, 4, yAxisValue),
+      NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_MOTOR_SPEED, 1, leftMotorScaled),
+      NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_MOTOR_SPEED, 2, rightMotorScaled),
     };
     NT_MSG_CALC_CRC(msg);
 
     RFduinoGZLL.sendToHost((const char*)msg, NT_MSG_SIZE);
   }
-
+#if 0
   Serial.print("x=");
   Serial.print(xAxisValue, DEC);
   Serial.print("\ty=");
@@ -133,7 +178,7 @@ void loop()
   Serial.print("\tfollowMode=");
   Serial.print(followMode, DEC);
   Serial.println("");
-
+#endif
 }
 
 void RFduinoGZLL_onReceive(device_t device, int rssi, char *data, int len)

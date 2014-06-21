@@ -43,6 +43,8 @@
 void motor(int speedA, int speedB);
 void printvalues ();
 
+#define INFO_LED 13
+
 // PIN Assignments
 // IR sensor pins
 #define IR1 A9
@@ -124,6 +126,24 @@ void lf_pid_setup(){
 
 void lf_loop()
 {
+  static bool reportSent = false;
+  static bool startReportSent = false;
+  static unsigned long reportSentLast = millis();
+  static unsigned long startReportSentLast = millis();
+
+  if (IR2_val < IR_MAX) {        
+    isHalted = false;
+    // only report that we are back on the line once per detection, also throttle reporting in case of sensor fluctutions 
+    if (!startReportSent) {
+      if  ((millis() - startReportSentLast) > 1000) {
+         lf_report_started ();
+        startReportSentLast = millis();
+      }
+    }
+    startReportSent=true;   
+    reportSent=false;
+  }
+  
   if (isHalted) {
       motor(manualA, manualB);
       return;
@@ -143,13 +163,13 @@ void lf_loop()
 
   correction = P_error + D_error;
 
-  static bool reportSent = false;
-  static unsigned long reportSentLast = millis();
     
   //if sernsor 2 is on white, set spped to zero
   if (IR2_val >= IR_MAX) {
     // set by app
-      cruiseSpeed = baseCruiseSpeed + manualA/4;
+      if (manualA>0) {
+        cruiseSpeed = baseCruiseSpeed + manualA/2;
+      }
       
       // Set motor speed
       // If correction is > 0, increase the speed of motor A and 
@@ -170,6 +190,7 @@ void lf_loop()
       }
     }
     reportSent=true;
+    startReportSent=false;
     speedA = manualA;
     speedB = manualB;
   }
@@ -288,6 +309,29 @@ void lf_right() {
   DBG("RIGHT");
 }
 
+void test_motor() {
+   digitalWrite(INFO_LED,HIGH);
+   motor(0,128);
+   delay(250);
+   motor(128,0);
+   delay(250);
+   motor(0,-128);
+   delay(250);
+   motor(-128,0);
+   delay(250);
+   motor(0,0);
+   digitalWrite(INFO_LED,LOW);
+}
+
+void info_blink(int count, int onPause, int offPause) {
+  while (count--) {
+     digitalWrite(INFO_LED,HIGH);
+     delay(onPause);
+     digitalWrite(INFO_LED,LOW);
+     delay(offPause);
+  }     
+}
+
 void lf_switch() {
    DBG("Switch");
     test_motor();
@@ -300,19 +344,78 @@ void lf_speed(int16_t speed) {
     cruiseSpeed=speed;
 }
 
-
 void lf_motor_speed(uint8_t motorNum, int16_t speed) {
+    static int yAxisValue = 0;
+    static int xAxisValue = 0;
+    
     Serial.print("M");
     Serial.print(motorNum, DEC);
     Serial.print("=");
     Serial.println(speed, DEC);
-
-    if (2==motorNum) {
-        manualA=speed;
+    switch (motorNum) {
+      case 1: 
+        manualB = speed;
+        break;
+      case 2: 
+         manualA=speed;
+        break;
+      case 3: 
+        //joy X axis vale
+        xAxisValue=speed;
+        break;
+      case 4: 
+         //joy y axis vale
+         yAxisValue=speed;
+        break;
+      default:
+        Serial.println("unknown motor");      
     }
-     else {
-        manualB=speed;
-     }
+    
+    if ((motorNum ==3) || (motorNum==4) ) {
+      //throttle (Y axis) and direction (X axis)
+    int throttle = yAxisValue;
+    int direction = xAxisValue;
+    int leftMotor,leftMotorScaled = 0; //left Motor helper variables
+    float leftMotorScale = 0;
+
+    int rightMotor,rightMotorScaled = 0; //right Motor helper variables
+    float rightMotorScale = 0;
+
+    float maxMotorScale = 0; //holds the mixed output scaling factor
+
+
+    //mix throttle and direction
+    leftMotor = throttle + direction;
+    rightMotor = throttle - direction;
+
+    //print the initial mix results
+    Serial.print("LIN:"); Serial.print( leftMotor, DEC);
+    Serial.print(", RIN:"); Serial.print( rightMotor, DEC);
+
+    //calculate the scale of the results in comparision base 8 bit PWM resolution
+    leftMotorScale =  leftMotor / 255.0;
+    leftMotorScale = abs(leftMotorScale);
+    rightMotorScale =  rightMotor / 255.0;
+    rightMotorScale = abs(rightMotorScale);
+
+    Serial.print("| LSCALE:"); Serial.print( leftMotorScale, 2);
+    Serial.print(", RSCALE:"); Serial.print( rightMotorScale, 2);
+
+    //choose the max scale value if it is above 1
+    maxMotorScale = max(leftMotorScale, rightMotorScale);
+    maxMotorScale = max(1, maxMotorScale);
+
+    //and apply it to the mixed values
+    leftMotorScaled = constrain(leftMotor / maxMotorScale, -255, 255);
+    rightMotorScaled = constrain(rightMotor / maxMotorScale, -255, 255);
+
+    Serial.print("| LOUT:"); Serial.print( leftMotorScaled);
+    Serial.print(", ROUT:"); Serial.print( rightMotorScaled);
+
+    Serial.println(" |");
+   manualA= leftMotorScaled;
+   manualB= rightMotorScaled;
+    }
 }
 
 void lf_rgb_colour(uint8_t v) {
@@ -332,6 +435,10 @@ void lf_ir_bias(uint8_t ir, int8_t val) {
 
 void lf_report_stopped() {
   NT_sendCommand(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_MOVE, LINEFOLLOW_STOP, 0); 
+}
+
+void lf_report_started() {
+  NT_sendCommand(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_MOVE, LINEFOLLOW_GO, 0); 
 }
 
 //////////////////////////////////////////
@@ -427,6 +534,8 @@ void NT_nv_configDefaults_LineFollowing() {
 uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
   //debug(F("linefollow:CMD=%d\n"), cmd);
   //debug(F("linefollow:ID =%d\n"), id);
+  digitalWrite(INFO_LED,HIGH);
+
   int status = NT_STATUS_OK;
   switch (cmd) {
     case NT_CMD_LINEFOLLOW_MOVE:
@@ -515,6 +624,8 @@ uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
       DBG(F("linefollow:NT_ERROR_CMD_INVALID!"));
       status = NT_ERROR_CMD_INVALID;
   }
+ digitalWrite(INFO_LED,LOW);
+
   return status;
 }
 
@@ -522,6 +633,18 @@ uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
 
 
 void setup() {
+  pinMode(INFO_LED, OUTPUT);
+  // C
+  info_blink(1,500,100);
+  info_blink(3,200,100);
+  delay(200);
+  // B
+  info_blink(1,500,100);
+  info_blink(1,200,100);
+  info_blink(1,500,100);
+  info_blink(1,200,100);
+  
+
   Serial.begin(9600);
   Serial1.begin(9600);
 #ifdef ARDUINO_AVR_LEONARDO  
@@ -545,12 +668,11 @@ void setup() {
   pinMode(pinA2, OUTPUT);
   pinMode(pinB1, OUTPUT);
   pinMode(pinB2, OUTPUT);
-   
+  
 
+  lf_pid_setup();
 
-   lf_pid_setup();
-   
-
+  //test_motor();
    // TODO:  NT to support callback to linefollow_processCommand() above.
 }
 
