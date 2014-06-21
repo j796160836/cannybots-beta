@@ -126,6 +126,9 @@ void lf_pid_setup() {
 
 void lf_loop()
 {
+  read_ir_sensors();
+  printvalues();
+
   if (IR2_val < IR_MAX) {
     isLineFollowingMode = false;
   } else {
@@ -137,7 +140,6 @@ void lf_loop()
     motor(manualA, manualB);
     return;
   }
-  read_ir_sensors();
 
   // process IR readings
   error_last = error; //store previous error before new one is caluclated
@@ -159,12 +161,11 @@ void lf_loop()
   // If correction is > 0, increase the speed of motor A and
   //decrease speed of motor B. If correction is < 0,
   // decrease speed of A and increase speedB.
-  speedA = constrain(cruiseSpeed + correction, -150, 150);
-  speedB = constrain(cruiseSpeed - correction, -150, 150);
+  speedA = constrain(cruiseSpeed + correction, -200, 200);
+  speedB = constrain(cruiseSpeed - correction, -200, 200);
 
   motor(speedA, speedB);
 
-  printvalues();
 }
 
 
@@ -403,7 +404,8 @@ void lf_ir_bias(uint8_t ir, int8_t val) {
 void lf_report_followingMode(bool isLineMode) {
   static unsigned long lastCall = millis();
   // throttle sending to 1000/x times a second
-  if (millis() - lastCall>250) {
+  if (millis() - lastCall>500) {
+    lastCall=millis();
     if (isLineMode) {
       NT_sendCommand(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_MOVE, LINEFOLLOW_GO, 0);
     } else {
