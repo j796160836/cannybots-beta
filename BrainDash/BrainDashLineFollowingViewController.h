@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface BrainDashLineFollowingViewController : UIViewController
+#import "TheBrain.h"
+
+@interface BrainDashLineFollowingViewController : UIViewController <NTCommandReceiver>
 
 @end

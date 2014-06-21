@@ -10,7 +10,7 @@
 
 #import "BrainDashFlipsideViewController.h"
 
-@interface BrainDashFlipsideViewController () <NTDebugReceiver>{
+@interface BrainDashFlipsideViewController () <NTDebugReceiver, NTSonarReceiver, NTIRReceiver, NTMicrophoneReceiver>{
 TheBrain            *theBrain;
 }
 @end
@@ -71,7 +71,7 @@ TheBrain            *theBrain;
 }
 
 
-- (void) didReceiveSonarPing:(uint16_t) distance forId:(uint8_t)_id {
+- (void) didReceiveSonarPing:(int16_t) distance forId:(uint8_t)_id {
     
     if (_id ==1 ) {
         _sonar1Label.text= [NSString stringWithFormat:@"%d", distance];
@@ -80,7 +80,7 @@ TheBrain            *theBrain;
     }
 }
 
-- (void) didReceiveIR:(int16_t)code forId:(uint8_t)_id withType:(uint16_t)type {
+- (void) didReceiveIR:(int16_t)code forId:(uint8_t)_id withType:(int16_t)type {
     static uint16_t lasstCode = 0;
     if (code!=-1)
         lasstCode = code;

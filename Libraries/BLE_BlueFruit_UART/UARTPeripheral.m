@@ -27,21 +27,32 @@
 
 #pragma mark - UUID Retrieval
 
+//#define ADAFRUIT
 
 + (CBUUID*)uartServiceUUID{
+#ifdef ADAFRUIT
     return [CBUUID UUIDWithString:@"6e400001-b5a3-f393-e0a9-e50e24dcca9e"];
+#else
+    return [CBUUID UUIDWithString:@"7e400001-b5a3-f393-e0a9-e50e24dcca9e"];
+#endif
 }
 
 
 + (CBUUID*)txCharacteristicUUID{
+#ifdef ADAFRUIT
     return [CBUUID UUIDWithString:@"6e400002-b5a3-f393-e0a9-e50e24dcca9e"];
-    //return [CBUUID UUIDWithString:@"0002"];
+#else
+    return [CBUUID UUIDWithString:@"7e400003-b5a3-f393-e0a9-e50e24dcca9e"];
+#endif
 }
 
 
 + (CBUUID*)rxCharacteristicUUID{
+#ifdef ADAFRUIT
     return [CBUUID UUIDWithString:@"6e400003-b5a3-f393-e0a9-e50e24dcca9e"];
-    //return [CBUUID UUIDWithString:@"0003"];
+#else
+    return [CBUUID UUIDWithString:@"7e400002-b5a3-f393-e0a9-e50e24dcca9e"];
+#endif
 }
 
 + (CBUUID*)deviceInformationServiceUUID{

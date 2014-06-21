@@ -11,11 +11,15 @@
 #import "CBUUID+StringExtraction.h"
 #import "NSData+hex.h"
 
+@interface BrainSpeakBLE()
+
+@property CBCentralManager    *cm;
+@property UARTPeripheral      *currentPeripheral;
+@end
+
 
 @implementation BrainSpeakBLE
 
-CBCentralManager    *cm;
-UARTPeripheral      *currentPeripheral;
 
 
 #pragma mark Singleton Methods
@@ -33,7 +37,7 @@ UARTPeripheral      *currentPeripheral;
     if (self = [super init]) {
         //someProperty = [[NSString alloc] initWithString:@"Default Property Value"];
         
-        cm = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
+        _cm = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
         _connectionStatus = ConnectionStatusDisconnected;
 
         [self reconnectBLE];
@@ -63,7 +67,7 @@ UARTPeripheral      *currentPeripheral;
     
     
     //skip scanning if UART is already connected
-    NSArray *connectedPeripherals = [cm retrieveConnectedPeripheralsWithServices:@[UARTPeripheral.uartServiceUUID]];
+    NSArray *connectedPeripherals = [_cm retrieveConnectedPeripheralsWithServices:@[UARTPeripheral.uartServiceUUID]];
     if ([connectedPeripherals count] > 0) {
         //connect to first peripheral in array
         [self connectPeripheral:[connectedPeripherals objectAtIndex:0]];
@@ -71,7 +75,7 @@ UARTPeripheral      *currentPeripheral;
     
     else{
         
-        [cm scanForPeripheralsWithServices:@[UARTPeripheral.uartServiceUUID]
+        [_cm scanForPeripheralsWithServices:@[UARTPeripheral.uartServiceUUID]
                                    options:@{CBCentralManagerScanOptionAllowDuplicatesKey: [NSNumber numberWithBool:NO]}];
     }
     
@@ -84,11 +88,11 @@ UARTPeripheral      *currentPeripheral;
     //Connect Bluetooth LE device
     
     //Clear off any pending connections
-    [cm cancelPeripheralConnection:peripheral];
+    [_cm cancelPeripheralConnection:peripheral];
     
     //Connect
-    currentPeripheral = [[UARTPeripheral alloc] initWithPeripheral:peripheral delegate:self];
-    [cm connectPeripheral:peripheral options:@{CBConnectPeripheralOptionNotifyOnDisconnectionKey: [NSNumber numberWithBool:YES]}];
+    _currentPeripheral = [[UARTPeripheral alloc] initWithPeripheral:peripheral delegate:self];
+    [_cm connectPeripheral:peripheral options:@{CBConnectPeripheralOptionNotifyOnDisconnectionKey: [NSNumber numberWithBool:YES]}];
     
 }
 
@@ -100,7 +104,7 @@ UARTPeripheral      *currentPeripheral;
     
     _connectionStatus = ConnectionStatusDisconnected;
     
-    [cm cancelPeripheralConnection:currentPeripheral.peripheral];
+    [_cm cancelPeripheralConnection:_currentPeripheral.peripheral];
     [self reconnectBLE];
 }
 
@@ -130,7 +134,7 @@ UARTPeripheral      *currentPeripheral;
     NSLog(@"Did discover peripheral %@  UUID=%@", peripheral.name, peripheral.UUID);
     
     NSLog(@"!!!!!!!!!!!!!! change this fucntion to get ALL devices .... BrainSpeakBLE.didDiscoverPeripheral");
-    [cm stopScan];
+    [_cm stopScan];
     
     [self connectPeripheral:peripheral];
 }
@@ -140,16 +144,16 @@ UARTPeripheral      *currentPeripheral;
     
     NSLog(@"didConnectPeripheral");
 
-    if ([currentPeripheral.peripheral isEqual:peripheral]){
+    if ([_currentPeripheral.peripheral isEqual:peripheral]){
         
         if(peripheral.services){
             NSLog(@"Did connect to existing peripheral %@", peripheral.name);
-            [currentPeripheral peripheral:peripheral didDiscoverServices:nil]; //already discovered services, DO NOT re-discover. Just pass along the peripheral.
+            [_currentPeripheral peripheral:peripheral didDiscoverServices:nil]; //already discovered services, DO NOT re-discover. Just pass along the peripheral.
         }
         
         else{
             NSLog(@"Did connect peripheral %@", peripheral.name);
-            [currentPeripheral didConnect];
+            [_currentPeripheral didConnect];
         }
     }
 }
@@ -162,9 +166,9 @@ UARTPeripheral      *currentPeripheral;
     //respond to disconnected
     [self peripheralDidDisconnect];
     
-    if ([currentPeripheral.peripheral isEqual:peripheral])
+    if ([_currentPeripheral.peripheral isEqual:peripheral])
     {
-        [currentPeripheral didDisconnect];
+        [_currentPeripheral didDisconnect];
     }
 }
 
@@ -258,7 +262,7 @@ UARTPeripheral      *currentPeripheral;
     //Output data to UART peripheral
     NSString *hexString = [newData hexRepresentationWithSpaces:YES];
     NSLog(@"Sending: %@", hexString);
-    [currentPeripheral writeRawData:newData];
+    [_currentPeripheral writeRawData:newData];
 }
 
 // called by the UART

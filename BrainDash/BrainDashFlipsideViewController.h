@@ -10,14 +10,13 @@
 #import "TheBrain.h"
 
 
-
 @class BrainDashFlipsideViewController;
 
 @protocol BrainDashFlipsideViewControllerDelegate
 - (void)flipsideViewControllerDidFinish:(BrainDashFlipsideViewController *)controller;
 @end
 
-@interface BrainDashFlipsideViewController : UIViewController //<NTDebugReceiver, NTSonarReceiver, NTIRReceiver>
+@interface BrainDashFlipsideViewController : UIViewController
 
 @property (weak, nonatomic) id <BrainDashFlipsideViewControllerDelegate> delegate;
 @property (weak, nonatomic) IBOutlet UITextView *debugTextView;

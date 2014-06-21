@@ -8,6 +8,7 @@
 
 #import "BrainDashLineFollowingViewController.h"
 #import "TheBrain.h"
+#import "CannybotsLineFollowing.h"
 
 @interface BrainDashLineFollowingViewController ()
 {
@@ -30,7 +31,18 @@
 {
     [super viewDidLoad];
     theBrain = [TheBrain sharedInstance];
+    
 }
+
+- (void) viewDidAppear:(BOOL)animated {
+    theBrain.appDelegate = self;
+}
+
+- (void) viewWillDisappear:(BOOL)animated {
+    theBrain.appDelegate = nil;
+    
+}
+
 
 - (void)didReceiveMemoryWarning
 {
@@ -65,8 +77,27 @@
 - (IBAction)go:(id)sender {
     [theBrain lf_go];
 
+
 }
 - (IBAction)speedChanged:(UISlider*)sender {
-    [theBrain lf_speed:sender.value * 1024];
+    int speed= (int)(sender.value * 255);
+    NSLog(@"Speed = %d", speed);
+    [theBrain lf_speed:speed];
 }
+
+
+
+- (void) didReceiveCommand:(uint8_t)cmd forId:(uint8_t)_id withArg:(int16_t)arg1 {
+    
+    NSLog(@"CMD=%d, id=%d, arg=%d", cmd, _id, arg1);
+    if (NT_CMD_LINEFOLLOW_MOVE == cmd) {
+        if (LINEFOLLOW_STOP == _id){
+             [self.tabBarController setSelectedIndex:1];
+        } else {
+            NSLog(@"WARNING: unrecognised CMD value: %d",_id);
+        }
+    }   
+}
+
+
 @end

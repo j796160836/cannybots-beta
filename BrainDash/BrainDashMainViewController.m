@@ -7,7 +7,7 @@
 //
 
 #import "BrainDashMainViewController.h"
-
+#import "CannybotsLineFollowing.h"
 
 // add a Project reference to cocos2d-ios.xcodeproj, using the dialog box and not the drag drop!! (xcode bug)
 // (rstart xcode helps)
@@ -32,6 +32,10 @@
 
 - (void)viewDidLoad
 {
+    CGAffineTransform sliderRotation = CGAffineTransformIdentity;
+    sliderRotation = CGAffineTransformRotate(sliderRotation, -(M_PI / 2));
+    _speedSlider.transform = sliderRotation;
+    
     CCDirector *director = [CCDirector sharedDirector];
     
     if([director isViewLoaded] == NO)
@@ -208,6 +212,50 @@
                               NSStringFromCGPoint(trans), NSStringFromCGPoint(velocity)];
     _statusLabel.text = resultString;
 }
+
+
+- (IBAction)speedChanged:(UISlider*)sender {
+    
+    int speed= (int)(sender.value * 255);
+    NSLog(@"Speed = %d", speed);
+    [theBrain lf_speed:speed];
+}
+- (IBAction)modeChanged:(UISegmentedControl *)sender {
+    
+    if ( 0 == sender.selectedSegmentIndex) {
+        [theBrain lf_stop];
+    } else if ( 1 == sender.selectedSegmentIndex) {
+        [theBrain lf_go];
+    }
+    
+}
+
+
+
+
+- (void) viewDidAppear:(BOOL)animated {
+    theBrain.appDelegate = self;
+}
+
+- (void) viewWillDisappear:(BOOL)animated {
+    theBrain.appDelegate = nil;
+    
+}
+
+
+
+- (void) didReceiveCommand:(uint8_t)cmd forId:(uint8_t)_id withArg:(int16_t)arg1 {
+    
+    NSLog(@"CMD=%d, id=%d, arg=%d", cmd, _id, arg1);
+    if (NT_CMD_LINEFOLLOW_MOVE == cmd) {
+        if (LINEFOLLOW_STOP == _id){
+            [self.modeSegment setSelectedSegmentIndex:0];
+        } else {
+            NSLog(@"WARNING: unrecognised CMD value: %d",_id);
+        }
+    }
+}
+
 
 
 @end

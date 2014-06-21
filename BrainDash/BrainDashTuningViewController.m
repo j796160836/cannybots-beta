@@ -8,7 +8,7 @@
 
 #import "BrainDashTuningViewController.h"
 
-#import "NT_APP_LineFollowing.h"
+#import "CannybotsLineFollowing.h"
 
 @interface BrainDashTuningViewController () {
     TheBrain            *theBrain;
@@ -38,9 +38,7 @@
     [singleTap setNumberOfTouchesRequired:1];
     [self.view addGestureRecognizer:singleTap];
     theBrain = [TheBrain sharedInstance];
-    theBrain.appDelegate = self;
-    [theBrain lf_cfg_get_config];
-    [theBrain lf_get_device_id];
+    [self revertPressed:nil];
 
 }
 
@@ -61,6 +59,14 @@
 }
 */
 
+- (void) viewDidAppear:(BOOL)animated {
+    theBrain.appDelegate = self;
+}
+
+- (void) viewWillDisappear:(BOOL)animated {
+    theBrain.appDelegate = nil;
+
+}
 
 -(IBAction)textFieldReturn:(id)sender
 {
@@ -75,38 +81,11 @@
         _iStepper.value = [[textField text] intValue];
     } else if (textField==_dTExtField) {
         _dStepper.value = [[textField text] intValue];
+    } else if (textField==_ledBrightnessTextField) {
+        _ledBrightnessStepper.value = [textField.text intValue];
     }
     return true;
 }
-
-///
-
-- (IBAction)pStepperValueChanged:(UIStepper *)sender {
-    _pTextField.text = [NSString stringWithFormat:@"%d",(int16_t)sender.value];
-}
-
-/*
-- (IBAction)pTextFIeldValueChanged:(UITextField *)sender {
-    NSLog(@"pTextFIeldValueChanged");
-    _pStepper.value = [[sender text] intValue];
-}
-*/
-
-
-- (IBAction)iStepperValueChanged:(UIStepper *)sender {
-    _iTextField.text = [NSString stringWithFormat:@"%d",(int16_t)sender.value];
-
-}
-
-- (IBAction)dStepperValueChanged:(UIStepper *)sender {
-    _dTExtField.text = [NSString stringWithFormat:@"%d",(int16_t)sender.value];
-
-}
-
-
-- (IBAction)deviceIdValueChanged:(id)sender {
-}
-
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
     self.currentResponder = textField;
@@ -116,26 +95,69 @@
     [self.currentResponder resignFirstResponder];
 }
 
+
+
+///
+
+- (IBAction)pStepperValueChanged:(UIStepper *)sender {
+    _pTextField.text = [NSString stringWithFormat:@"%d",(int16_t)sender.value];
+}
+
+
+
+- (IBAction)ledBrightnessTextFieldValueChanged:(id)sender {
+}
+
+- (IBAction)iStepperValueChanged:(UIStepper *)sender {
+    _iTextField.text = [NSString stringWithFormat:@"%d",(int16_t)sender.value];
+
+}
+
+// Device ID
+
+- (IBAction)dStepperValueChanged:(UIStepper *)sender {
+    _dTExtField.text = [NSString stringWithFormat:@"%d",(int16_t)sender.value];
+
+}
+
+
+// LED brightness
+- (IBAction)ledBrightnessValueChanged:(UIStepper *)sender {
+    _ledBrightnessTextField.text =  [NSString stringWithFormat:@"%d",(int16_t)sender.value];
+}
+
+
+
+
+- (IBAction)deviceIdValueChanged:(id)sender {
+}
+
+
 - (IBAction)ledColourSelected:(id)sender {
 }
+
+
+
 - (IBAction)savePressed:(id)sender {
     
     lfconfig cfg;
+    
+    cfg.deviceId = [[_deviceIdTextField text] intValue];
     cfg.p = [[_pTextField text] intValue];
     cfg.i = [[_iTextField text] intValue];
     cfg.d = [[_dTExtField text] intValue];
-    cfg.rgbCol = LINEFOLLOW_RGB_COLOUR_RED;
-    cfg.rgbBrightness = 255;
+    cfg.rgbCol = _ledColourSegment.selectedSegmentIndex;
+    cfg.rgbBrightness = [_ledBrightnessTextField.text intValue];
+    cfg.IRBias[0] = [_IRBias1TextField.text intValue];
+    cfg.IRBias[1] = [_IRBias2TextField.text intValue];
+    cfg.IRBias[2] = [_IRBias3TextField.text intValue];
     
     [theBrain lf_cfg_write_config:cfg];
     
-    [theBrain lf_set_device_id:[[_deviceIdTextField text] intValue]];
-
+   
 }
 - (IBAction)revertPressed:(id)sender {
     [theBrain lf_cfg_get_config];
-    [theBrain lf_get_device_id];
-
 
 }
 
@@ -146,20 +168,35 @@
         if (LINEFOLLOW_CFG_PID_P == _id){
             _pTextField.text = [NSString stringWithFormat:@"%d", arg1];
             _pStepper.value = arg1;
-
         } else if (LINEFOLLOW_CFG_PID_I == _id){
             _iTextField.text = [NSString stringWithFormat:@"%d", arg1];
             _iStepper.value = arg1;
         } else if (LINEFOLLOW_CFG_PID_D == _id){
             _dTExtField.text = [NSString stringWithFormat:@"%d", arg1];
-            _iStepper.value = arg1;
+            _dStepper.value = arg1;
         } else if ( LINEFOLLOW_CFG_DEVICE_ID == _id){
             NSLog(@"device id = %d", arg1);
             _deviceIdTextField.text = [NSString stringWithFormat:@"%d", arg1];
-            
+        } else if ( LINEFOLLOW_CFG_RGB_COLOUR == _id){
+            NSLog(@"RGB col= %d", arg1);
+            _ledColourSegment.selectedSegmentIndex = arg1;
+        } else if ( LINEFOLLOW_CFG_RGB_BRIGHTNESS == _id){
+            NSLog(@"RGB bri= %d", arg1);
+            _ledBrightnessTextField.text =[NSString stringWithFormat:@"%d", arg1];
+            _ledBrightnessStepper.value = arg1;
+        } else if ( LINEFOLLOW_CFG_IR_BIAS_1 == _id){
+            NSLog(@"IR1= %d", arg1);
+            _IRBias1TextField.text =[NSString stringWithFormat:@"%d", arg1];
+        } else if ( LINEFOLLOW_CFG_IR_BIAS_2 == _id){
+            NSLog(@"IR2= %d", arg1);
+            _IRBias2TextField.text =[NSString stringWithFormat:@"%d", arg1];
+        } else if ( LINEFOLLOW_CFG_IR_BIAS_3 == _id){
+            NSLog(@"IR3= %d", arg1);
+            _IRBias3TextField.text =[NSString stringWithFormat:@"%d", arg1];
+        } else {
+            NSLog(@"WARNING: unrecognised CFG value: %d",_id);
         }
     }
-    
 }
 
 

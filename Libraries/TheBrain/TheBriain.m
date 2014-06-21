@@ -1,10 +1,11 @@
 #import "TheBrain.h"
 #import "NTUtils.h"
-#import "NT_APP_LineFollowing.h"
+#import "CannybotsLineFollowing.h"
 
 #import "BrainSpeakBLE.h"
 #import "NTProtocol.h"
 #import "NSData+hex.h"
+#import "NSObject+performBlockAfterDelay.h"
 
 @interface TheBrain () {
     CBCentralManager    *cm;
@@ -290,6 +291,19 @@ void dumpCmd(const NT_cmd cmd) {
     
     NSData *data = [NSData dataWithBytesNoCopy:(void*)msg length:NT_MSG_SIZE freeWhenDone:NO];
     [self sendData:data];
+    
+    [self performBlock:^{ [self lf_set_led_colour:config.rgbCol]; } afterDelay: .2];
+    [self performBlock:^{ [self lf_set_led_brightness:config.rgbBrightness]; } afterDelay: .4];
+    [self performBlock:^{ [self lf_set_device_id:config.deviceId];} afterDelay: .6];
+
+    for (int i =0;  i < IR_BIAS_NUM_SENSORS; i++) {
+        [self performBlock:^{ [self lf_set_ir_bias:i bias:config.IRBias[i]];} afterDelay: .8 + (0.1*i)];
+    }
+    
+    // offset at 1.8...
+
+     
+    
 }
 
 - (void) lf_cfg_get_config {
@@ -305,6 +319,14 @@ void dumpCmd(const NT_cmd cmd) {
     
     NSData *data = [NSData dataWithBytesNoCopy:(void*)msg length:NT_MSG_SIZE freeWhenDone:NO];
     [self sendData:data];
+    
+    [self performBlock:^{[self lf_get_device_id];} afterDelay: .2];
+    [self performBlock:^{[self lf_get_led_colour];} afterDelay: .4];
+    [self performBlock:^{[self lf_get_led_brightness];} afterDelay: .6];
+    [self performBlock:^{[self lf_get_ir_bias:0];} afterDelay: .8];
+    [self performBlock:^{[self lf_get_ir_bias:1];} afterDelay: .9];
+    [self performBlock:^{[self lf_get_ir_bias:2];} afterDelay: 1.0];
+
 }
 
 
@@ -317,6 +339,33 @@ void dumpCmd(const NT_cmd cmd) {
 
 - (void) lf_set_device_id:(uint16_t) did {
     [self send_1cmd_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_CONFIG_SET id:LINEFOLLOW_CFG_DEVICE_ID p1:did];
+}
+
+
+
+- (void) lf_get_led_colour {
+    [self send_1cmd_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_CONFIG_GET id:LINEFOLLOW_CFG_RGB_COLOUR p1:0];
+}
+
+- (void) lf_set_led_colour:(uint8_t) colour {
+    [self send_1cmd_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_CONFIG_SET id:LINEFOLLOW_CFG_RGB_COLOUR p1:colour];
+}
+
+- (void) lf_get_led_brightness {
+    [self send_1cmd_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_CONFIG_GET id:LINEFOLLOW_CFG_RGB_BRIGHTNESS p1:0];
+}
+
+- (void) lf_set_led_brightness :(uint8_t) brightness {
+    [self send_1cmd_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_CONFIG_SET id:LINEFOLLOW_CFG_RGB_BRIGHTNESS p1:brightness];
+}
+
+- (void) lf_get_ir_bias :(uint8_t) ir {
+    [self send_1cmd_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_CONFIG_GET id:LINEFOLLOW_CFG_IR_BIAS_1+ir p1:0];
+}
+
+
+- (void) lf_set_ir_bias:(uint8_t) ir bias:(int8_t)bias  {
+    [self send_1cmd_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_CONFIG_SET id:LINEFOLLOW_CFG_IR_BIAS_1+ir p1:bias];
 }
 
 // Actions

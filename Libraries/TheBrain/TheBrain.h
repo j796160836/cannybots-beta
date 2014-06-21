@@ -25,7 +25,7 @@
 @end
 
 @protocol NTIRReceiver
-- (void) didReceiveIR:(int16_t)code forId:(uint8_t)_id withType:(uint16_t)type;
+- (void) didReceiveIR:(int16_t)code forId:(uint8_t)_id withType:(int16_t)type;
 @end
 
 
@@ -66,13 +66,13 @@
 //TODO: move this to seprate class
 // Config
 
-- (void) lf_cfg_get_pid_p;
-- (void) lf_cfg_get_pid_i;
-- (void) lf_cfg_get_pid_d;
+
 
 typedef struct lfconfig_t {
+    int16_t deviceId;
     int16_t p,i,d;
     uint8_t rgbCol, rgbBrightness;
+    int8_t  IRBias[10];
 } lfconfig;
 
 - (void) lf_cfg_write_config:(lfconfig)config;
@@ -82,7 +82,16 @@ typedef struct lfconfig_t {
 - (void) lf_get_device_id;
 - (void) lf_set_device_id:(uint16_t) did;
 
-// Actions
+- (void) lf_get_led_colour;
+- (void) lf_set_led_colour:(uint8_t) colour;
+- (void) lf_get_led_brightness;
+- (void) lf_set_led_brightness :(uint8_t) brightness;
+
+
+- (void) lf_get_ir_bias :(uint8_t) ir;
+- (void) lf_set_ir_bias:(uint8_t) ir bias:(int8_t)bias;
+
+    // Actions
 - (void) lf_go;
 - (void) lf_stop;
 - (void) lf_left;

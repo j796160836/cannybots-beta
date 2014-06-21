@@ -83,9 +83,9 @@
     int16_t leftSpeed  = 0;
     int16_t rightSpeed = 0;
     
-    float maxSpeed   = 900;
-    float deadzone  = 0.1f;
-    float pivotZone = 0.2f;
+    float maxSpeed   = 255;
+    float deadzone  = 0.25f;
+    float pivotZone = 0.0f;
 
     
     if ( ( fabs(x)<deadzone) && ( fabs(y)< deadzone) ){
@@ -121,13 +121,13 @@
     }
     
     //NSLog(@"(x,y)=(%f,%f) |  (left, right)=(%d,%d)", x, y, leftSpeed, rightSpeed);
-    if ( ( abs(leftSpeed-leftSpeedLast)>5) || ( abs(rightSpeed - rightSpeedLast)>5 )) {
+    if ( ( abs(leftSpeed-leftSpeedLast)>2) || ( abs(rightSpeed - rightSpeedLast)>2 )) {
         //Dynamixels:
         //[tb setEndlessTurnMode:YES forId:1];
         //[tb setEndlessTurnMode:YES forId:2];
         //[tb setServoSpeed:leftSpeed forId:1];
         //[tb setServoSpeed:rightSpeed forId:2];
-        
+        NSLog(@"L=%d, R=%d", leftSpeed,rightSpeed);
         // Line folllowing motors
         [tb lf_setMotorSpeed:leftSpeed forId:1];
         [tb lf_setMotorSpeed:rightSpeed forId:2];

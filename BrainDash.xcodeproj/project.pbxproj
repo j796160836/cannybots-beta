@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B01EEBDF1948F94F00E6D3A4 /* Speed High Rot.png in Resources */ = {isa = PBXBuildFile; fileRef = B01EEBDD1948F94F00E6D3A4 /* Speed High Rot.png */; };
+		B01EEBE01948F94F00E6D3A4 /* Speed Low Rot.png in Resources */ = {isa = PBXBuildFile; fileRef = B01EEBDE1948F94F00E6D3A4 /* Speed Low Rot.png */; };
+		B076061319541E950094046F /* NTBLE.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B076060B19541E950094046F /* NTBLE.cpp */; };
+		B076061419541E950094046F /* NTMessaging.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B076060D19541E950094046F /* NTMessaging.cpp */; };
+		B076061519541E950094046F /* NTProtocol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B076060F19541E950094046F /* NTProtocol.cpp */; };
+		B076061619541E950094046F /* NTUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B076061119541E950094046F /* NTUtils.cpp */; };
+		B076061A19541F680094046F /* CannybotsLineFollowing.ino in Resources */ = {isa = PBXBuildFile; fileRef = B076061919541F680094046F /* CannybotsLineFollowing.ino */; };
 		B916F51F190506920057388D /* TheBriain.m in Sources */ = {isa = PBXBuildFile; fileRef = B916F51E190506920057388D /* TheBriain.m */; };
 		B916F522190529B40057388D /* BrainSpeakBLE.m in Sources */ = {isa = PBXBuildFile; fileRef = B916F521190529B40057388D /* BrainSpeakBLE.m */; };
 		B92C59DE18FEC8FE005EC882 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59DD18FEC8FE005EC882 /* Foundation.framework */; };
@@ -37,7 +44,6 @@
 		B9A660151905AA35004869BF /* SneakyJoystickSkinnedBase.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A660111905AA35004869BF /* SneakyJoystickSkinnedBase.m */; };
 		B9A660161905AA35004869BF /* SneakyButtonSkinnedBase.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A660131905AA35004869BF /* SneakyButtonSkinnedBase.m */; };
 		B9A660191905AA82004869BF /* SneakyButton.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A660171905AA82004869BF /* SneakyButton.m */; };
-		B9AD38DB1900FDDE00FA9CD0 /* NTProtocol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B9AD38DA1900FDDE00FA9CD0 /* NTProtocol.cpp */; };
 		B9AD5E3A193E64C800BC9631 /* Button Pause.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E1F193E64C800BC9631 /* Button Pause.png */; };
 		B9AD5E3B193E64C800BC9631 /* Button Play.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E20193E64C800BC9631 /* Button Play.png */; };
 		B9AD5E3C193E64C800BC9631 /* Button Shuffle.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E21193E64C800BC9631 /* Button Shuffle.png */; };
@@ -74,6 +80,7 @@
 		B9AD5E70193F481300BC9631 /* knob.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E6D193F481300BC9631 /* knob.png */; };
 		B9AD5E73193F66E800BC9631 /* BrainDashTuningViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9AD5E72193F66E800BC9631 /* BrainDashTuningViewController.m */; };
 		B9AD5E76194071DA00BC9631 /* BrainDashSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9AD5E75194071DA00BC9631 /* BrainDashSettingsViewController.m */; };
+		B9AD5E791941A0DE00BC9631 /* NSObject+performBlockAfterDelay.m in Sources */ = {isa = PBXBuildFile; fileRef = B9AD5E781941A0DE00BC9631 /* NSObject+performBlockAfterDelay.m */; };
 		B9F68B2919055A0D00F6654D /* SneakyJoystick.m in Sources */ = {isa = PBXBuildFile; fileRef = B9F68B1C19055A0D00F6654D /* SneakyJoystick.m */; };
 /* End PBXBuildFile section */
 
@@ -102,6 +109,19 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B01EEBDD1948F94F00E6D3A4 /* Speed High Rot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Speed High Rot.png"; sourceTree = "<group>"; };
+		B01EEBDE1948F94F00E6D3A4 /* Speed Low Rot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Speed Low Rot.png"; sourceTree = "<group>"; };
+		B076060B19541E950094046F /* NTBLE.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NTBLE.cpp; sourceTree = "<group>"; };
+		B076060C19541E950094046F /* NTBLE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NTBLE.h; sourceTree = "<group>"; };
+		B076060D19541E950094046F /* NTMessaging.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NTMessaging.cpp; sourceTree = "<group>"; };
+		B076060E19541E950094046F /* NTMessaging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NTMessaging.h; sourceTree = "<group>"; };
+		B076060F19541E950094046F /* NTProtocol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NTProtocol.cpp; sourceTree = "<group>"; };
+		B076061019541E950094046F /* NTProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NTProtocol.h; sourceTree = "<group>"; };
+		B076061119541E950094046F /* NTUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NTUtils.cpp; sourceTree = "<group>"; };
+		B076061219541E950094046F /* NTUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NTUtils.h; sourceTree = "<group>"; };
+		B076061819541F680094046F /* CannybotsLineFollowing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CannybotsLineFollowing.h; sourceTree = "<group>"; };
+		B076061919541F680094046F /* CannybotsLineFollowing.ino */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CannybotsLineFollowing.ino; sourceTree = "<group>"; };
+		B076061B195420540094046F /* SimpleFIFO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SimpleFIFO.h; path = ../../../../../../Documents/Arduino/libraries/SimpleFIFO/SimpleFIFO.h; sourceTree = "<group>"; };
 		B916F51D190506920057388D /* TheBrain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TheBrain.h; sourceTree = "<group>"; };
 		B916F51E190506920057388D /* TheBriain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TheBriain.m; sourceTree = "<group>"; };
 		B916F520190529B40057388D /* BrainSpeakBLE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrainSpeakBLE.h; sourceTree = "<group>"; };
@@ -150,8 +170,6 @@
 		B9A660141905AA35004869BF /* SneakyButtonSkinnedBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SneakyButtonSkinnedBase.h; sourceTree = "<group>"; };
 		B9A660171905AA82004869BF /* SneakyButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SneakyButton.m; sourceTree = "<group>"; };
 		B9A660181905AA82004869BF /* SneakyButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SneakyButton.h; sourceTree = "<group>"; };
-		B9AD38D9190030D900FA9CD0 /* NTProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NTProtocol.h; path = ../../../../../avr/CannyFirmata/NTProtocol.h; sourceTree = "<group>"; };
-		B9AD38DA1900FDDE00FA9CD0 /* NTProtocol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NTProtocol.cpp; path = ../../../../../avr/CannyFirmata/NTProtocol.cpp; sourceTree = "<group>"; };
 		B9AD5E1F193E64C800BC9631 /* Button Pause.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Button Pause.png"; sourceTree = "<group>"; };
 		B9AD5E20193E64C800BC9631 /* Button Play.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Button Play.png"; sourceTree = "<group>"; };
 		B9AD5E21193E64C800BC9631 /* Button Shuffle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Button Shuffle.png"; sourceTree = "<group>"; };
@@ -184,7 +202,6 @@
 		B9AD5E5E193EF58A00BC9631 /* Cannybots_Logo_2000x446.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Cannybots_Logo_2000x446.png; sourceTree = "<group>"; };
 		B9AD5E60193EF9D400BC9631 /* BrainDashLineFollowingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrainDashLineFollowingViewController.h; sourceTree = "<group>"; };
 		B9AD5E61193EF9D400BC9631 /* BrainDashLineFollowingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrainDashLineFollowingViewController.m; sourceTree = "<group>"; };
-		B9AD5E63193F0D6200BC9631 /* NT_APP_LineFollowing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NT_APP_LineFollowing.h; path = ../../../../../avr/CannyFirmata/NT_APP_LineFollowing.h; sourceTree = "<group>"; };
 		B9AD5E6B193F481300BC9631 /* button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = button.png; sourceTree = "<group>"; };
 		B9AD5E6C193F481300BC9631 /* joystick.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = joystick.png; sourceTree = "<group>"; };
 		B9AD5E6D193F481300BC9631 /* knob.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = knob.png; sourceTree = "<group>"; };
@@ -192,6 +209,8 @@
 		B9AD5E72193F66E800BC9631 /* BrainDashTuningViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrainDashTuningViewController.m; sourceTree = "<group>"; };
 		B9AD5E74194071DA00BC9631 /* BrainDashSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrainDashSettingsViewController.h; sourceTree = "<group>"; };
 		B9AD5E75194071DA00BC9631 /* BrainDashSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrainDashSettingsViewController.m; sourceTree = "<group>"; };
+		B9AD5E771941A0DE00BC9631 /* NSObject+performBlockAfterDelay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+performBlockAfterDelay.h"; sourceTree = "<group>"; };
+		B9AD5E781941A0DE00BC9631 /* NSObject+performBlockAfterDelay.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+performBlockAfterDelay.m"; sourceTree = "<group>"; };
 		B9F68B1B19055A0D00F6654D /* SneakyJoystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SneakyJoystick.h; sourceTree = "<group>"; };
 		B9F68B1C19055A0D00F6654D /* SneakyJoystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SneakyJoystick.m; sourceTree = "<group>"; };
 		B9F68B3419055C9F00F6654D /* cocos2d-ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cocos2d-ios.xcodeproj"; path = "Libraries/cocos2d-iphone/cocos2d-ios.xcodeproj"; sourceTree = "<group>"; };
@@ -224,12 +243,35 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B076060A19541E950094046F /* NTProtocol */ = {
+			isa = PBXGroup;
+			children = (
+				B076060B19541E950094046F /* NTBLE.cpp */,
+				B076060C19541E950094046F /* NTBLE.h */,
+				B076060D19541E950094046F /* NTMessaging.cpp */,
+				B076060E19541E950094046F /* NTMessaging.h */,
+				B076060F19541E950094046F /* NTProtocol.cpp */,
+				B076061019541E950094046F /* NTProtocol.h */,
+				B076061119541E950094046F /* NTUtils.cpp */,
+				B076061219541E950094046F /* NTUtils.h */,
+			);
+			name = NTProtocol;
+			path = ../../../../../../Documents/Arduino/libraries/NTProtocol;
+			sourceTree = "<group>";
+		};
+		B076061719541F680094046F /* CannybotsLineFollowing */ = {
+			isa = PBXGroup;
+			children = (
+				B076061819541F680094046F /* CannybotsLineFollowing.h */,
+				B076061919541F680094046F /* CannybotsLineFollowing.ino */,
+			);
+			name = CannybotsLineFollowing;
+			path = ../../../avr/CannybotsLineFollowing;
+			sourceTree = "<group>";
+		};
 		B916F51C190506920057388D /* TheBrain */ = {
 			isa = PBXGroup;
 			children = (
-				B9AD5E63193F0D6200BC9631 /* NT_APP_LineFollowing.h */,
-				B9AD38DA1900FDDE00FA9CD0 /* NTProtocol.cpp */,
-				B9AD38D9190030D900FA9CD0 /* NTProtocol.h */,
 				B916F51D190506920057388D /* TheBrain.h */,
 				B916F51E190506920057388D /* TheBriain.m */,
 				B916F520190529B40057388D /* BrainSpeakBLE.h */,
@@ -242,6 +284,9 @@
 		B92C59D118FEC8FE005EC882 = {
 			isa = PBXGroup;
 			children = (
+				B076061B195420540094046F /* SimpleFIFO.h */,
+				B076061719541F680094046F /* CannybotsLineFollowing */,
+				B076060A19541E950094046F /* NTProtocol */,
 				B9AD5E5C193EF58A00BC9631 /* graphics */,
 				B9AD5E1D193E64C800BC9631 /* icons */,
 				B9F68B3419055C9F00F6654D /* cocos2d-ios.xcodeproj */,
@@ -349,6 +394,8 @@
 				B92C5A5E18FEFD1D005EC882 /* NSData+hex.m */,
 				B92C5A5F18FEFD1D005EC882 /* NSString+hex.h */,
 				B92C5A6018FEFD1D005EC882 /* NSString+hex.m */,
+				B9AD5E771941A0DE00BC9631 /* NSObject+performBlockAfterDelay.h */,
+				B9AD5E781941A0DE00BC9631 /* NSObject+performBlockAfterDelay.m */,
 			);
 			name = Categories;
 			path = Libraries/Categories;
@@ -395,6 +442,8 @@
 		B9AD5E2A193E64C800BC9631 /* ui */ = {
 			isa = PBXGroup;
 			children = (
+				B01EEBDD1948F94F00E6D3A4 /* Speed High Rot.png */,
+				B01EEBDE1948F94F00E6D3A4 /* Speed Low Rot.png */,
 				B9AD5E58193EF35800BC9631 /* Speed Low.png */,
 				B9AD5E59193EF35800BC9631 /* Speed High.png */,
 				B9AD5E2B193E64C800BC9631 /* Button Add.png */,
@@ -567,14 +616,17 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B01EEBE01948F94F00E6D3A4 /* Speed Low Rot.png in Resources */,
 				B9AD5E40193E64C800BC9631 /* Cursor Move Alt.png in Resources */,
 				B9AD5E3C193E64C800BC9631 /* Button Shuffle.png in Resources */,
 				B9AD5E56193EEBEF00BC9631 /* Arrow Right 3.png in Resources */,
 				B9AD5E3D193E64C800BC9631 /* Button Stop.png in Resources */,
 				B9AD5E4E193E64C800BC9631 /* Plug.png in Resources */,
+				B076061A19541F680094046F /* CannybotsLineFollowing.ino in Resources */,
 				B9AD5E49193E64C800BC9631 /* Heart.png in Resources */,
 				B9AD5E4A193E64C800BC9631 /* Information 2.png in Resources */,
 				B9AD5E6E193F481300BC9631 /* button.png in Resources */,
+				B01EEBDF1948F94F00E6D3A4 /* Speed High Rot.png in Resources */,
 				B9AD5E46193E64C800BC9631 /* Button Delete.png in Resources */,
 				B9AD5E41193E64C800BC9631 /* Dashboard.png in Resources */,
 				B9AD5E4D193E64C800BC9631 /* Medal.png in Resources */,
@@ -621,24 +673,28 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B076061619541E950094046F /* NTUtils.cpp in Sources */,
 				B9A660101905AA07004869BF /* ColoredCircleSprite.m in Sources */,
 				B92C59EA18FEC8FE005EC882 /* main.m in Sources */,
 				B916F522190529B40057388D /* BrainSpeakBLE.m in Sources */,
 				B9AD5E62193EF9D400BC9631 /* BrainDashLineFollowingViewController.m in Sources */,
 				B9A660161905AA35004869BF /* SneakyButtonSkinnedBase.m in Sources */,
+				B076061319541E950094046F /* NTBLE.cpp in Sources */,
 				B9A6600E1905AA07004869BF /* HelloWorldScene.m in Sources */,
 				B92C5A6418FEFD1D005EC882 /* NSString+hex.m in Sources */,
 				B9AD5E76194071DA00BC9631 /* BrainDashSettingsViewController.m in Sources */,
-				B9AD38DB1900FDDE00FA9CD0 /* NTProtocol.cpp in Sources */,
 				B92C5A6118FEFD1D005EC882 /* UARTPeripheral.m in Sources */,
 				B92C59F718FEC8FE005EC882 /* BrainDashFlipsideViewController.m in Sources */,
+				B076061519541E950094046F /* NTProtocol.cpp in Sources */,
 				B9A660151905AA35004869BF /* SneakyJoystickSkinnedBase.m in Sources */,
 				B92C5A6218FEFD1D005EC882 /* CBUUID+StringExtraction.m in Sources */,
+				B076061419541E950094046F /* NTMessaging.cpp in Sources */,
 				B916F51F190506920057388D /* TheBriain.m in Sources */,
 				B92C59EE18FEC8FE005EC882 /* BrainDashAppDelegate.m in Sources */,
 				B9AD5E73193F66E800BC9631 /* BrainDashTuningViewController.m in Sources */,
 				B9F68B2919055A0D00F6654D /* SneakyJoystick.m in Sources */,
 				B92C59F418FEC8FE005EC882 /* BrainDashMainViewController.m in Sources */,
+				B9AD5E791941A0DE00BC9631 /* NSObject+performBlockAfterDelay.m in Sources */,
 				B9A6600F1905AA07004869BF /* ColoredSquareSprite.m in Sources */,
 				B9A660191905AA82004869BF /* SneakyButton.m in Sources */,
 				B92C5A6318FEFD1D005EC882 /* NSData+hex.m in Sources */,
@@ -783,7 +839,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/Libraries/cocos2d-iphone/build/Debug-iphoneos",
+					"$(PROJECT_DIR)/Libraries/",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
@@ -807,7 +863,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/Libraries/cocos2d-iphone/build/Debug-iphoneos",
+					"$(PROJECT_DIR)/Libraries/",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
