@@ -20,7 +20,9 @@ void NT_sendCommand(int8_t cat, uint8_t cmd, uint8_t _id, uint16_t p1) {
         NT_CREATE_CMD_NOP,
         NT_CREATE_CMD_NOP
     };
-#ifdef ARDUINO
+
+#if 0
+//#ifdef ARDUINO
     Serial.print(cat, HEX);
     Serial.print(" ");
     Serial.print(cmd, HEX);

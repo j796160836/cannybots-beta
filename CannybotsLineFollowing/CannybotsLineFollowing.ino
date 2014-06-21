@@ -7,9 +7,9 @@
 
 // TODO:  DONE!  0) uC to remote control (app) data flow 
 // TODO:  1) line following mode - increase and decrease cruise speed from the app joystick. 
-// TODO:  2) autonomous switch to manual mode when out of line (that is enabling steering, just like you had before).
-// TODO:  4) manual/line following button switch.
-// TODO:  5)uncomment lf_report_stopped
+// TODO:  DONE 2) autonomous switch to manual mode when out of line (that is enabling steering, just like you had before).
+// TODO:  DONE 4) manual/line following button switch.
+// TODO:  DONE 5)uncomment lf_report_stopped
 
 
 // nice to have:
@@ -45,40 +45,31 @@ void printvalues ();
 
 // PIN Assignments
 // IR sensor pins
-#define IR0 0
-#define IR1 1
-#define IR2 2 
-#define IR3 3
-#define IR4 4
+#define IR1 A9
+#define IR2 A8 
+#define IR3 A6
 
 // motor control pins
 
-#define enableA 5      // analog input to control speed
-#define phaseA 4       //digital output to control direction
-#define enableB 6
-#define phaseB 7
+// motor control pins
+const int pinA1 = 5; 
+const int pinA2 = 6; 
+const int pinB1 = 10;
+const int pinB2 = 11;
 
 //reading from IR sensors
 int IR1_val = 0, IR2_val = 0, IR3_val = 0;
 bool ir1on = 0, ir2on = 0, ir3on = 0;
 
+int IRbias[3] = {0, 0, 0};
 
-#if 1
-// Leebo
-int IRbias[3] = {3, 0, -2};
-#else 
-// el  dho
-int IR1_bias = -2;
-int IR2_bias = 0;
-int IR3_bias = 1;
-#endif
+volatile int speedA = 0;
+volatile int speedB = 0;
+volatile int manualA = 0;
+volatile int manualB = 0;
 
-int speedA = 0;
-int speedB = 0;
-int manualA = 0;
-int manualB = 0;
-
-int cruiseSpeed=50;  //50;
+int baseCruiseSpeed = 100;
+int cruiseSpeed=baseCruiseSpeed;
 
 int printdelay = 1; //counter to slow print rate
 
@@ -133,6 +124,10 @@ void lf_pid_setup(){
 
 void lf_loop()
 {
+  if (isHalted) {
+      motor(manualA, manualB);
+      return;
+  }
   read_ir_sensors();
 
   // process IR readings
@@ -149,11 +144,13 @@ void lf_loop()
   correction = P_error + D_error;
 
   static bool reportSent = false;
+  static unsigned long reportSentLast = millis();
     
   //if sernsor 2 is on white, set spped to zero
   if (IR2_val >= IR_MAX) {
     // set by app
-    //cruiseSpeed = 100;
+      cruiseSpeed = baseCruiseSpeed + manualA/4;
+      
       // Set motor speed
       // If correction is > 0, increase the speed of motor A and 
       //decrease speed of motor B. If correction is < 0,  
@@ -164,8 +161,13 @@ void lf_loop()
   }
   else
   {
+    // only report that we're off the line once per detection, also throttle reporting in case of sensor fluctutions 
     if (!reportSent) {
-      //lf_report_stopped();
+      if  ((millis() - reportSentLast) > 1000) {
+        lf_report_stopped();
+        halt_motors();
+        reportSentLast = millis();
+      }
     }
     reportSent=true;
     speedA = manualA;
@@ -179,20 +181,36 @@ void lf_loop()
 
 
 // motor controller function
-void motor(int _speedA, int _speedB)
+void motor(int speedA, int speedB)
 {
-  _speedA=constrain(_speedA, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
-  _speedB=constrain(_speedB, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
+ if (speedA >= 0){
+    if (speedA > 255)
+    speedA = 255;
+   analogWrite(pinA1, speedA);
+   analogWrite(pinA2,0);
+  }
   
-  digitalWrite(phaseA, (_speedA >= 0 ) ? HIGH:LOW);
-  digitalWrite(phaseB, (_speedB >= 0 ) ? HIGH:LOW);
+  if (speedA < 0){
+   if (speedA < -255)
+    speedA = -255; 
+    analogWrite(pinA1,0);
+    analogWrite(pinA2,speedA);
+  }
   
-  // map from the max range to a smaller subset
-  _speedA=MOTOR_MAX_SPEED-abs(_speedA);
-  _speedB=MOTOR_MAX_SPEED-abs(_speedB);
-  //Serial.print("A=");  Serial.print(_speedA);  Serial.print(", B=");  Serial.println(_speedB);
-  analogWrite(enableA, _speedA);
-  analogWrite(enableB, _speedB);
+  if (speedB >= 0){
+    if (speedB > 255)
+    speedB = 255;
+   analogWrite(pinB1, speedB);
+   analogWrite(pinB2,0);
+  }
+  
+  if (speedB < 0){
+   if (speedB < -255)
+    speedB = -255; 
+    analogWrite(pinB1,0);
+    analogWrite(pinB2,speedB);
+  }
+  
 
 }
 
@@ -249,152 +267,6 @@ void printvalues ()
 #endif
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#ifdef PID_METHOD2
-double Setpoint, Input, Output;
-double Kp = 0.0, Ki = 0.0, Kd = 0.0;
-PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
-
-
-
-void lf_pid_setup(){
-   read_ir_sensors();
-   Setpoint = 0;
-   myPID.SetSampleTime(1);
-   myPID.SetOutputLimits(-MOTOR_MAX_SPEED+105, MOTOR_MAX_SPEED-105);
-   myPID.SetMode(AUTOMATIC);
-}
-
-void lf_loop()
-{
-    if (isHalted) {
-        motor(manualA, manualB);
-      return;
-    }
-   read_ir_sensors();
-   printvalues(); 
-  /*
-  // check for manual mode
-  if (IR2_val < WHITE_THRESHOLD) {
-      // only flag stopped as a one-shot
-     if (myPID.GetMode() != MANUAL) {
-       lf_report_stopped();
-       // pause PID
-       myPID.SetMode(MANUAL);
-     }
-     
-     speedA = manualA;
-     speedB = manualB;
-  } else {
-    // one-shot mode change
-     if (myPID.GetMode() != AUTOMATIC) {
-        myPID.SetMode(AUTOMATIC);
-     }
-
-     myPID.Compute(); 
-     speedA = cruiseSpeedManual + Output;
-     speedB = cruiseSpeedManual - Output;
-  }
-  */
-  Input =  2 - ( ( !ir1on + 2*(ir2on) + 3*!ir3on )  / ( !ir1on + ir2on + !ir3on) );
-  myPID.Compute(); 
-  speedA = cruiseSpeed + Output;
-  speedB = cruiseSpeed - Output;
-  motor(speedA, speedB);
-}
-
-
-
-// motor controller function
-void motor(int _speedA, int _speedB)
-{
-  _speedA=constrain(_speedA, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
-  _speedB=constrain(_speedB, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
-  
-  digitalWrite(phaseA, ( _speedA >= 0 ) ? HIGH:LOW);
-  digitalWrite(phaseB, ( _speedB >= 0 ) ? HIGH:LOW);
-  
-  // map from the max range to a smaller subset
-  _speedA=MOTOR_MAX_SPEED-abs(_speedA);
-  _speedB=MOTOR_MAX_SPEED-abs(_speedB);
-  //_speedA = map(_speedA, 255, 0, 100, 0);
-  //_speedB = map(_speedB, 255, 0, 100, 0);
-  //Serial.print("A=");  Serial.print(_speedA);  Serial.print(", B=");  Serial.println(_speedB);
-  analogWrite(enableA, _speedA);
-  analogWrite(enableB, _speedB);
-
-}
-
-void halt_motors() {
-  isHalted = true;
-   manualB = manualA = 0;
-   myPID.SetMode(MANUAL);
-   motor(0,0);
-}
-void resume_motors() {
-   isHalted = false;
-   manualB = manualA = 0;
-   myPID.SetMode(MANUAL);
-   motor(0,0);
-}
-
-
-
-void lf_pid_p(int16_t v) {
-    //DBG("%d", v);
-    Kp=((double)v)/100.0;
-    myPID.SetTunings(Kp, Ki, Kd);
-
-}
-void lf_pid_i(int16_t v) {
-    //DBG("%d", v);
-    Ki=((double)v)/100.0;
-    myPID.SetTunings(Kp, Ki, Kd);
-
-}
-void lf_pid_d(int16_t v) {
-    //DBG("%d", v);
-    Kd=((double)v)/100.0;
-    myPID.SetTunings(Kp, Ki, Kd);
-
-}
-
-
-void printvalues ()
-{
-  if ( printdelay++ % 100 )
-    return;
-    
-  Serial.print(IR1_val);
-  Serial.print(", ");
-  Serial.print(IR2_val);
-  Serial.print(", ");
-  Serial.print(IR3_val);
-  Serial.print(", Kp=");
-  Serial.print(Kp);
-  Serial.print(", Kd=");
-  Serial.print(Kd);
-  Serial.print(", Input=");
-  Serial.print(Input);
-  Serial.print(", Output=");
-  Serial.print(Output);
-  Serial.print(", cruiseSpeed=");
-  Serial.print(cruiseSpeed);
-  
-  Serial.print(", A=");
-  Serial.print(speedA);
-  Serial.print(", B=");
-  Serial.println(speedB);
-  
-}
-
-#endif
-
 //////////////////////////////////////////
 // Actions
 
@@ -417,7 +289,9 @@ void lf_right() {
 }
 
 void lf_switch() {
-    DBG("Switch");
+   DBG("Switch");
+    test_motor();
+
 }
 
 void lf_speed(int16_t speed) {
@@ -667,14 +541,17 @@ void setup() {
   for (i = 0; i < IR_BIAS_NUM_SENSORS; i++);
     lf_ir_bias(i, lf_cfg_get_ir_bias(i));
   
-   pinMode(enableA, OUTPUT);
-   pinMode(enableB, OUTPUT);
-   pinMode(phaseA, OUTPUT);
-   pinMode(phaseB, OUTPUT);
+  pinMode(pinA1, OUTPUT);
+  pinMode(pinA2, OUTPUT);
+  pinMode(pinB1, OUTPUT);
+  pinMode(pinB2, OUTPUT);
    
+
+
    lf_pid_setup();
    
-   // TODO: setup NT with callback to linefollow_processCommand() above.
+
+   // TODO:  NT to support callback to linefollow_processCommand() above.
 }
 
 
@@ -685,5 +562,140 @@ void loop() {
   lf_loop();
   NT_processInboundMessageQueue();
 }
+
+
+
+
+
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#ifdef PID_METHOD2
+double Setpoint, Input, Output;
+double Kp = 0.0, Ki = 0.0, Kd = 0.0;
+PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
+
+
+
+void lf_pid_setup(){
+   read_ir_sensors();
+   Setpoint = 0;
+   myPID.SetSampleTime(1);
+   myPID.SetOutputLimits(-MOTOR_MAX_SPEED+105, MOTOR_MAX_SPEED-105);
+   myPID.SetMode(AUTOMATIC);
+}
+
+void lf_loop()
+{
+    if (isHalted) {
+        motor(manualA, manualB);
+      return;
+    }
+   read_ir_sensors();
+   printvalues(); 
+  /*
+  // check for manual mode
+  if (IR2_val < WHITE_THRESHOLD) {
+      // only flag stopped as a one-shot
+     if (myPID.GetMode() != MANUAL) {
+       lf_report_stopped();
+       // pause PID
+       myPID.SetMode(MANUAL);
+     }
+     
+     speedA = manualA;
+     speedB = manualB;
+  } else {
+    // one-shot mode change
+     if (myPID.GetMode() != AUTOMATIC) {
+        myPID.SetMode(AUTOMATIC);
+     }
+
+     myPID.Compute(); 
+     speedA = cruiseSpeedManual + Output;
+     speedB = cruiseSpeedManual - Output;
+  }
+  */
+  Input =  2 - ( ( !ir1on + 2*(ir2on) + 3*!ir3on )  / ( !ir1on + ir2on + !ir3on) );
+  myPID.Compute(); 
+  speedA = cruiseSpeed + Output;
+  speedB = cruiseSpeed - Output;
+  motor(speedA, speedB);
+}
+
+
+void halt_motors() {
+  isHalted = true;
+   manualB = manualA = 0;
+   myPID.SetMode(MANUAL);
+   motor(0,0);
+}
+void resume_motors() {
+   isHalted = false;
+   manualB = manualA = 0;
+   myPID.SetMode(MANUAL);
+   motor(0,0);
+}
+
+
+
+void lf_pid_p(int16_t v) {
+    //DBG("%d", v);
+    Kp=((double)v)/100.0;
+    myPID.SetTunings(Kp, Ki, Kd);
+
+}
+void lf_pid_i(int16_t v) {
+    //DBG("%d", v);
+    Ki=((double)v)/100.0;
+    myPID.SetTunings(Kp, Ki, Kd);
+
+}
+void lf_pid_d(int16_t v) {
+    //DBG("%d", v);
+    Kd=((double)v)/100.0;
+    myPID.SetTunings(Kp, Ki, Kd);
+
+}
+
+
+void printvalues ()
+{
+  if ( printdelay++ % 100 )
+    return;
+    
+  Serial.print(IR1_val);
+  Serial.print(", ");
+  Serial.print(IR2_val);
+  Serial.print(", ");
+  Serial.print(IR3_val);
+  Serial.print(", Kp=");
+  Serial.print(Kp);
+  Serial.print(", Kd=");
+  Serial.print(Kd);
+  Serial.print(", Input=");
+  Serial.print(Input);
+  Serial.print(", Output=");
+  Serial.print(Output);
+  Serial.print(", cruiseSpeed=");
+  Serial.print(cruiseSpeed);
+  
+  Serial.print(", A=");
+  Serial.print(speedA);
+  Serial.print(", B=");
+  Serial.println(speedB);
+  
+}
+
+#endif
 
 
