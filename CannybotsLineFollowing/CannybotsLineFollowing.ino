@@ -78,6 +78,10 @@ int printdelay = 1; //counter to slow print rate
 //boolean isHalted = false;
 boolean isLineFollowingMode = true;
 
+
+volatile unsigned long lastCommandTime = millis();
+
+
 // read the IR sensors:
 //set limit on reading. The reading can be very high and inaccurate on pitch black
 
@@ -134,6 +138,14 @@ void lf_loop()
   } else {
     isLineFollowingMode = true;
   }
+  // need watchdog to stop ifin mnaul mode but no command has been received.
+  if ( (millis() - lastCommandTime) > 2000) {
+    manualA=0;
+    manualB=0;
+    
+  }
+
+  
   lf_report_followingMode(isLineFollowingMode);
 
   if (!isLineFollowingMode) {
@@ -183,7 +195,7 @@ void motor(int speedA, int speedB)
     if (speedA < -255)
       speedA = -255;
     analogWrite(pinA1, 0);
-    analogWrite(pinA2, speedA);
+    analogWrite(pinA2, 255-speedA);
   }
 
   if (speedB >= 0) {
@@ -197,7 +209,7 @@ void motor(int speedA, int speedB)
     if (speedB < -255)
       speedB = -255;
     analogWrite(pinB1, 0);
-    analogWrite(pinB2, speedB);
+    analogWrite(pinB2, 255-speedB);
   }
 
 
@@ -250,7 +262,11 @@ void printvalues ()
   Serial.print(", A=");
   Serial.print(speedA);
   Serial.print(", B=");
-  Serial.println(speedB);
+  Serial.print(speedB);
+  Serial.print(", MA=");
+  Serial.print(manualA);
+  Serial.print(", MB=");
+  Serial.println(manualB);
 }
 
 #endif
@@ -309,7 +325,7 @@ void lf_switch() {
 void lf_speed(int16_t speed) {
   Serial.print("LS=");
   Serial.println(speed, DEC);
-  cruiseSpeed = speed;
+  manualA = speed;
 }
 
 void lf_motor_speed(uint8_t motorNum, int16_t speed) {
@@ -338,11 +354,13 @@ void lf_motor_speed(uint8_t motorNum, int16_t speed) {
     default:
       Serial.println("unknown motor");
   }
-
   if ((motorNum == 3) || (motorNum == 4) ) {
-    //throttle (Y axis) and direction (X axis)
+    if (isLineFollowingMode) {
+      manualA = xAxisValue>0?xAxisValue:0;
+    } else {
+   // direction (X axis)  anf throttle (Y axis) 
     int throttle = yAxisValue;
-    int direction = xAxisValue;
+    int direction = -xAxisValue;
     int leftMotor, leftMotorScaled = 0; //left Motor helper variables
     float leftMotorScale = 0;
 
@@ -381,8 +399,16 @@ void lf_motor_speed(uint8_t motorNum, int16_t speed) {
     Serial.print(", ROUT:"); Serial.print( rightMotorScaled);
 
     Serial.println(" |");
-    manualA = leftMotorScaled;
-    manualB = rightMotorScaled;
+//    if (yAxisValue>0) {
+//      manualA = leftMotorScaled;
+//      manualB = rightMotorScaled;
+//    } else {
+      manualA = leftMotorScaled;
+      manualB = rightMotorScaled;
+      
+      motor(manualA, manualB);
+
+    }
   }
 }
 
@@ -508,6 +534,9 @@ uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
   //debug(F("linefollow:CMD=%d\n"), cmd);
   //debug(F("linefollow:ID =%d\n"), id);
   digitalWrite(INFO_LED, HIGH);
+  lastCommandTime = millis();
+  
+
 
   int status = NT_STATUS_OK;
   switch (cmd) {
@@ -642,6 +671,12 @@ void setup() {
   pinMode(pinB1, OUTPUT);
   pinMode(pinB2, OUTPUT);
 
+  /*
+  for (int i = -255 ; i< 255; i += 5 ) {
+     motor(i,-i);
+    delay(50); 
+  }
+  */
 
   lf_pid_setup();
 
