@@ -250,6 +250,8 @@
     if (NT_CMD_LINEFOLLOW_MOVE == cmd) {
         if (LINEFOLLOW_STOP == _id){
             [self.modeSegment setSelectedSegmentIndex:0];
+        } else if (LINEFOLLOW_GO == _id){
+            [self.modeSegment setSelectedSegmentIndex:1];
         } else {
             NSLog(@"WARNING: unrecognised CMD value: %d",_id);
         }

@@ -13,7 +13,7 @@
 #import "SneakyButton.h"
 #import "SneakyButtonSkinnedBase.h"
 #import "ColoredCircleSprite.h"
-
+#import "CannybotsLineFollowing.h"
 
 #import "TheBrain.h"
 
@@ -60,7 +60,7 @@
 		
 		[[CCDirector sharedDirector] setAnimationInterval:1.0f/60.0f];
 		
-        [self schedule:@selector(tick:) interval:1.0f/15.0f];
+        [self schedule:@selector(tick:) interval:1.0f/5.0f];
         
 	}
 	return self;
@@ -75,64 +75,39 @@
         [tb playTone:4 tone:415];
     }
     
-    static int16_t leftSpeedLast  = 0;
-    static int16_t rightSpeedLast = 0;
     float y = leftJoystick.velocity.y;
     float x = leftJoystick.velocity.x;
 
-    int16_t leftSpeed  = 0;
-    int16_t rightSpeed = 0;
+    int dir = MOTOR_MAX_SPEED*x;
+    int throttle =MOTOR_MAX_SPEED*y;
     
-    float maxSpeed   = 255;
-    float deadzone  = 0.25f;
-    float pivotZone = 0.0f;
+    //NSLog(@"%d,%d", dir, throttle);
+    static int lastDir = 0;
+    static int lastThrottle= 0;
 
-    
-    if ( ( fabs(x)<deadzone) && ( fabs(y)< deadzone) ){
-        leftSpeed = rightSpeed = 0;
-    } else if (x>deadzone) {
-        // turn right
-        //leftSpeed  = maxSpeed*(y *    x);
-        if (fabs(y) < pivotZone) {
-            // pivot right
-            leftSpeed  = maxSpeed*(x);
-            rightSpeed = maxSpeed*(-x);
-            
-        } else {
-            leftSpeed  = maxSpeed*(y);
-            rightSpeed = maxSpeed*(y * (1-x));
+    // deadzone check (save radio tx)
+    if ( (abs(dir) < 10) || (abs(throttle)<10)){
+        dir=0;
+        throttle=0;
+        if (lastDir != 0  || lastThrottle!=0) {
+            [tb lf_setMotorSpeed:dir forId:3];
+            [tb lf_setMotorSpeed:throttle forId:4];
+            [tb lf_setMotorSpeed:dir forId:3];
+            [tb lf_setMotorSpeed:throttle forId:4];
+            [tb lf_setMotorSpeed:dir forId:3];
+            [tb lf_setMotorSpeed:throttle forId:4];
         }
-    } else if (x < -deadzone){
-        // turn left
-        //rightSpeed = maxSpeed*(y *    fabs(x)  );
-        if (fabs(y) < pivotZone) {
-            // pivot left
-            leftSpeed  = maxSpeed*(x);
-            rightSpeed = maxSpeed*(-x);
-            
-        } else {
-            rightSpeed = maxSpeed*(y *    fabs(x)  );
-            leftSpeed  = maxSpeed*(y * (1-fabs(x)) );
-        }
-    } else {
-    
-        // straight bck/forward
-        leftSpeed = rightSpeed = maxSpeed*y;
+        lastDir = dir;
+        lastThrottle= throttle;
     }
-    
-    //NSLog(@"(x,y)=(%f,%f) |  (left, right)=(%d,%d)", x, y, leftSpeed, rightSpeed);
-    if ( ( abs(leftSpeed-leftSpeedLast)>2) || ( abs(rightSpeed - rightSpeedLast)>2 )) {
-        //Dynamixels:
-        //[tb setEndlessTurnMode:YES forId:1];
-        //[tb setEndlessTurnMode:YES forId:2];
-        //[tb setServoSpeed:leftSpeed forId:1];
-        //[tb setServoSpeed:rightSpeed forId:2];
-        NSLog(@"L=%d, R=%d", leftSpeed,rightSpeed);
-        // Line folllowing motors
-        [tb lf_setMotorSpeed:leftSpeed forId:1];
-        [tb lf_setMotorSpeed:rightSpeed forId:2];
-        leftSpeedLast = leftSpeed;
-        rightSpeedLast = rightSpeed;
+
+    if ( (abs(lastDir-dir) > 0) || (abs(lastThrottle-throttle)>0) ){
+        
+        [tb lf_setMotorSpeed:dir forId:3];
+        [tb lf_setMotorSpeed:throttle forId:4];
+        lastDir = dir;
+        lastThrottle= throttle;
+        
     }
 }
 
