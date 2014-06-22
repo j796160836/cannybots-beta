@@ -165,9 +165,7 @@ void lf_loop()
 
 
   // set by app
-  if (manualA > 0) {
-    cruiseSpeed = baseCruiseSpeed + manualA / 2;
-  }
+  cruiseSpeed = baseCruiseSpeed + manualA;
 
   // Set motor speed
   // If correction is > 0, increase the speed of motor A and
