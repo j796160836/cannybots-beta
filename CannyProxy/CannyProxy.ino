@@ -6,7 +6,7 @@
 #include <NTMessaging.h>
 
 #define DBG(x)
-//#define LED_DEBUG
+#define LED_DEBUG
 // A-star pin 0 RX
 // A-star pin 1 TX
 
@@ -144,6 +144,8 @@ void processBLE2UARTMessageQueue() {
   sending = true;
   for (int i = 0; i < ble2uartMsgFIFO.count(); i++) {
     BLEMessage* msg = ble2uartMsgFIFO.dequeue();
+    while(!RFduinoBLE.radioActive);
+    while(RFduinoBLE.radioActive);
     Serial.write(">>");
     Serial.write(msg->payload, msg->size);
     delete msg;
@@ -156,8 +158,6 @@ void processUART2BLEMessageQueue() {
     BLEMessage* msg = uart2bleMsgFIFO.dequeue();
 
     if (ble_connected) {
-      while (!RFduinoBLE.radioActive);
-      while (RFduinoBLE.radioActive);
       RFduinoBLE.send((char*)msg->payload, NT_MSG_SIZE);
     } else if (gzll_connected) {
       // can only piggy back, so need to send these as part of a client request , see RFduinoGZLL_onReceive()
@@ -176,6 +176,7 @@ void processUART2BLEMessageQueue() {
 /////////////
 
 void setup() {
+    
 #ifdef LED_DEBUG
   for (int i = 1 ; i <= 3; i++) {
     pinMode(i, OUTPUT);
@@ -186,7 +187,11 @@ void setup() {
 #endif
   Serial.begin(9600, RX_PIN, TX_PIN);
   DBG("CannyProxy UP!");
-  delay(2000);
+  //delay(2000);
+  
+  // start the watchdog
+  NRF_WDT->CRV = 32768 * 1; // Timeout period of 2 s
+  NRF_WDT->TASKS_START = 1; 
 }
 
 #define NT_CAT_APP_LINEFOLLOW NT_CAT_APP
@@ -195,6 +200,8 @@ void setup() {
 
 
 void sendHeartBeat () {
+  // reload the watchdog timer
+  NRF_WDT->RR[0] = WDT_RR_RR_Reload;
   static unsigned long lastTime = millis();
   if (millis() - lastTime > 1000) {
     lastTime = millis();
@@ -218,3 +225,7 @@ void loop() {
   ble_rfduino_manageRadios();
   processUART2BLEMessageQueue();
 }
+
+//void WDT_IRQHandler         ( void ) {
+//   RFduino_systemReset(); 
+//}
