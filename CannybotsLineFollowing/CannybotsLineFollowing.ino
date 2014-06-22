@@ -289,6 +289,14 @@ void lf_left() {
 
 void lf_right() {
   DBG("RIGHT");
+  static unsigned long lastTime = millis();
+  static byte ledOn = 0;
+  if (millis() - lastTime > 1000) {
+    lastTime = millis();
+    digitalWrite(INFO_LED, ledOn?HIGH:LOW);
+    ledOn = 1-ledOn;
+  }
+  
 }
 
 void test_motor() {
@@ -531,7 +539,7 @@ void NT_nv_configDefaults_LineFollowing() {
 uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
   //debug(F("linefollow:CMD=%d\n"), cmd);
   //debug(F("linefollow:ID =%d\n"), id);
-  digitalWrite(INFO_LED, HIGH);
+  //digitalWrite(INFO_LED, HIGH);
   lastCommandTime = millis();
   
 
@@ -624,7 +632,7 @@ uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
       DBG(F("linefollow:NT_ERROR_CMD_INVALID!"));
       status = NT_ERROR_CMD_INVALID;
   }
-  digitalWrite(INFO_LED, LOW);
+  //digitalWrite(INFO_LED, LOW);
 
   return status;
 }
