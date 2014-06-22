@@ -356,7 +356,7 @@ void lf_motor_speed(uint8_t motorNum, int16_t speed) {
   }
   if ((motorNum == 3) || (motorNum == 4) ) {
     if (isLineFollowingMode) {
-      manualA = xAxisValue>0?xAxisValue:0;
+      manualA = yAxisValue>0?yAxisValue:0;
     } else {
    // direction (X axis)  anf throttle (Y axis) 
     int throttle = yAxisValue;
