@@ -73,15 +73,16 @@ void loop()
     if (buttonReading != buttonState) {
       buttonState = buttonReading;
       if (buttonState == HIGH) {
-        followMode = 1 - followMode;
         uint8_t msg[NT_MSG_SIZE] = {
           NT_DEFAULT_MSG_HEADER(),
-          NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_MOVE, followMode ? LINEFOLLOW_GO : LINEFOLLOW_STOP, 0),
+          NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_MOVE, LINEFOLLOW_GO, 0),
           NT_CREATE_CMD_NOP,
           NT_CREATE_CMD_NOP,
           NT_CREATE_CMD_NOP
         };
         RFduinoGZLL.sendToHost((const char*)msg, NT_MSG_SIZE);
+      } else {
+        
       }
     }
   }

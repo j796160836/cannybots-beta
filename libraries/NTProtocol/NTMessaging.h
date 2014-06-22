@@ -17,6 +17,7 @@ class BLEMessage {
 };
 
 typedef SimpleFIFO<BLEMessage*, 4> NTQueue;
+typedef SimpleFIFO<BLEMessage*, 4> NTQueue;
 
 extern SimpleFIFO<BLEMessage*, 4> inboundMsgFIFO;
 extern SimpleFIFO<BLEMessage*, 4> outboundMsgFIFO;  

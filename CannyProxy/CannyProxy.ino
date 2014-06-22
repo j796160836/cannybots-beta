@@ -6,6 +6,7 @@
 #include <NTMessaging.h>
 
 #define DBG(x)
+//#define LED_DEBUG
 // A-star pin 0 RX
 // A-star pin 1 TX
 
@@ -155,6 +156,8 @@ void processUART2BLEMessageQueue() {
     BLEMessage* msg = uart2bleMsgFIFO.dequeue();
 
     if (ble_connected) {
+      while (!RFduinoBLE.radioActive);
+      while (RFduinoBLE.radioActive);
       RFduinoBLE.send((char*)msg->payload, NT_MSG_SIZE);
     } else if (gzll_connected) {
       // can only piggy back, so need to send these as part of a client request , see RFduinoGZLL_onReceive()
