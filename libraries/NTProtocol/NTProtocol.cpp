@@ -95,10 +95,11 @@ uint8_t  processCategory(int cat, int cmd, int id, int p1) {
       status = tone_processCommand(cmd, id, p1);
       break;
 #endif
+#ifdef ARDUINO
     case NT_CAT_APP:  
     //case NT_CAT_APP_LINEFOLLOW:
       status = linefollow_processCommand(cmd, id, p1);
-      
+#endif
       break;
     case NT_CAT_NOP:  
       break;

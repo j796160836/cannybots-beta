@@ -9,8 +9,8 @@
 class BLEMessage {
   public:
     BLEMessage(uint8_t* buffer, uint16_t len) {
-      memcpy(payload, buffer, NT_MSG_SIZE);
-      size=len;
+        memcpy(payload, buffer, len<NT_MSG_SIZE?len:NT_MSG_SIZE);
+        size=len;
     };
   uint8_t payload[NT_MSG_SIZE];
   uint8_t size;
@@ -29,7 +29,12 @@ void     NT_processOutboundMessageQueue();
 
 #ifdef ARDUINO
 #include <Arduino.h>
-void NT_UART_parseIntoQueue(HardwareSerial &ser, NTQueue &queue);
+#include <stdint.h>
+typedef void (messageHandler)(uint8_t* data, uint16_t len);
+
+void NT_message_enqueueInboundMessage(uint8_t* data, uint16_t len);
+
+void NT_UART_parseIntoCallback(HardwareSerial &ser, messageHandler* handler);
 #endif
 
 #endif

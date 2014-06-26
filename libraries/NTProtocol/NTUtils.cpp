@@ -91,7 +91,11 @@ void NT_nv_init() {
      //delay(5000);
   //   debug("NVsetup\n");
      NT_nv_setupConfig();
+#ifdef ARDUINO
+       
      NT_nv_configDefaults_LineFollowing();
+#endif
+       
    } else {
 //      debug("NV is CNYB\n");
    }

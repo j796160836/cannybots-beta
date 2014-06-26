@@ -4,9 +4,13 @@
 #include <NTProtocol.h>
 #include <NTUtils.h>
 #include <NTMessaging.h>
+#include <stdint.h>
+
+#define USE_QUEUES 
+
 
 #define DBG(x)
-#define LED_DEBUG
+//#define LED_DEBUG
 // A-star pin 0 RX
 // A-star pin 1 TX
 
@@ -29,8 +33,53 @@
 NTQueue ble2uartMsgFIFO;
 NTQueue uart2bleMsgFIFO;
 
+volatile
+void writeRadioBLE(uint8_t* data, uint16_t len) {
+    RFduinoBLE.send((char*)data, len);
+}
+
+void writeUART(uint8_t* data, uint16_t len) {
+  // try to perform serial when radios are inactive
+  // see: http://forum.rfduino.com/index.php?topic=134.15
+  //while (!RFduinoBLE.radioActive) 
+  //while (RFduinoBLE.radioActive) 
+  //delay(6);
+  // end of workaround
+  if (len==NT_MSG_SIZE) {
+    Serial.write(">>");
+    Serial.write(data, len);
+    //Serial.flush();
+  }
+}
+
+
+
+void radio2uartMsg(uint8_t* data, uint16_t len) {
+#ifdef USE_QUEUES
+  BLEMessage* msg = new BLEMessage((uint8_t*)data, len);  
+  ble2uartMsgFIFO.enqueue(msg);
+#else 
+  writeUART(data, len);
+#endif
+}
+
+void uart2radioMsg(uint8_t* data, uint16_t len) {
+
+#ifdef USE_QUEUES
+    BLEMessage* msg = new BLEMessage(data, NT_MSG_SIZE);
+    uart2bleMsgFIFO.enqueue(msg);
+#else
+  writeRadioBLE(data, len);
+
+#endif
+}
+
+
+
+/////
 boolean volatile ble_connected = false;
 boolean volatile gzll_connected = false;
+
 
 void RFduinoBLE_onAdvertisement(bool start) {
 }
@@ -53,15 +102,17 @@ void RFduinoBLE_onDisconnect() {
   ble_connected = false;
 }
 
-volatile bool sending = false;
+//volatile bool sending = false;
+
 
 void RFduinoBLE_onReceive(char *data, int len) {
   DBG("RFduinoBLE_onReceive");
-  if (sending)
-    return;
-  BLEMessage* msg = new BLEMessage((uint8_t*)data, len);
-  ble2uartMsgFIFO.enqueue(msg);
+//  if (sending)
+//    return;
+  radio2uartMsg((uint8_t*)data, len);
+  
 }
+
 
 
 // GZLL
@@ -78,8 +129,7 @@ void RFduinoGZLL_onReceive(device_t device, int rssi, char *data, int len)
   DBG("RFduinoGZLL_onReceive");
 
   gzll_connected = true;
-  BLEMessage* msg = new BLEMessage((uint8_t*)data, len);
-  ble2uartMsgFIFO.enqueue(msg);
+  radio2uartMsg((uint8_t*)data, len);
 
   // MAYBE-TODO: check uart2ble here as Gazelle can only piggy back client device requests
   //RFduinoGZLL.sendToDevice(device, "OK");
@@ -132,25 +182,19 @@ void  ble_rfduino_manageRadios() {
 
 // scedule UART to BLE message
 
-uint8_t  sendBLE(uint8_t* buffer) {
-  BLEMessage* msg = new BLEMessage(buffer, NT_MSG_SIZE);
-  uart2bleMsgFIFO.enqueue(msg);
-}
-
 
 // Message queue processing
 
 void processBLE2UARTMessageQueue() {
-  sending = true;
   for (int i = 0; i < ble2uartMsgFIFO.count(); i++) {
     BLEMessage* msg = ble2uartMsgFIFO.dequeue();
-    while(!RFduinoBLE.radioActive);
-    while(RFduinoBLE.radioActive);
-    Serial.write(">>");
-    Serial.write(msg->payload, msg->size);
+//    sending = true;
+    writeUART(msg->payload, msg->size);
+//    sending = false;
+
     delete msg;
   }
-  sending = false;
+//  sending = false;
 }
 
 void processUART2BLEMessageQueue() {
@@ -158,7 +202,7 @@ void processUART2BLEMessageQueue() {
     BLEMessage* msg = uart2bleMsgFIFO.dequeue();
 
     if (ble_connected) {
-      RFduinoBLE.send((char*)msg->payload, NT_MSG_SIZE);
+      writeRadioBLE((uint8_t*)msg->payload, NT_MSG_SIZE);
     } else if (gzll_connected) {
       // can only piggy back, so need to send these as part of a client request , see RFduinoGZLL_onReceive()
     } else {
@@ -208,22 +252,28 @@ void sendHeartBeat () {
 
     uint8_t data[NT_MSG_SIZE] = {
       NT_DEFAULT_MSG_HEADER(),
-      NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_MOVE, LINEFOLLOW_RIGHT, 0),
+      NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_MOVE, LINEFOLLOW_RIGHT, 127),
       NT_CREATE_CMD_NOP,
       NT_CREATE_CMD_NOP,
       NT_CREATE_CMD_NOP
     };
-    BLEMessage* msg = new BLEMessage((uint8_t*)data, NT_MSG_SIZE);
-    ble2uartMsgFIFO.enqueue(msg);
+    radio2uartMsg((uint8_t*)data, NT_MSG_SIZE);
   }
 }
 
 void loop() {
-  NT_UART_parseIntoQueue(Serial, uart2bleMsgFIFO);
+  NT_UART_parseIntoCallback(Serial, uart2radioMsg);
+  
   sendHeartBeat();
+#ifdef USE_QUEUES  
   processBLE2UARTMessageQueue();
+#endif
+
   ble_rfduino_manageRadios();
+  
+#ifdef USE_QUEUES  
   processUART2BLEMessageQueue();
+#endif
 }
 
 //void WDT_IRQHandler         ( void ) {

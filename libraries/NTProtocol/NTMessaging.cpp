@@ -50,7 +50,7 @@ void NT_sendCommand(int8_t cat, uint8_t cmd, uint8_t _id, uint16_t p1) {
 uint8_t  NT_scheduleMsg(uint8_t* buffer) {
   BLEMessage* msg = new BLEMessage(buffer, NT_MSG_SIZE);
   outboundMsgFIFO.enqueue(msg);
-    return 0;
+    return NT_STATUS_OK;
 }
 
 void NT_processInboundMessageQueue() {
@@ -101,6 +101,14 @@ void NT_processOutboundMessageQueue() {
 }
 
 
+void NT_message_enqueueInboundMessage(uint8_t* data, uint16_t len) {
+    BLEMessage* msg = new BLEMessage(data, len);
+    inboundMsgFIFO.enqueue(msg);
+}
+
+
+
+
 #define SERIAL_BUF_SIZE 32
 uint8_t serialBuffer[SERIAL_BUF_SIZE+1];
 int serialBufPtr = 0;
@@ -108,7 +116,10 @@ bool foundStart = false;
 char c=0, lastChar=0;
 
 #ifdef ARDUINO
-void NT_UART_parseIntoQueue(HardwareSerial &ser, NTQueue &queue) {
+void NT_UART_parseIntoCallback(HardwareSerial &ser, messageHandler handler) {
+//}
+
+//void NT_UART_parseIntoQueue(HardwareSerial &ser, NTQueue &queue) {
     
     while (ser.available()>0) {
         lastChar = c;
@@ -126,8 +137,10 @@ void NT_UART_parseIntoQueue(HardwareSerial &ser, NTQueue &queue) {
         if (serialBufPtr>=NT_MSG_SIZE) {
             //Serial.println("<EOC>");
             foundStart = false;
-            BLEMessage* msg = new BLEMessage(serialBuffer, NT_MSG_SIZE);
-            queue.enqueue(msg);
+            //BLEMessage* msg = new BLEMessage(serialBuffer, NT_MSG_SIZE);
+            //queue.enqueue(msg);
+        handler(serialBuffer, NT_MSG_SIZE);
+
             serialBufPtr=0;
         }
     }

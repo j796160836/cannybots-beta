@@ -239,7 +239,7 @@ void lf_pid_d(int16_t v) {
 
 void printvalues ()
 {
-  if ( printdelay++ % 100 )
+  if ( printdelay++ % 2000 )
     return;
 
   Serial.print(IR1_val);
@@ -363,7 +363,10 @@ void lf_motor_speed(uint8_t motorNum, int16_t speed) {
   if ((motorNum == 3) || (motorNum == 4) ) {
     if (isLineFollowingMode) {
       manualA = yAxisValue>0?yAxisValue:0;
+    } else if ( (0 == xAxisValue) && (yAxisValue==0) ){
+       motor(0, 0);
     } else {
+      
    // direction (X axis)  anf throttle (Y axis) 
     int throttle = yAxisValue;
     int direction = -xAxisValue;
@@ -404,11 +407,8 @@ void lf_motor_speed(uint8_t motorNum, int16_t speed) {
     Serial.print("| LOUT:"); Serial.print( leftMotorScaled);
     Serial.print(", ROUT:"); Serial.print( rightMotorScaled);
 
-    Serial.println(" |");
-//    if (yAxisValue>0) {
-//      manualA = leftMotorScaled;
-//      manualB = rightMotorScaled;
-//    } else {
+    Serial.println("");
+
       manualA = leftMotorScaled;
       manualB = rightMotorScaled;
       
@@ -529,6 +529,9 @@ int16_t lf_cfg_get_ir_bias(uint8_t ir) {
 void NT_nv_configDefaults_LineFollowing() {
   for (int a = NT_NV_CFG_APP_LINEFOLLOWING_BASE; a < 8; a++) {
     NT_nv_setByte(a, 0);
+  }
+  for (int b = NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_BASE; b < NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_MAX; b++) {
+    NT_nv_setByte(b, 0);    
   }
   NT_nv_setByte(NT_NV_CFG_APP_LINEFOLLOWING_BASE + NT_NV_CFG_APP_LINEFOLLOWING_RGBCOL_VAL, LINEFOLLOW_RGB_COLOUR_RED);
   NT_nv_setByte(NT_NV_CFG_APP_LINEFOLLOWING_BASE + NT_NV_CFG_APP_LINEFOLLOWING_RGBBRI_VAL, 255);
@@ -691,8 +694,9 @@ void setup() {
 }
 
 
+
 void loop() {
-  NT_UART_parseIntoQueue(Serial1, inboundMsgFIFO);
+  NT_UART_parseIntoCallback(Serial1, NT_message_enqueueInboundMessage);
 
   NT_processOutboundMessageQueue();
   lf_loop();
