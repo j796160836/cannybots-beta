@@ -41,8 +41,8 @@ void writeRadioBLE(uint8_t* data, uint16_t len) {
 void writeUART(uint8_t* data, uint16_t len) {
   // try to perform serial when radios are inactive
   // see: http://forum.rfduino.com/index.php?topic=134.15
-  //while (!RFduinoBLE.radioActive) 
-  //while (RFduinoBLE.radioActive) 
+  //while (!RFduinoBLE.radioActive); 
+  //while (RFduinoBLE.radioActive); 
   //delay(6);
   // end of workaround
   if (len==NT_MSG_SIZE) {
