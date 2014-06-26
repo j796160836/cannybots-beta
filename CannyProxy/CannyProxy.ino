@@ -1,139 +1,119 @@
 #include <RFduinoBLE.h>
 #include <RFduinoGZLL.h>
-#include <SimpleFIFO.h>
-#include <NTProtocol.h>
-#include <NTUtils.h>
-#include <NTMessaging.h>
 #include <stdint.h>
 
-#define USE_QUEUES 
+/////////////////////////////////////////////////////////
+// Config
 
+#define BLE_UUID                 "7e400001-b5a3-f393-e0a9-e50e24dcca9e"
+#define BLE_LOCALNAME            "Cannybots"
+#define BLE_ADVERTISEMENT_DATA   "CB_LFB_001"
 
-#define DBG(x)
-//#define LED_DEBUG
-// A-star pin 0 RX
-// A-star pin 1 TX
+#define TOGGLE_MILLIS 2500
+
+#define Q_MAX_ENTRIES 12
+#define Q_ENTRY_SIZE 20
+
+#define UART_SOURCE Serial
+#define SERIAL_BUF_SIZE 32
+
+#define NT_MSG_SIZE 20
 
 #define TX_PIN 5
 #define RX_PIN 6
 
-// connect RFd TX pin to WHITE PL2303 USB TTL Serial lead
-// connect RFd RX pin to GREEN PL2303 USB TTL Serial lead
+
+/////////////////////////////////////////////////////////
+// Queues
+
+char radio2uartQ[Q_MAX_ENTRIES][Q_ENTRY_SIZE];
+int  radio2uartQHead  = 0;
+int  radio2uartQTail  = 0;
+int  radio2uartQItems = 0;
 
 
 
-// loop ticks to swap between BLE and GZLL
-#define TOGGLE_MILLIS 2500
-
-
-
-
-// Inbound & outbound FIFO's
-
-NTQueue ble2uartMsgFIFO;
-NTQueue uart2bleMsgFIFO;
-
-volatile
-void writeRadioBLE(uint8_t* data, uint16_t len) {
-    RFduinoBLE.send((char*)data, len);
+void enqueue(char *data, int len) {
+   if (radio2uartQItems == Q_MAX_ENTRIES)
+     return;
+    memcpy(radio2uartQ[radio2uartQTail++], data, len <= Q_ENTRY_SIZE ? len : Q_ENTRY_SIZE);
+    radio2uartQItems++;
+    if (radio2uartQTail == Q_MAX_ENTRIES) {
+      radio2uartQTail=0;
+    }
 }
 
-void writeUART(uint8_t* data, uint16_t len) {
-  // try to perform serial when radios are inactive
-  // see: http://forum.rfduino.com/index.php?topic=134.15
-  //while (!RFduinoBLE.radioActive); 
-  //while (RFduinoBLE.radioActive); 
-  //delay(6);
-  // end of workaround
-  if (len==NT_MSG_SIZE) {
-    Serial.write(">>");
-    Serial.write(data, len);
-    //Serial.flush();
-  }
+/////////////////////////////////////////////////////////
+// Serial
+
+uint8_t serialBuffer[SERIAL_BUF_SIZE+1];
+int serialBufPtr = 0;
+bool foundStart = false;
+char c=0, lastChar=0;
+
+
+void writeUART(const uint8_t* data, uint16_t len) {
+  Serial.write(">>");
+  Serial.write( data, len);
+  Serial.flush();              // crashes prior to rfduino 2.0.3
 }
 
-
-
-void radio2uartMsg(uint8_t* data, uint16_t len) {
-#ifdef USE_QUEUES
-  BLEMessage* msg = new BLEMessage((uint8_t*)data, len);  
-  ble2uartMsgFIFO.enqueue(msg);
-#else 
-  writeUART(data, len);
-#endif
+void process_uart2ble_q() {
+  while (UART_SOURCE.available()>0) {
+        lastChar = c;
+        c =  UART_SOURCE.read();
+        if (foundStart && (serialBufPtr<SERIAL_BUF_SIZE)) {
+            serialBuffer[serialBufPtr++] = c;
+        } else if ( ('>' == c) && ('>' == lastChar) ) {
+            foundStart=true;
+            serialBufPtr=0;
+        }
+        if (serialBufPtr>=NT_MSG_SIZE) {
+            foundStart = false;
+            RFduinoBLE.send((const char*)serialBuffer, NT_MSG_SIZE);
+            serialBufPtr=0;
+        }
+    }
 }
 
-void uart2radioMsg(uint8_t* data, uint16_t len) {
+/////////////////////////////////////////////////////////
+// Radio
 
-#ifdef USE_QUEUES
-    BLEMessage* msg = new BLEMessage(data, NT_MSG_SIZE);
-    uart2bleMsgFIFO.enqueue(msg);
-#else
-  writeRadioBLE(data, len);
-
-#endif
-}
-
-
-
-/////
 boolean volatile ble_connected = false;
 boolean volatile gzll_connected = false;
-
-
-void RFduinoBLE_onAdvertisement(bool start) {
-}
-
-void RFduinoBLE_onConnect() {
-  DBG("RFduinoBLE_onConnect");
-  ble_connected = true;
-#ifdef LED_DEBUG
-  digitalWrite(2, HIGH);
-#endif
-
-
-}
-
-void RFduinoBLE_onDisconnect() {
-#ifdef LED_DEBUG
-  digitalWrite(2, LOW);
-#endif
-  DBG("RFduinoBLE_onDisconnect");
-  ble_connected = false;
-}
-
-//volatile bool sending = false;
-
-
-void RFduinoBLE_onReceive(char *data, int len) {
-  DBG("RFduinoBLE_onReceive");
-//  if (sending)
-//    return;
-  radio2uartMsg((uint8_t*)data, len);
-  
-}
 
 
 
 // GZLL
 void RFduinoGZLL_onReceive(device_t device, int rssi, char *data, int len)
 {
-#ifdef LED_DEBUG
-  static bool set = false;
-  if (!set) {
-    digitalWrite(3, HIGH);
-    set = true;
-  }
-#endif
-
-  DBG("RFduinoGZLL_onReceive");
-
   gzll_connected = true;
-  radio2uartMsg((uint8_t*)data, len);
+  enqueue(data, len);
+  // TODO: fake pairing. check the device is the same as before...
 
   // MAYBE-TODO: check uart2ble here as Gazelle can only piggy back client device requests
   //RFduinoGZLL.sendToDevice(device, "OK");
 }
+
+
+// BLE
+void RFduinoBLE_onAdvertisement(bool start) {
+}
+
+void RFduinoBLE_onConnect() {
+  ble_connected = true;
+}
+
+void RFduinoBLE_onDisconnect() {
+  ble_connected = false;
+}
+
+void RFduinoBLE_onReceive(char *data, int len) {
+  enqueue(data, len);
+}
+
+
+// BLE & GZLL
 
 void  ble_rfduino_manageRadios() {
 
@@ -153,17 +133,15 @@ void  ble_rfduino_manageRadios() {
 
   if ( 0 == state) {
     state = 1;
-    DBG("BLE");
 
     RFduinoGZLL.end();
-    RFduinoBLE.customUUID = "7e400001-b5a3-f393-e0a9-e50e24dcca9e";
-    RFduinoBLE.deviceName = "Cannybots";
-    RFduinoBLE.advertisementData = "Leebo";
+    RFduinoBLE.customUUID = BLE_UUID;
+    RFduinoBLE.deviceName = BLE_LOCALNAME;
+    RFduinoBLE.advertisementData = BLE_ADVERTISEMENT_DATA;
     RFduinoBLE.begin();
 
   } else if (2 == state  ) {
     state = 3;
-    DBG("GZLL");
     while (!RFduinoBLE.radioActive);
     while (RFduinoBLE.radioActive);
     RFduinoBLE.end();
@@ -177,105 +155,31 @@ void  ble_rfduino_manageRadios() {
 
 
 
-// scedule BLE to UART message
-// see callback above
+/////////////////////////////////////////////////////////
+// Queue processing
 
-// scedule UART to BLE message
-
-
-// Message queue processing
-
-void processBLE2UARTMessageQueue() {
-  for (int i = 0; i < ble2uartMsgFIFO.count(); i++) {
-    BLEMessage* msg = ble2uartMsgFIFO.dequeue();
-//    sending = true;
-    writeUART(msg->payload, msg->size);
-//    sending = false;
-
-    delete msg;
-  }
-//  sending = false;
-}
-
-void processUART2BLEMessageQueue() {
-  for (int i = 0; i < uart2bleMsgFIFO.count(); i++) {
-    BLEMessage* msg = uart2bleMsgFIFO.dequeue();
-
-    if (ble_connected) {
-      writeRadioBLE((uint8_t*)msg->payload, NT_MSG_SIZE);
-    } else if (gzll_connected) {
-      // can only piggy back, so need to send these as part of a client request , see RFduinoGZLL_onReceive()
-    } else {
-      // discard message as we are not connected to anything.
+void process_ble2uart_q() {
+  if (radio2uartQItems>0) { 
+    writeUART((uint8_t*) radio2uartQ[radio2uartQHead++], Q_ENTRY_SIZE);
+    radio2uartQItems--;
+    if (radio2uartQHead == Q_MAX_ENTRIES) {
+      radio2uartQHead=0;
     }
-
-    delete msg;
-  }
+  }  
 }
 
-
-
-
-
-/////////////
+/////////////////////////////////////////////////////////
+// Standard arduino entry points.
 
 void setup() {
-    
-#ifdef LED_DEBUG
-  for (int i = 1 ; i <= 3; i++) {
-    pinMode(i, OUTPUT);
-    digitalWrite(i, HIGH); delay(500);
-    digitalWrite(i, LOW);
-  }
-  digitalWrite(1, HIGH);
-#endif
-  Serial.begin(9600, RX_PIN, TX_PIN);
-  DBG("CannyProxy UP!");
-  //delay(2000);
-  
-  // start the watchdog
-  NRF_WDT->CRV = 32768 * 1; // Timeout period of 2 s
-  NRF_WDT->TASKS_START = 1; 
+  Serial.begin(9600, RX_PIN, TX_PIN);        // can, but shouldn't, go higher than 9600 (RFduino limitation)
+  NRF_WDT->CRV = 32768 * 2;   // Timeout period of 2 s
+  NRF_WDT->TASKS_START = 1;   // start the watchdog 
 }
 
-#define NT_CAT_APP_LINEFOLLOW NT_CAT_APP
-#define NT_CMD_LINEFOLLOW_MOVE 1
-#define LINEFOLLOW_RIGHT 4
-
-
-void sendHeartBeat () {
-  // reload the watchdog timer
-  NRF_WDT->RR[0] = WDT_RR_RR_Reload;
-  static unsigned long lastTime = millis();
-  if (millis() - lastTime > 1000) {
-    lastTime = millis();
-
-    uint8_t data[NT_MSG_SIZE] = {
-      NT_DEFAULT_MSG_HEADER(),
-      NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_MOVE, LINEFOLLOW_RIGHT, 127),
-      NT_CREATE_CMD_NOP,
-      NT_CREATE_CMD_NOP,
-      NT_CREATE_CMD_NOP
-    };
-    radio2uartMsg((uint8_t*)data, NT_MSG_SIZE);
-  }
-}
-
-void loop() {
-  NT_UART_parseIntoCallback(Serial, uart2radioMsg);
-  
-  sendHeartBeat();
-#ifdef USE_QUEUES  
-  processBLE2UARTMessageQueue();
-#endif
-
+void loop() {  
+  NRF_WDT->RR[0] = WDT_RR_RR_Reload;    // reload the watchdog timer
   ble_rfduino_manageRadios();
-  
-#ifdef USE_QUEUES  
-  processUART2BLEMessageQueue();
-#endif
+  process_ble2uart_q();
+  process_uart2ble_q();
 }
-
-//void WDT_IRQHandler         ( void ) {
-//   RFduino_systemReset(); 
-//}

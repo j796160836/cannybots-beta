@@ -168,7 +168,6 @@ void process_ble2uart_q() {
   }  
 }
 
-
 /////////////////////////////////////////////////////////
 // Standard arduino entry points.
 
