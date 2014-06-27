@@ -12,7 +12,7 @@
 #import "UARTPeripheral.h"
 #import "TheBrain.h"
 
-#define BLE_CONN_RETRY_DELAY 3.0f
+#define BLE_CONN_RETRY_DELAY 1.0f
 
 
 @interface BrainSpeakBLE : NSObject <UARTPeripheralDelegate, CBCentralManagerDelegate, NTSender>

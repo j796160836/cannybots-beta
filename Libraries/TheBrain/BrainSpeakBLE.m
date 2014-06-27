@@ -119,6 +119,8 @@
     if (central.state == CBCentralManagerStatePoweredOn){
         
         //respond to powered on
+        [self reconnectBLE];
+
     }
     
     else if (central.state == CBCentralManagerStatePoweredOff){
@@ -271,15 +273,5 @@
     
 }
 
-#import "NTProtocol.h"
-#if __cplusplus
-extern "C" {
-#endif
-    uint8_t  NT_scheduleMsg(uint8_t* buffer) {
-        return NT_STATUS_OK;
-    }
-#if __cplusplus
-}
-#endif
 
 @end

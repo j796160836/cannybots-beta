@@ -13,7 +13,6 @@
 		B076061419541E950094046F /* NTMessaging.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B076060D19541E950094046F /* NTMessaging.cpp */; };
 		B076061519541E950094046F /* NTProtocol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B076060F19541E950094046F /* NTProtocol.cpp */; };
 		B076061619541E950094046F /* NTUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B076061119541E950094046F /* NTUtils.cpp */; };
-		B076061A19541F680094046F /* CannybotsLineFollowing.ino in Resources */ = {isa = PBXBuildFile; fileRef = B076061919541F680094046F /* CannybotsLineFollowing.ino */; };
 		B916F51F190506920057388D /* TheBriain.m in Sources */ = {isa = PBXBuildFile; fileRef = B916F51E190506920057388D /* TheBriain.m */; };
 		B916F522190529B40057388D /* BrainSpeakBLE.m in Sources */ = {isa = PBXBuildFile; fileRef = B916F521190529B40057388D /* BrainSpeakBLE.m */; };
 		B92C59DE18FEC8FE005EC882 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59DD18FEC8FE005EC882 /* Foundation.framework */; };
@@ -120,7 +119,6 @@
 		B076061119541E950094046F /* NTUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NTUtils.cpp; sourceTree = "<group>"; };
 		B076061219541E950094046F /* NTUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NTUtils.h; sourceTree = "<group>"; };
 		B076061819541F680094046F /* CannybotsLineFollowing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CannybotsLineFollowing.h; sourceTree = "<group>"; };
-		B076061919541F680094046F /* CannybotsLineFollowing.ino */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CannybotsLineFollowing.ino; sourceTree = "<group>"; };
 		B076061B195420540094046F /* SimpleFIFO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SimpleFIFO.h; path = ../../../../../../Documents/Arduino/libraries/SimpleFIFO/SimpleFIFO.h; sourceTree = "<group>"; };
 		B916F51D190506920057388D /* TheBrain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TheBrain.h; sourceTree = "<group>"; };
 		B916F51E190506920057388D /* TheBriain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TheBriain.m; sourceTree = "<group>"; };
@@ -263,7 +261,6 @@
 			isa = PBXGroup;
 			children = (
 				B076061819541F680094046F /* CannybotsLineFollowing.h */,
-				B076061919541F680094046F /* CannybotsLineFollowing.ino */,
 			);
 			name = CannybotsLineFollowing;
 			path = ../../../avr/CannybotsLineFollowing;
@@ -625,7 +622,6 @@
 				B9AD5E56193EEBEF00BC9631 /* Arrow Right 3.png in Resources */,
 				B9AD5E3D193E64C800BC9631 /* Button Stop.png in Resources */,
 				B9AD5E4E193E64C800BC9631 /* Plug.png in Resources */,
-				B076061A19541F680094046F /* CannybotsLineFollowing.ino in Resources */,
 				B9AD5E49193E64C800BC9631 /* Heart.png in Resources */,
 				B9AD5E4A193E64C800BC9631 /* Information 2.png in Resources */,
 				B9AD5E6E193F481300BC9631 /* button.png in Resources */,

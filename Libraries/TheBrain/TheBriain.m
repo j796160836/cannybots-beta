@@ -380,7 +380,15 @@ void dumpCmd(const NT_cmd cmd) {
 }
 
 - (void) lf_left {
-    [self send_1cmd_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_MOVE id:LINEFOLLOW_LEFT p1:0];
+    [self performBlock:^{
+        for (int i = 0 ; i <200; i++) {
+            [self send_1cmd_util:NT_CAT_APP_LINEFOLLOW cmd:NT_CMD_LINEFOLLOW_MOVE id:LINEFOLLOW_SPEED p1:i];
+            [NSThread sleepForTimeInterval:0.02];
+        }
+    } afterDelay: 0];
+
+    
+    
 }
 
 - (void) lf_right {

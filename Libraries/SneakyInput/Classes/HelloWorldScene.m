@@ -14,6 +14,8 @@
 #import "SneakyButtonSkinnedBase.h"
 #import "ColoredCircleSprite.h"
 #import "CannybotsLineFollowing.h"
+#import "NSObject+performBlockAfterDelay.h"
+
 
 #import "TheBrain.h"
 
@@ -60,7 +62,7 @@
 		
 		[[CCDirector sharedDirector] setAnimationInterval:1.0f/60.0f];
 		
-        [self schedule:@selector(tick:) interval:1.0f/5.0f];
+        [self schedule:@selector(tick:) interval:1.0f/25.0f];
         
 	}
 	return self;
@@ -69,46 +71,22 @@
 
 -(void)tick:(float)delta {
     TheBrain* tb = [TheBrain sharedInstance];
-
-
-    if (rightButton.value) {
-        [tb playTone:4 tone:415];
-    }
-    
-    float y = leftJoystick.velocity.y;
-    float x = leftJoystick.velocity.x;
-
-    int dir = MOTOR_MAX_SPEED*x;
-    int throttle =MOTOR_MAX_SPEED*y;
-    
-    //NSLog(@"%d,%d", dir, throttle);
     static int lastDir = 0;
     static int lastThrottle= 0;
+    int dir      = MOTOR_MAX_SPEED*leftJoystick.velocity.x;
+    int throttle = MOTOR_MAX_SPEED*leftJoystick.velocity.y;
 
-    // deadzone check (save radio tx)
-    if ( (abs(dir) < 10) || (abs(throttle)<10)){
-        dir=0;
-        throttle=0;
-        if (lastDir != 0  || lastThrottle!=0) {
-            [tb lf_setMotorSpeed:dir forId:3];
-            [tb lf_setMotorSpeed:throttle forId:4];
-            [tb lf_setMotorSpeed:dir forId:3];
-            [tb lf_setMotorSpeed:throttle forId:4];
-            [tb lf_setMotorSpeed:dir forId:3];
-            [tb lf_setMotorSpeed:throttle forId:4];
-        }
-        lastDir = dir;
-        lastThrottle= throttle;
-    }
-
-    if ( (abs(lastDir-dir) > 0) || (abs(lastThrottle-throttle)>0) ){
-        
+    // deadzone check
+    dir      =      abs(dir) < 25  ? 0 : dir;
+    throttle = abs(throttle) < 25  ? 0 : throttle;
+    
+    if ( (abs(lastDir-dir) > 5) || (abs(lastThrottle-throttle)>5) ){
         [tb lf_setMotorSpeed:dir forId:3];
         [tb lf_setMotorSpeed:throttle forId:4];
         lastDir = dir;
         lastThrottle= throttle;
-        
     }
+
 }
 
 
