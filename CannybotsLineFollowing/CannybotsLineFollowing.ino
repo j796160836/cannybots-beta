@@ -19,13 +19,24 @@
 // 3. cruise speed in EEPROM and iOS app (note : IR sensor bias in eeprom and in app has been done)
 // 4. current settings (e.g. cruise speed), not just EEPROM values, sent to app on connection
 
+// see: https://github.com/merose/AnalogScanner
+#include <AnalogScanner.h>
+
 
 #include "CannybotsLineFollowing.h"
 
-//#define DEBUG 1
-//#define DEBUG_OUT Serial
-//#define DEBUG_OUT_TARGET_UART_BAUD 9600
-//#define NT_PLATFORM_AVR 1
+#define DEBUG 1
+#ifdef DEBUG 
+
+static char dbg_buffer[128];
+#define DBG_PRINTF(FMT, ...) snprintf(dbg_buffer, 128, FMT, __VA_ARGS__); Serial.println(dbg_buffer);
+
+#else
+#define DBG_PRINTF(...) 
+
+#endif
+
+
 
 #include <stdint.h>
 #include <Arduino.h>
@@ -38,6 +49,8 @@
 #include <NTProtocol.h>
 #include <NTMessaging.h>
 
+
+AnalogScanner scanner;
 
 
 void motor(int speedA, int speedB);
@@ -63,7 +76,7 @@ const int pinB2 = 11;
 int IR1_val = 0, IR2_val = 0, IR3_val = 0;
 bool ir1on = 0, ir2on = 0, ir3on = 0;
 
-int IRbias[3] = {0, 0, 0};
+int IRbias[IR_BIAS_NUM_SENSORS] = {0, 0, 0};
 
 volatile int speedA = 0;
 volatile int speedB = 0;
@@ -73,7 +86,6 @@ volatile int manualB = 0;
 int baseCruiseSpeed = 100;
 int cruiseSpeed = baseCruiseSpeed;
 
-int printdelay = 1; //counter to slow print rate
 
 //boolean isHalted = false;
 boolean isLineFollowingMode = true;
@@ -88,15 +100,15 @@ volatile unsigned long lastCommandTime = millis();
 
 void read_ir_sensors() {
   //IR1_val = analogRead(IR1);
-  IR1_val = constrain(analogRead(IR1) - IRbias[0], 0, IR_MAX); //left looking from behind
+  IR1_val = constrain( scanner.getValue(IR1) - IRbias[0], 0, IR_MAX); //left looking from behind
   ir1on = IR1_val >= IR_MAX;
 
   //IR2_val = analogRead(IR2);
-  IR2_val = constrain(analogRead(IR2) - IRbias[1], 0, IR_MAX); //centre
+  IR2_val = constrain(scanner.getValue(IR2) - IRbias[1], 0, IR_MAX); //centre
   ir2on   = IR2_val >= IR_MAX;
 
   //IR3_val = analogRead(IR3);
-  IR3_val = constrain (analogRead(IR3) - IRbias[2], 0, IR_MAX); //right
+  IR3_val = constrain (scanner.getValue(IR3) - IRbias[2], 0, IR_MAX); //right
   ir3on   = IR3_val >= IR_MAX;
 
 
@@ -139,11 +151,12 @@ void lf_loop()
     isLineFollowingMode = true;
   }
   // need watchdog to stop ifin mnaul mode but no command has been received.
+  /*
   if ( (millis() - lastCommandTime) > 2000) {
-    manualA=0;
-    manualB=0;
-    
+    //manualA=0;
+    //manualB=0;    
   }
+  */
 
   
   lf_report_followingMode(isLineFollowingMode);
@@ -182,6 +195,7 @@ void lf_loop()
 // motor controller function
 void motor(int speedA, int speedB)
 {
+  //DBG_PRINTF("M(%d,%d)", speedA, speedB);
   if (speedA >= 0) {
     if (speedA > 255)
       speedA = 255;
@@ -237,34 +251,18 @@ void lf_pid_d(int16_t v) {
 }
 
 
+
 void printvalues ()
 {
-  if ( printdelay++ % 2000 )
-    return;
+  static unsigned long lastPrint = millis();
 
-  Serial.print(IR1_val);
-  Serial.print(", ");
-  Serial.print(IR2_val);
-  Serial.print(", ");
-  Serial.print(IR3_val);
-  Serial.print(", Kp=");
-  Serial.print(Kp);
-  Serial.print(", Kd=");
-  Serial.print(Kd);
-  Serial.print(", e=");
-  Serial.print(error);
-  Serial.print(", pe");
-  Serial.print(P_error);
-  Serial.print(", de=");
-  Serial.print(D_error);
-  Serial.print(", A=");
-  Serial.print(speedA);
-  Serial.print(", B=");
-  Serial.print(speedB);
-  Serial.print(", MA=");
-  Serial.print(manualA);
-  Serial.print(", MB=");
-  Serial.println(manualB);
+  if ( millis()-lastPrint < 2000 ){
+    return;
+  }
+  lastPrint = millis();
+
+  DBG_PRINTF("%lu: IR(%u,%u,%u) Kpd(%d,%d) e(%d) PeDe(%d,%d) Sab(%d,%d) Mab(%d,%d)", millis(), IR1_val, IR2_val, IR3_val, Kp, Kd, error, P_error, D_error, speedA,speedB, manualA,manualB  );
+
 }
 
 #endif
@@ -338,10 +336,6 @@ void lf_motor_speed(uint8_t motorNum, int16_t speed) {
   static int yAxisValue = 0;
   static int xAxisValue = 0;
 
-  Serial.print("M");
-  Serial.print(motorNum, DEC);
-  Serial.print("=");
-  Serial.println(speed, DEC);
   switch (motorNum) {
     case 1:
       manualB = speed;
@@ -364,6 +358,8 @@ void lf_motor_speed(uint8_t motorNum, int16_t speed) {
     if (isLineFollowingMode) {
       manualA = yAxisValue>0?yAxisValue:0;
     } else if ( (0 == xAxisValue) && (yAxisValue==0) ){
+      manualA=manualB=0;
+       // immediate 0
        motor(0, 0);
     } else {
       
@@ -384,8 +380,6 @@ void lf_motor_speed(uint8_t motorNum, int16_t speed) {
     rightMotor = throttle - direction;
 
     //print the initial mix results
-    Serial.print("LIN:"); Serial.print( leftMotor, DEC);
-    Serial.print(", RIN:"); Serial.print( rightMotor, DEC);
 
     //calculate the scale of the results in comparision base 8 bit PWM resolution
     leftMotorScale =  leftMotor / 255.0;
@@ -393,8 +387,6 @@ void lf_motor_speed(uint8_t motorNum, int16_t speed) {
     rightMotorScale =  rightMotor / 255.0;
     rightMotorScale = abs(rightMotorScale);
 
-    Serial.print("| LSCALE:"); Serial.print( leftMotorScale, 2);
-    Serial.print(", RSCALE:"); Serial.print( rightMotorScale, 2);
 
     //choose the max scale value if it is above 1
     maxMotorScale = max(leftMotorScale, rightMotorScale);
@@ -403,16 +395,12 @@ void lf_motor_speed(uint8_t motorNum, int16_t speed) {
     //and apply it to the mixed values
     leftMotorScaled = constrain(leftMotor / maxMotorScale, -255, 255);
     rightMotorScaled = constrain(rightMotor / maxMotorScale, -255, 255);
-
-    Serial.print("| LOUT:"); Serial.print( leftMotorScaled);
-    Serial.print(", ROUT:"); Serial.print( rightMotorScaled);
-
-    Serial.println("");
-
       manualA = leftMotorScaled;
       manualB = rightMotorScaled;
       
-      motor(manualA, manualB);
+      
+      
+      //motor(manualA, manualB);
 
     }
   }
@@ -644,6 +632,11 @@ uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
 
 
 void setup() {
+  int scanOrder[IR_BIAS_NUM_SENSORS] = {IR1, IR2, IR3};
+  scanner.setScanOrder(IR_BIAS_NUM_SENSORS, scanOrder);
+  scanner.beginScanning();
+  delay(1); // Wait for the first scans to occur.
+    
   pinMode(INFO_LED, OUTPUT);
   // C
   info_blink(1, 500, 100);
@@ -807,34 +800,6 @@ void lf_pid_d(int16_t v) {
 
 }
 
-
-void printvalues ()
-{
-  if ( printdelay++ % 100 )
-    return;
-
-  Serial.print(IR1_val);
-  Serial.print(", ");
-  Serial.print(IR2_val);
-  Serial.print(", ");
-  Serial.print(IR3_val);
-  Serial.print(", Kp=");
-  Serial.print(Kp);
-  Serial.print(", Kd=");
-  Serial.print(Kd);
-  Serial.print(", Input=");
-  Serial.print(Input);
-  Serial.print(", Output=");
-  Serial.print(Output);
-  Serial.print(", cruiseSpeed=");
-  Serial.print(cruiseSpeed);
-
-  Serial.print(", A=");
-  Serial.print(speedA);
-  Serial.print(", B=");
-  Serial.println(speedB);
-
-}
 
 #endif
 
