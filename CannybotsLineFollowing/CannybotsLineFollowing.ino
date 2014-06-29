@@ -2,37 +2,25 @@
 //
 // Line Following
 
-
-// MUST HAVE!!!
-
-// TODO:  DONE!  0) uC to remote control (app) data flow
-// TODO:  1) line following mode - increase and decrease cruise speed from the app joystick.
-// TODO:  DONE 2) autonomous switch to manual mode when out of line (that is enabling steering, just like you had before).
-// TODO:  DONE 4) manual/line following button switch.
-// TODO:  DONE 5)uncomment lf_report_stopped
-
-
-// nice to have:
+// TODO:
 
 // 1. connection status icon on app
 // 2. connection mangement screen
 // 3. cruise speed in EEPROM and iOS app (note : IR sensor bias in eeprom and in app has been done)
 // 4. current settings (e.g. cruise speed), not just EEPROM values, sent to app on connection
 
-// see: https://github.com/merose/AnalogScanner
-#include <AnalogScanner.h>
 
 
 #include "CannybotsLineFollowing.h"
 
 #define DEBUG 1
-#ifdef DEBUG 
+#ifdef DEBUG
 
 static char dbg_buffer[128];
 #define DBG_PRINTF(FMT, ...) snprintf(dbg_buffer, 128, FMT, __VA_ARGS__); Serial.println(dbg_buffer);
 
 #else
-#define DBG_PRINTF(...) 
+#define DBG_PRINTF(...)
 
 #endif
 
@@ -49,8 +37,14 @@ static char dbg_buffer[128];
 #include <NTProtocol.h>
 #include <NTMessaging.h>
 
-
+#ifdef USE_ANALOG_LIB
+// see: https://github.com/merose/AnalogScanner
+#include <AnalogScanner.h>
 AnalogScanner scanner;
+#define ANALOG_READ scanner.getValue
+#else
+#define ANALOG_READ analogRead
+#endif
 
 
 void motor(int speedA, int speedB);
@@ -86,49 +80,38 @@ volatile int manualB = 0;
 int baseCruiseSpeed = 100;
 int cruiseSpeed = baseCruiseSpeed;
 
-
-//boolean isHalted = false;
 boolean isLineFollowingMode = true;
-
 
 volatile unsigned long lastCommandTime = millis();
 
 
+
 // read the IR sensors:
-//set limit on reading. The reading can be very high and inaccurate on pitch black
-
-
+// set limit on reading. The reading can be very high and inaccurate on pitch black
 void read_ir_sensors() {
-  //IR1_val = analogRead(IR1);
-  IR1_val = constrain( scanner.getValue(IR1) - IRbias[0], 0, IR_MAX); //left looking from behind
+  
+  IR1_val = constrain(ANALOG_READ(IR1) - IRbias[0], 0, IR_MAX); //left looking from behind
+  IR2_val = constrain(ANALOG_READ(IR2) - IRbias[1], 0, IR_MAX); //centre
+  IR3_val = constrain(ANALOG_READ(IR3) - IRbias[2], 0, IR_MAX); //right
+
   ir1on = IR1_val >= IR_MAX;
-
-  //IR2_val = analogRead(IR2);
-  IR2_val = constrain(scanner.getValue(IR2) - IRbias[1], 0, IR_MAX); //centre
   ir2on   = IR2_val >= IR_MAX;
-
-  //IR3_val = analogRead(IR3);
-  IR3_val = constrain (scanner.getValue(IR3) - IRbias[2], 0, IR_MAX); //right
   ir3on   = IR3_val >= IR_MAX;
-
-
 }
 
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #define PID_METHOD1
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 #ifdef PID_METHOD1
 int Kp = 0, Ki = 0, Kd = 0;
-
 int I_limit = 100;
-
 int P_error = 0;
 int I_error = 0;
 int D_error = 0;
@@ -143,85 +126,57 @@ void lf_pid_setup() {
 void lf_loop()
 {
   read_ir_sensors();
-  printvalues();
 
-  if (IR2_val < IR_MAX) {
-    isLineFollowingMode = false;
-  } else {
-    isLineFollowingMode = true;
-  }
-  // need watchdog to stop ifin mnaul mode but no command has been received.
-  /*
-  if ( (millis() - lastCommandTime) > 2000) {
-    //manualA=0;
-    //manualB=0;    
-  }
-  */
-
-  
+  isLineFollowingMode = IR2_val >= IR_MAX;              
   lf_report_followingMode(isLineFollowingMode);
 
-  if (!isLineFollowingMode) {
-    motor(manualA, manualB);
-    return;
+  if (isLineFollowingMode) {
+    // process IR readings via PID
+    error_last = error;                                   // store previous error before new one is caluclated
+    error = constrain(IR1_val - IR3_val, -30, 30);        // set bounds for error
+    P_error = error * Kp;                                 // calculate proportional term
+    D_error = (error - error_last) * Kd;                  // calculate differential term
+    correction = P_error + D_error;
+    cruiseSpeed = baseCruiseSpeed + manualA;
+    speedA = constrain(cruiseSpeed + correction, -200, 200);
+    speedB = constrain(cruiseSpeed - correction, -200, 200);
+  } else {
+    speedA = manualA;
+    speedB = manualB;
   }
 
-  // process IR readings
-  error_last = error; //store previous error before new one is caluclated
-  //set bounds for error
-  error = constrain(IR1_val - IR3_val, -30, 30);
-  // calculate proportional term
-  P_error = error * Kp;
-  // calculate differential term
-  D_error = (error - error_last) * Kd;
-  correction = P_error + D_error;
 
+  // watchdog to stop if in manual mode but no command has been received in the last 2 seconds.
+  if ( !isLineFollowingMode && ((millis() - lastCommandTime) > 2000)) {
+    speedA = speedB = 0;
+  }
 
-  // set by app
-  cruiseSpeed = baseCruiseSpeed + manualA;
-
-  // Set motor speed
-  // If correction is > 0, increase the speed of motor A and
-  //decrease speed of motor B. If correction is < 0,
-  // decrease speed of A and increase speedB.
-  speedA = constrain(cruiseSpeed + correction, -200, 200);
-  speedB = constrain(cruiseSpeed - correction, -200, 200);
-
+  printvalues();
   motor(speedA, speedB);
-
 }
 
 
 // motor controller function
-void motor(int speedA, int speedB)
+void motor(int _speedA, int _speedB)
 {
+    _speedA = constrain(_speedA, -255, 255);
+    _speedB = constrain(_speedB, -255, 255);
+
   //DBG_PRINTF("M(%d,%d)", speedA, speedB);
-  if (speedA >= 0) {
-    if (speedA > 255)
-      speedA = 255;
-    analogWrite(pinA1, speedA);
+  if (_speedA >= 0) {
+    analogWrite(pinA1, _speedA);
     analogWrite(pinA2, 0);
-  }
-
-  if (speedA < 0) {
-    if (speedA < -255)
-      speedA = -255;
+  } else {
     analogWrite(pinA1, 0);
-    analogWrite(pinA2, 255-speedA);
+    analogWrite(pinA2, abs(_speedA));
   }
 
-  if (speedB >= 0) {
-    if (speedB > 255)
-      speedB = 255;
-    analogWrite(pinB1, speedB);
+  if (_speedB >= 0) {
+    analogWrite(pinB1, _speedB);
     analogWrite(pinB2, 0);
-  }
-
-  if (speedB < 0) {
-    if (speedB < -255)
-      speedB = -255;
+  } else {
     analogWrite(pinB1, 0);
-    analogWrite(pinB2, 255-speedB);
+    analogWrite(pinB2, abs(_speedB));
   }
 
 
@@ -229,13 +184,9 @@ void motor(int speedA, int speedB)
 
 void halt_motors() {
   isLineFollowingMode = false;
-  manualB = manualA = 0;
-  motor(0, 0);
 }
 void resume_motors() {
   isLineFollowingMode = true;
-  manualB = manualA = 0;
-  motor(0, 0);
 }
 
 
@@ -255,14 +206,9 @@ void lf_pid_d(int16_t v) {
 void printvalues ()
 {
   static unsigned long lastPrint = millis();
-
-  if ( millis()-lastPrint < 2000 ){
-    return;
-  }
+  if ( millis() - lastPrint < 250 )  return;
   lastPrint = millis();
-
-  DBG_PRINTF("%lu: IR(%u,%u,%u) Kpd(%d,%d) e(%d) PeDe(%d,%d) Sab(%d,%d) Mab(%d,%d)", millis(), IR1_val, IR2_val, IR3_val, Kp, Kd, error, P_error, D_error, speedA,speedB, manualA,manualB  );
-
+  DBG_PRINTF("%lu: IR(%u,%u,%u) Kpd(%d,%d) e(%d) PeDe(%d,%d) Sab(%d,%d) Mab(%d,%d)", millis(), IR1_val, IR2_val, IR3_val, Kp, Kd, error, P_error, D_error, speedA, speedB, manualA, manualB  );
 }
 
 #endif
@@ -291,10 +237,10 @@ void lf_right() {
   static byte ledOn = 0;
   if (millis() - lastTime > 1000) {
     lastTime = millis();
-    digitalWrite(INFO_LED, ledOn?HIGH:LOW);
-    ledOn = 1-ledOn;
+    digitalWrite(INFO_LED, ledOn ? HIGH : LOW);
+    ledOn = 1 - ledOn;
   }
-  
+
 }
 
 void test_motor() {
@@ -344,11 +290,11 @@ void lf_motor_speed(uint8_t motorNum, int16_t speed) {
       manualA = speed;
       break;
     case 3:
-      //joy X axis vale
+      //joy X axis vale  = Direction
       xAxisValue = speed;
       break;
     case 4:
-      //joy y axis vale
+      //joy y axis vale = Throttle
       yAxisValue = speed;
       break;
     default:
@@ -356,54 +302,57 @@ void lf_motor_speed(uint8_t motorNum, int16_t speed) {
   }
   if ((motorNum == 3) || (motorNum == 4) ) {
     if (isLineFollowingMode) {
-      manualA = yAxisValue>0?yAxisValue:0;
-    } else if ( (0 == xAxisValue) && (yAxisValue==0) ){
-      manualA=manualB=0;
-       // immediate 0
-       motor(0, 0);
+      manualA = yAxisValue > 0 ? yAxisValue : 0;
+    } else if ( (0 == xAxisValue) && (yAxisValue == 0) ) {
+      manualA = manualB = 0;
+      // immediate stop
+      motor(0, 0);
     } else {
-      
-   // direction (X axis)  anf throttle (Y axis) 
-    int throttle = yAxisValue;
-    int direction = -xAxisValue;
-    int leftMotor, leftMotorScaled = 0; //left Motor helper variables
-    float leftMotorScale = 0;
 
-    int rightMotor, rightMotorScaled = 0; //right Motor helper variables
-    float rightMotorScale = 0;
+      // direction (X axis)  anf throttle (Y axis)
+      int throttle = yAxisValue;
+      int direction = -xAxisValue;
 
-    float maxMotorScale = 0; //holds the mixed output scaling factor
+      // perfomr some remapping)
+      if ( abs(xAxisValue) < 100 )
+        xAxisValue = 0;
 
+      int leftMotor, leftMotorScaled = 0; //left Motor helper variables
+      float leftMotorScale = 0;
 
-    //mix throttle and direction
-    leftMotor = throttle + direction;
-    rightMotor = throttle - direction;
+      int rightMotor, rightMotorScaled = 0; //right Motor helper variables
+      float rightMotorScale = 0;
 
-    //print the initial mix results
-
-    //calculate the scale of the results in comparision base 8 bit PWM resolution
-    leftMotorScale =  leftMotor / 255.0;
-    leftMotorScale = abs(leftMotorScale);
-    rightMotorScale =  rightMotor / 255.0;
-    rightMotorScale = abs(rightMotorScale);
+      float maxMotorScale = 0; //holds the mixed output scaling factor
 
 
-    //choose the max scale value if it is above 1
-    maxMotorScale = max(leftMotorScale, rightMotorScale);
-    maxMotorScale = max(1, maxMotorScale);
+      //mix throttle and direction
+      leftMotor = throttle + direction;
+      rightMotor = throttle - direction;
 
-    //and apply it to the mixed values
-    leftMotorScaled = constrain(leftMotor / maxMotorScale, -255, 255);
-    rightMotorScaled = constrain(rightMotor / maxMotorScale, -255, 255);
+      //print the initial mix results
+
+      //calculate the scale of the results in comparision base 8 bit PWM resolution
+      leftMotorScale =  leftMotor / 255.0;
+      leftMotorScale = abs(leftMotorScale);
+      rightMotorScale =  rightMotor / 255.0;
+      rightMotorScale = abs(rightMotorScale);
+
+
+      //choose the max scale value if it is above 1
+      maxMotorScale = max(leftMotorScale, rightMotorScale);
+      maxMotorScale = max(1, maxMotorScale);
+
+      //and apply it to the mixed values
+      leftMotorScaled = constrain(leftMotor / maxMotorScale, -255, 255);
+      rightMotorScaled = constrain(rightMotor / maxMotorScale, -255, 255);
       manualA = leftMotorScaled;
       manualB = rightMotorScaled;
-      
-      
-      
-      //motor(manualA, manualB);
+      motor(manualA, manualB);
 
     }
   }
+  DBG_PRINTF("Ms(%d,%d)", manualA, manualB);
 }
 
 void lf_rgb_colour(uint8_t v) {
@@ -424,8 +373,8 @@ void lf_ir_bias(uint8_t ir, int8_t val) {
 void lf_report_followingMode(bool isLineMode) {
   static unsigned long lastCall = millis();
   // throttle sending to 1000/x times a second
-  if (millis() - lastCall>500) {
-    lastCall=millis();
+  if (millis() - lastCall > 500) {
+    lastCall = millis();
     if (isLineMode) {
       NT_sendCommand(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_MOVE, LINEFOLLOW_GO, 0);
     } else {
@@ -519,7 +468,7 @@ void NT_nv_configDefaults_LineFollowing() {
     NT_nv_setByte(a, 0);
   }
   for (int b = NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_BASE; b < NT_NV_CFG_APP_LINEFOLLOWING_IR_BIAS_MAX; b++) {
-    NT_nv_setByte(b, 0);    
+    NT_nv_setByte(b, 0);
   }
   NT_nv_setByte(NT_NV_CFG_APP_LINEFOLLOWING_BASE + NT_NV_CFG_APP_LINEFOLLOWING_RGBCOL_VAL, LINEFOLLOW_RGB_COLOUR_RED);
   NT_nv_setByte(NT_NV_CFG_APP_LINEFOLLOWING_BASE + NT_NV_CFG_APP_LINEFOLLOWING_RGBBRI_VAL, 255);
@@ -532,7 +481,7 @@ uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
   //debug(F("linefollow:ID =%d\n"), id);
   //digitalWrite(INFO_LED, HIGH);
   lastCommandTime = millis();
-  
+
 
 
   int status = NT_STATUS_OK;
@@ -612,7 +561,7 @@ uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
           NT_sendCommand(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_CONFIG_GET, id, lf_cfg_get_ir_bias(id - LINEFOLLOW_CFG_IR_BIAS_1));
           break;
         default:
-          DBG("linefollow:NT_ERROR_CMD_INVALID for NT_CMD_LINEFOLLOW_CONFIG_SET");
+          DBG("linefollow:NT_ERROR_CMD_INVALID for NT_CMD_LINEFOLLOW_CONFIG_GET");
           status = NT_ERROR_CMD_INVALID;
       }
       break;
@@ -633,10 +582,12 @@ uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
 
 void setup() {
   int scanOrder[IR_BIAS_NUM_SENSORS] = {IR1, IR2, IR3};
+#ifdef USE_ANALOG_LIB
   scanner.setScanOrder(IR_BIAS_NUM_SENSORS, scanOrder);
   scanner.beginScanning();
+#endif
   delay(1); // Wait for the first scans to occur.
-    
+
   pinMode(INFO_LED, OUTPUT);
   // C
   info_blink(1, 500, 100);
@@ -676,7 +627,7 @@ void setup() {
   /*
   for (int i = -255 ; i< 255; i += 5 ) {
      motor(i,-i);
-    delay(50); 
+    delay(50);
   }
   */
 

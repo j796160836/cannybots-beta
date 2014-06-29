@@ -7,7 +7,8 @@
 
 #define BLE_UUID                 "7e400001-b5a3-f393-e0a9-e50e24dcca9e"
 #define BLE_LOCALNAME            "Cannybots"
-#define BLE_ADVERTISEMENT_DATA   "CB_LFB_001"
+#define BLE_ADVERTISEMENT_DATA   "CB_LFB_001"  
+// Note: BLE_ADVERTISEMENT_DATA must be < 16 bytes.
 
 #define TOGGLE_MILLIS 2500
 
@@ -85,12 +86,14 @@ boolean volatile gzll_connected = false;
 
 
 // GZLL
+static unsigned long lastGZLLPacketTime = millis();
 void RFduinoGZLL_onReceive(device_t device, int rssi, char *data, int len)
 {
   gzll_connected = true;
+  lastGZLLPacketTime = millis();
   enqueue(data, len);
   // TODO: fake pairing. check the device is the same as before...
-
+  // TODO: timout connection and if no packet is receve > TIMOUT then go back to BLE/GZll flipping
   // MAYBE-TODO: check uart2ble here as Gazelle can only piggy back client device requests
   //RFduinoGZLL.sendToDevice(device, "OK");
 }
@@ -121,10 +124,15 @@ void  ble_rfduino_manageRadios() {
   static unsigned long lastTime = millis();
   unsigned long timeDelta = ( millis() - lastTime );
 
-  if (ble_connected)
+  /*
+  if ( (millis() - lastGZLLPacketTime ) > 60000 ) {
+      gzll_connected=false;
+  }
+  */
+
+  if (ble_connected || gzll_connected) {
     return;
-  if (gzll_connected)
-    return;
+  }
 
   if (timeDelta > TOGGLE_MILLIS) {
     state++;
@@ -138,6 +146,9 @@ void  ble_rfduino_manageRadios() {
     RFduinoBLE.customUUID = BLE_UUID;
     RFduinoBLE.deviceName = BLE_LOCALNAME;
     RFduinoBLE.advertisementData = BLE_ADVERTISEMENT_DATA;
+    //RFduinoBLE.advertisementInterval(millis);
+    
+    //RFduinoBLE.txPowerLevel(x); // x one of; -20, -16, -12, -8, -4, 0, +4
     RFduinoBLE.begin();
 
   } else if (2 == state  ) {
@@ -174,7 +185,8 @@ void process_ble2uart_q() {
 // Standard arduino entry points.
 
 void setup() {
-  Serial.begin(9600, RX_PIN, TX_PIN);        // can, but shouldn't, go higher than 9600 (RFduino limitation)
+  Serial.begin(9600, RX_PIN, TX_PIN);        // UART Baud is limited to 9600 when the BLE stack is on.
+
   NRF_WDT->CRV = 32768 * 2;   // Timeout period of 2 s
   NRF_WDT->TASKS_START = 1;   // start the watchdog 
 }
