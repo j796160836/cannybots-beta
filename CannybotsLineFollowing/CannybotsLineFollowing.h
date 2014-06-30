@@ -1,4 +1,19 @@
 
+#define MOTOR_MAX_SPEED 255
+
+#define IR_MAX 100
+#define WHITE_THRESHOLD 100
+
+
+
+#define DEBUG 1
+#define INFO_LED 13
+#ifdef DEBUG
+static char dbg_buffer[128];
+#define DBG_PRINTF(FMT, ...) snprintf(dbg_buffer, 128, FMT, __VA_ARGS__); Serial.println(dbg_buffer);
+#else
+#define DBG_PRINTF(...)
+#endif
 
 
 #define IR_BIAS_NUM_SENSORS 3
@@ -80,8 +95,4 @@
 #define LINEFOLLOW_CFG_IR_BIAS_10  15
 
 
-#define MOTOR_MAX_SPEED 255
-
-#define IR_MAX 100
-#define WHITE_THRESHOLD 100
 

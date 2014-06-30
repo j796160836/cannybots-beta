@@ -3,27 +3,10 @@
 // Line Following
 
 // TODO:
-
 // 1. connection status icon on app
 // 2. connection mangement screen
 // 3. cruise speed in EEPROM and iOS app (note : IR sensor bias in eeprom and in app has been done)
 // 4. current settings (e.g. cruise speed), not just EEPROM values, sent to app on connection
-
-
-
-#include "CannybotsLineFollowing.h"
-
-#define DEBUG 1
-#ifdef DEBUG
-
-static char dbg_buffer[128];
-#define DBG_PRINTF(FMT, ...) snprintf(dbg_buffer, 128, FMT, __VA_ARGS__); Serial.println(dbg_buffer);
-
-#else
-#define DBG_PRINTF(...)
-
-#endif
-
 
 
 #include <stdint.h>
@@ -37,6 +20,11 @@ static char dbg_buffer[128];
 #include <NTProtocol.h>
 #include <NTMessaging.h>
 
+#include "CannybotsLineFollowing.h"
+void lf_report_followingMode(bool isLineMode);
+
+
+
 #ifdef USE_ANALOG_LIB
 // see: https://github.com/merose/AnalogScanner
 #include <AnalogScanner.h>
@@ -46,11 +34,6 @@ AnalogScanner scanner;
 #define ANALOG_READ analogRead
 #endif
 
-
-void motor(int speedA, int speedB);
-void printvalues ();
-
-#define INFO_LED 13
 
 // PIN Assignments
 // IR sensor pins
@@ -72,10 +55,14 @@ bool ir1on = 0, ir2on = 0, ir3on = 0;
 
 int IRbias[IR_BIAS_NUM_SENSORS] = {0, 0, 0};
 
-volatile int speedA = 0;
-volatile int speedB = 0;
-volatile int manualA = 0;
-volatile int manualB = 0;
+int speedA = 0;
+int speedB = 0;
+int manualA = 0;
+int manualB = 0;
+
+int yAxisValue = 0;
+int xAxisValue = 0;
+
 
 int baseCruiseSpeed = 100;
 int cruiseSpeed = baseCruiseSpeed;
@@ -95,9 +82,33 @@ void read_ir_sensors() {
   IR3_val = constrain(ANALOG_READ(IR3) - IRbias[2], 0, IR_MAX); //right
 
   ir1on = IR1_val >= IR_MAX;
-  ir2on   = IR2_val >= IR_MAX;
-  ir3on   = IR3_val >= IR_MAX;
+  ir2on = IR2_val >= IR_MAX;
+  ir3on = IR3_val >= IR_MAX;
 }
+
+
+
+// motor controller function
+void motor(int _speedA, int _speedB)
+{
+   _speedA = constrain(_speedA, -255, 255);
+   _speedB = constrain(_speedB, -255, 255);
+  if (_speedA >= 0) {
+    analogWrite(pinA1, _speedA);
+    analogWrite(pinA2, 0);
+  } else {
+    analogWrite(pinA1, 0);
+    analogWrite(pinA2, abs(_speedA));
+  }
+  if (_speedB >= 0) {
+    analogWrite(pinB1, _speedB);
+    analogWrite(pinB2, 0);
+  } else {
+    analogWrite(pinB1, 0);
+    analogWrite(pinB2, abs(_speedB));
+  }
+}
+
 
 
 
@@ -120,7 +131,24 @@ int error_last = 0; // to calculate D_error = error - error_last
 int correction = 0; //error after PID filter
 
 
+
+void printvalues ()
+{
+  static unsigned long lastPrint = millis();
+  if ( millis() - lastPrint < 250 )  return;
+  lastPrint = millis();
+  DBG_PRINTF(    "%lu: IR(%u,%u,%u) Kpd(%d,%d) e(%d) PeDe(%d,%d) Sab(%d,%d) Mab(%d,%d), XY(%d,%d)", 
+    millis(), 
+    IR1_val, IR2_val, IR3_val, 
+    Kp, Kd, error, P_error, D_error, 
+    speedA, speedB, manualA, manualB, 
+    xAxisValue, yAxisValue
+    );
+}
+
+
 void lf_pid_setup() {
+
 }
 
 void lf_loop()
@@ -129,6 +157,7 @@ void lf_loop()
 
   isLineFollowingMode = IR2_val >= IR_MAX;              
   lf_report_followingMode(isLineFollowingMode);
+
 
   if (isLineFollowingMode) {
     // process IR readings via PID
@@ -141,46 +170,19 @@ void lf_loop()
     speedA = constrain(cruiseSpeed + correction, -200, 200);
     speedB = constrain(cruiseSpeed - correction, -200, 200);
   } else {
-    speedA = manualA;
-    speedB = manualB;
+    // in manual mode
+    if ((millis() - lastCommandTime) > 2000) {
+      // no command has been received in the last 2 seconds, err on the side of caution and stop!
+      speedA = speedB = 0;
+    } else {
+      speedA = manualA;
+      speedB = manualB;
+    }
   }
-
-
-  // watchdog to stop if in manual mode but no command has been received in the last 2 seconds.
-  if ( !isLineFollowingMode && ((millis() - lastCommandTime) > 2000)) {
-    speedA = speedB = 0;
-  }
-
   printvalues();
   motor(speedA, speedB);
 }
 
-
-// motor controller function
-void motor(int _speedA, int _speedB)
-{
-    _speedA = constrain(_speedA, -255, 255);
-    _speedB = constrain(_speedB, -255, 255);
-
-  //DBG_PRINTF("M(%d,%d)", speedA, speedB);
-  if (_speedA >= 0) {
-    analogWrite(pinA1, _speedA);
-    analogWrite(pinA2, 0);
-  } else {
-    analogWrite(pinA1, 0);
-    analogWrite(pinA2, abs(_speedA));
-  }
-
-  if (_speedB >= 0) {
-    analogWrite(pinB1, _speedB);
-    analogWrite(pinB2, 0);
-  } else {
-    analogWrite(pinB1, 0);
-    analogWrite(pinB2, abs(_speedB));
-  }
-
-
-}
 
 void halt_motors() {
   isLineFollowingMode = false;
@@ -199,16 +201,6 @@ void lf_pid_i(int16_t v) {
 }
 void lf_pid_d(int16_t v) {
   Kd = v;
-}
-
-
-
-void printvalues ()
-{
-  static unsigned long lastPrint = millis();
-  if ( millis() - lastPrint < 250 )  return;
-  lastPrint = millis();
-  DBG_PRINTF("%lu: IR(%u,%u,%u) Kpd(%d,%d) e(%d) PeDe(%d,%d) Sab(%d,%d) Mab(%d,%d)", millis(), IR1_val, IR2_val, IR3_val, Kp, Kd, error, P_error, D_error, speedA, speedB, manualA, manualB  );
 }
 
 #endif
@@ -243,20 +235,6 @@ void lf_right() {
 
 }
 
-void test_motor() {
-  digitalWrite(INFO_LED, HIGH);
-  motor(0, 128);
-  delay(250);
-  motor(128, 0);
-  delay(250);
-  motor(0, -128);
-  delay(250);
-  motor(-128, 0);
-  delay(250);
-  motor(0, 0);
-  digitalWrite(INFO_LED, LOW);
-}
-
 void info_blink(int count, int onPause, int offPause) {
   while (count--) {
     digitalWrite(INFO_LED, HIGH);
@@ -268,8 +246,6 @@ void info_blink(int count, int onPause, int offPause) {
 
 void lf_switch() {
   DBG("Switch");
-  test_motor();
-
 }
 
 void lf_speed(int16_t speed) {
@@ -278,44 +254,35 @@ void lf_speed(int16_t speed) {
   manualA = speed;
 }
 
-void lf_motor_speed(uint8_t motorNum, int16_t speed) {
-  static int yAxisValue = 0;
-  static int xAxisValue = 0;
+void calculateMotorSpeedFromJoystick(int xAxisValue, int yAxisValue, int* motor1, int* motor2) {
+       // direction (X axis)  anf throttle (Y axis)
+      int throttle  = yAxisValue;
+      int direction = yAxisValue>0?-xAxisValue:xAxisValue  ;
 
-  switch (motorNum) {
-    case 1:
-      manualB = speed;
-      break;
-    case 2:
-      manualA = speed;
-      break;
-    case 3:
-      //joy X axis vale  = Direction
-      xAxisValue = speed;
-      break;
-    case 4:
-      //joy y axis vale = Throttle
-      yAxisValue = speed;
-      break;
-    default:
-      Serial.println("unknown motor");
-  }
-  if ((motorNum == 3) || (motorNum == 4) ) {
-    if (isLineFollowingMode) {
-      manualA = yAxisValue > 0 ? yAxisValue : 0;
-    } else if ( (0 == xAxisValue) && (yAxisValue == 0) ) {
-      manualA = manualB = 0;
-      // immediate stop
-      motor(0, 0);
-    } else {
+      // perfomr some remapping...
 
-      // direction (X axis)  anf throttle (Y axis)
-      int throttle = yAxisValue;
-      int direction = -xAxisValue;
+      
+      // dead zone the xaxis
+      if ( abs(xAxisValue) < 50 ) {
+        direction = 0;
+      } else {
+        direction = map (direction, -255, 255, 270, 270+180);
+        direction = sin( radians(direction) ) * MOTOR_MAX_SPEED;
+      }
 
-      // perfomr some remapping)
-      if ( abs(xAxisValue) < 100 )
-        xAxisValue = 0;
+      // create a wider azimuth between forward and back
+      if ( abs(yAxisValue) < 25 ) {
+        throttle = 0; 
+      } else if ( yAxisValue<-25 && yAxisValue > -50 ) {
+        throttle = -50;
+      } else if ( yAxisValue>25 && yAxisValue < 50 ) {
+        throttle = 50;
+      } else {
+        throttle = map (throttle, -255, 255, 270, 270+180);
+        throttle = sin( radians(throttle) ) * MOTOR_MAX_SPEED;
+      }
+      
+      // TODO: at high speed dampen the direction?
 
       int leftMotor, leftMotorScaled = 0; //left Motor helper variables
       float leftMotorScale = 0;
@@ -333,10 +300,10 @@ void lf_motor_speed(uint8_t motorNum, int16_t speed) {
       //print the initial mix results
 
       //calculate the scale of the results in comparision base 8 bit PWM resolution
-      leftMotorScale =  leftMotor / 255.0;
-      leftMotorScale = abs(leftMotorScale);
+      leftMotorScale =   leftMotor / 255.0;
+      leftMotorScale =   abs(leftMotorScale);
       rightMotorScale =  rightMotor / 255.0;
-      rightMotorScale = abs(rightMotorScale);
+      rightMotorScale =  abs(rightMotorScale);
 
 
       //choose the max scale value if it is above 1
@@ -346,13 +313,41 @@ void lf_motor_speed(uint8_t motorNum, int16_t speed) {
       //and apply it to the mixed values
       leftMotorScaled = constrain(leftMotor / maxMotorScale, -255, 255);
       rightMotorScaled = constrain(rightMotor / maxMotorScale, -255, 255);
-      manualA = leftMotorScaled;
-      manualB = rightMotorScaled;
-      motor(manualA, manualB);
+      *motor1 = leftMotorScaled;
+      *motor2 = rightMotorScaled; 
+}
 
+
+void lf_motor_speed(uint8_t motorNum, int16_t speed) {
+
+  switch (motorNum) {
+    case 1:
+      manualB = speed;
+      break;
+    case 2:
+      manualA = speed;
+      break;
+    case 3:
+      //joy X axis vale  = Direction  -255 to 255
+      xAxisValue = speed;
+      break;
+    case 4:
+      //joy y axis vale = Throttle    -255 to 255
+      yAxisValue = speed;
+      break;
+    default:
+      Serial.println("unknown motor");
+  }
+  if ((motorNum == 3) || (motorNum == 4) ) {
+    if (isLineFollowingMode) {
+      manualA = yAxisValue > 0 ? yAxisValue : 0;
+    } else if ( (0 == xAxisValue) && (yAxisValue == 0) ) {
+      manualA = manualB = 0;
+      motor(0, 0);                  // immediate stop
+    } else {
+      calculateMotorSpeedFromJoystick(xAxisValue, yAxisValue, &manualA, &manualB);
     }
   }
-  DBG_PRINTF("Ms(%d,%d)", manualA, manualB);
 }
 
 void lf_rgb_colour(uint8_t v) {
@@ -581,12 +576,12 @@ uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
 
 
 void setup() {
-  int scanOrder[IR_BIAS_NUM_SENSORS] = {IR1, IR2, IR3};
 #ifdef USE_ANALOG_LIB
+  int scanOrder[IR_BIAS_NUM_SENSORS] = {IR1, IR2, IR3};
   scanner.setScanOrder(IR_BIAS_NUM_SENSORS, scanOrder);
   scanner.beginScanning();
-#endif
   delay(1); // Wait for the first scans to occur.
+#endif
 
   pinMode(INFO_LED, OUTPUT);
   // C
@@ -617,31 +612,18 @@ void setup() {
   lf_rgb_brightness(lf_cfg_get_led_brightness());
   int i;
   for (i = 0; i < IR_BIAS_NUM_SENSORS; i++);
-  lf_ir_bias(i, lf_cfg_get_ir_bias(i));
+    lf_ir_bias(i, lf_cfg_get_ir_bias(i));
 
   pinMode(pinA1, OUTPUT);
   pinMode(pinA2, OUTPUT);
   pinMode(pinB1, OUTPUT);
   pinMode(pinB2, OUTPUT);
-
-  /*
-  for (int i = -255 ; i< 255; i += 5 ) {
-     motor(i,-i);
-    delay(50);
-  }
-  */
-
-  lf_pid_setup();
-
-  //test_motor();
-  // TODO:  NT to support callback to linefollow_processCommand() above.
 }
 
 
 
 void loop() {
   NT_UART_parseIntoCallback(Serial1, NT_message_enqueueInboundMessage);
-
   NT_processOutboundMessageQueue();
   lf_loop();
   NT_processInboundMessageQueue();
@@ -650,18 +632,13 @@ void loop() {
 
 
 
-
-
-
-
-
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 #ifdef PID_METHOD2
 double Setpoint, Input, Output;

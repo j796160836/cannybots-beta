@@ -7,8 +7,10 @@
 
 #define BLE_UUID                 "7e400001-b5a3-f393-e0a9-e50e24dcca9e"
 #define BLE_LOCALNAME            "Cannybots"
-#define BLE_ADVERTISEMENT_DATA   "CB_LFB_001"  
+#define BLE_ADVERTISEMENT_DATA   "CB_LFB_001"   
 // Note: BLE_ADVERTISEMENT_DATA must be < 16 bytes.
+
+// TODO: append devideID to advertising data
 
 #define TOGGLE_MILLIS 2500
 

@@ -1,19 +1,21 @@
 // Platform include
 #include <Cannybots.h>
 
-// This enum  represents the ID's for variables that need to be 
+// These represents the ID's for variables that need to be 
 // handled (passed between client and bot) by the Cannybots library
-enum RacerCommands { 
-  RACER_KP,
-  RACER_KI,
-  RACER_KD,
-  RACER_SET_SPEED,
-  RACER_IRBIAS,
-  RACER_BASECRUISESPEED,
-  RACER_CURRENTCRUISESPEED,
-  RACER_LINEFOLLOWING_MODE,
-  RACER_MAX_COMMAND_ID
-};
+CB_ATTRIBUTE_ID(RACER_KP, 1, "Kp");
+CB_ATTRIBUTE_ID(RACER_KI, 2, "Ki");
+CB_ATTRIBUTE_ID(RACER_KD, 3, "Kd");
+CB_ATTRIBUTE_ID(RACER_IRBIAS, 4, "IRbias");
+CB_ATTRIBUTE_ID(RACER_BASECRUISESPEED, 5, "baseCruiseSpeed");
+CB_ATTRIBUTE_ID(RACER_CURRENTCRUISESPEED, 6, "currentCruiseSpeed");
+CB_ATTRIBUTE_ID(RACER_LINEFOLLOWING_MODE, 7, "isLineFollowingMode");
+
+// may want a _METHOD_ID instead?
+CB_ATTRIBUTE_ID(RACER_SET_SPEED, 8, "setMotorSpeeds");
+
+// perhaps instead use a type-safe enum that is supported by the compiler's C++ lang spec, or see http://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Type_Safe_Enum
+
 // other ID's for variables/settings like DeviceID, serial number, battery power, 
 // radio power & signal strength, would be pre-defined by the Cannybots library so 
 // it was commonly known across all apps & bots.
@@ -27,22 +29,24 @@ enum RacerCommands {
 int  Kp, Ki, Kd;
 bool isLineFollowingMode;
 int  speeds[NUM_MOTORS];
-int  IRbias[NUM_IR_SENSORS];
+int16_t  IRbias[NUM_IR_SENSORS];
 int  baseCruiseSpeed, currentCruiseSpeed;
 
 
 // The Cannybots object which handles bi-directional data passing between the Sketch and the 'client'
-Cannybots cb();
+Cannybots cb;
 
 // The Cannybots setup that allows variable to be set and read remotely.
 void cannybots_setup() {
   
-  cb.setEeprom(F("CBLF"), 128);  // optional
+  cb.setConfigStorage("CBLF", 64);
   // the paramters are an EEPROM magic marker and an EEPROM offset
-  // The marker is checked to see if the app EEPROM config already exists; it will be set to defaults if not
+  // The marker is checked to see if the app EEPROM config already exists; values will be set to defaults if not
   // The second parameter is the start offset into EEPROM when the config should be looked for first
-  // An EEPROM search for the magic marker maybe performed if not found at that specifc location)
   // if the app doesnt need EEPROM settings dont call this function
+
+  // by default when variables are updated and they are stored in EEPROM then a call to
+  // cb.saveEEPROM() needs to be made excplicitly (save on EEPROM/Flash writes)
 
   // Step 1:  
   // Registar simple variables that can be set and read remotely by the client
@@ -50,15 +54,16 @@ void cannybots_setup() {
   // Step 1.1: 
   // register variables that can be saved to EEPROM
   // Function parameters are : enum ID, variable address, is saved in EEPROM?, default if EEPROM not setup.
-  cb.registerVariable_int16(RACER_KP, &Kp, true, 0); 
-  cb.registerVariable_int16(RACER_KD, &Kd, true, 0); 
-  cb.registerVariable_int16(RACER_BASECRUISESPEED, &baseCruiseSpeed, true, 0); 
-  cb.registerVariable_bool(RACER_LINEFOLLOWING_MODE, &isLineFollowingMode, true, true); 
+  cb.registerVariable(RACER_KP, &Kp, true, 0); 
+  cb.registerVariable(RACER_KD, &Kd, true, 0); 
+  cb.registerVariable(RACER_BASECRUISESPEED, &baseCruiseSpeed, true, 0); 
+  cb.registerVariable(RACER_LINEFOLLOWING_MODE, &isLineFollowingMode, true, true); 
   
   // Step 1.2: 
   // Register variables that don't need to be saved to EEPROM
   
-  cb.registerVariable_int16(RACER_CURRENTCRUISESPEED, &currentCruiseSpeed); 
+  // just make all variable scriptable
+  //cb.registerVariable(RACER_CURRENTCRUISESPEED, &currentCruiseSpeed); 
   
   
   // Step 2
@@ -66,7 +71,7 @@ void cannybots_setup() {
   
   // Step 2.1
   // parameters are : ID, array address, array length
-  cb.registerArray_int16(RACER_IRBIAS, &IRbias, NUM_IR_SENSORS); 
+  cb.registerArray(RACER_IRBIAS, IRbias, NUM_IR_SENSORS); 
   
   
   // Step 3
@@ -75,7 +80,7 @@ void cannybots_setup() {
   // Function parameters are : enum ID, variable address, update method which is one of:
   // CB_PUB_UPDATE_ONCHANGE - only send an update when the value changes
   // CB_PUB_UPDATE_ALWAYS   - send an update each time cb.update() is called (e.g. once per loop() )
-  cb.registerPublisher(RACER_LINEFOLLOWING_MODE, isLineFollowingMode, CB_PUB_UPDATE_ONCHANGE);
+  cb.registerPublisher(RACER_LINEFOLLOWING_MODE, &isLineFollowingMode, Cannybots::PUBLISH_UPDATE_ONCHANGE);
   // maybe todo, sub modifiers with optional values, e.g:
   // registerPublisher(..., CB_PUB_UPDATE_DEBOUNCED, CB_PUB_UPDATE_LESSTHAN, 100);
   // registerPublisher(..., CB_PUB_UPDATE_DEBOUNCED, CB_PUB_UPDATE_GREATERTHAN, 200);
@@ -85,7 +90,7 @@ void cannybots_setup() {
   
   // Step 4 
   // Register functions that can be called by the client
-  cb.registerHandler_int16_x2(RACER_SET_SPEED, lf_setSpeed);
+  cb.registerHandler(RACER_SET_SPEED, lf_setMotorSpeeds);
   
   
   // Step 5:
@@ -98,22 +103,23 @@ void cannybots_setup() {
   // Configure the client side custom GUI tab
   // avaialbe GUI elemetns are: buttons, level meters, x & y sliders (get&set), joystick, ...
   // x, y, button lable, function to call in sketch when pressed
-  cb.gui_addButton(50,100, F("Stop"), lf_gui_stopPressed);
-  cb.gui_addButton(250,100, F("Go"), lf_gui_goPressed);
+  cb.gui_addButton(50,100, "Stop", lf_gui_stopPressed);
+  cb.gui_addButton(250,100, "Go", lf_gui_goPressed);
   // x, y,variable to send to client, var range min value, var range max value
-  cb.gui_addLevelMeter(100,200, &currentCruiseSpeed, 0, 255);
+  cb.gui_addLevelMeter(100,200, "Speed", &currentCruiseSpeed, 0, 255);
   
   
   if (!cb.validate()) {
     // error in setup, e.g. duplicate ID's used
-    Serial.println(cb.lastError());
+    Serial.println(cb.getLastError());
     // Flash some lights, ring some alarms :)
   }
   
   // optionally: cb.debug(true, Serial);
+  cb.begin();
 }
 
-void lf_setSpeed(int speedA, int speedB) {
+void lf_setMotorSpeeds(int speedA, int speedB) {
    // Do motor speed settings
 }
 
@@ -124,6 +130,11 @@ void setup() {
   
   // LINE FOLLOWING SETUP CODE GOES HERE... (e.g. set output pins)
 
+}
+void lf_gui_goPressed() {
+}
+
+void lf_gui_stopPressed() {
 }
 
 void loop() {
