@@ -12,7 +12,11 @@
 #import "UARTPeripheral.h"
 #import "TheBrain.h"
 
+#import "CannybotsController.h"
+
+
 #define BLE_CONN_RETRY_DELAY 1.0f
+
 
 
 @interface BrainSpeakBLE : NSObject <UARTPeripheralDelegate, CBCentralManagerDelegate, NTSender>
@@ -28,6 +32,7 @@ typedef enum {
 @property (nonatomic, assign) ConnectionStatus                connectionStatus;
 
 @property (nonatomic, retain) id<NTReceiver>                  delegate;
+@property (nonatomic, retain) id<CannybotsReceiver>           cbdelegate;
 
 
 

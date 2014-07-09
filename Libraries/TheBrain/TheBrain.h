@@ -99,6 +99,7 @@ typedef struct lfconfig_t {
 - (void) lf_switchNextJunction;
 - (void) lf_speed:(int16_t)speed;
 - (void) lf_setMotorSpeed:(int16_t)speed forId:(uint8_t)sid;
+- (void) lf_setMotorSpeeds:(int16_t)speed1 forId1:(uint8_t)sid1 speed2:(int16_t)speed2 forId2:(uint8_t)sid2;
 
 @end
     

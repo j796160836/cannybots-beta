@@ -270,6 +270,7 @@
 // called by the UART
 - (void) didReceiveData:(NSData*)newData{
     [self.delegate didReceiveData:newData];
+    [self.cbdelegate didReceiveData:newData];
     
 }
 

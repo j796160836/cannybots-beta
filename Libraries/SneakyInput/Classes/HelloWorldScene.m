@@ -19,6 +19,9 @@
 
 #import "TheBrain.h"
 
+#import "CannybotsController.h"
+#import "CannybotsRacer.h"
+
 @implementation HelloWorld
 
 + (HelloWorld *)scene;
@@ -43,26 +46,28 @@
 
         
         leftJoy.thumbSprite =  [CCSprite spriteWithImageNamed:@"knob.png"];
-		leftJoy.joystick = [[SneakyJoystick alloc] initWithRect:CGRectMake(0,0,180,180)];
+        
+		leftJoy.joystick = [[SneakyJoystick alloc] initWithRect:leftJoy.backgroundSprite.boundingBox];
 		leftJoystick = leftJoy.joystick;
 		[self addChild:leftJoy];
 		
         
-        
+  /*
 		SneakyButtonSkinnedBase *rightBut = [[SneakyButtonSkinnedBase alloc] init];
 		rightBut.position = ccp(256,32*5);
-        rightBut.defaultSprite = [ColoredCircleSprite circleWithColor:[CCColor colorWithRed:0.5 green:1 blue:0.5 alpha:0.5f] radius:32];
-        rightBut.activatedSprite = [ColoredCircleSprite circleWithColor:[CCColor colorWithRed:1 green:0 blue:0 alpha:1] radius:32];
-        rightBut.pressSprite = [ColoredCircleSprite circleWithColor:[CCColor colorWithRed:1 green:0 blue:0 alpha:1] radius:32];
-		rightBut.button = [[SneakyButton alloc] initWithRect:CGRectMake(0, 0, 64, 64)];
+//        rightBut.defaultSprite = [ColoredCircleSprite circleWithColor:[CCColor colorWithRed:0.5 green:1 blue:0.5 alpha:0.5f] radius:32];
+  //      rightBut.activatedSprite = [ColoredCircleSprite circleWithColor:[CCColor colorWithRed:1 green:0 blue:0 alpha:1] radius:32];
+    //    rightBut.pressSprite = [ColoredCircleSprite circleWithColor:[CCColor colorWithRed:1 green:0 blue:0 alpha:1] radius:32];
+//		rightBut.button = [[SneakyButton alloc] initWithRect:CGRectMake(0, 0, 64, 64)];
 		rightButton = rightBut.button;
 		rightButton.isToggleable = YES;
         //rightButton.isHoldable = YES;
 		//[self addChild:rightBut];
-		
+	*/
+        
 		[[CCDirector sharedDirector] setAnimationInterval:1.0f/60.0f];
 		
-        [self schedule:@selector(tick:) interval:1.0f/25.0f];
+        [self schedule:@selector(tick:) interval:1.0f/15.0f];
         
 	}
 	return self;
@@ -77,12 +82,24 @@
     int throttle = MOTOR_MAX_SPEED*leftJoystick.velocity.y;
 
     // deadzone check
-    dir      =      abs(dir) < 25  ? 0 : dir;
-    throttle = abs(throttle) < 25  ? 0 : throttle;
+    dir      =      abs(dir) < 10  ? 0 : dir;
+    throttle = abs(throttle) < 10  ? 0 : throttle;
     
-    if ( (abs(lastDir-dir) > 5) || (abs(lastThrottle-throttle)>5) ){
-        [tb lf_setMotorSpeed:dir forId:3];
-        [tb lf_setMotorSpeed:throttle forId:4];
+    CannybotsController* cb = [CannybotsController sharedInstance];
+    
+    if ( (abs(lastDir-dir) > 3) || (abs(lastThrottle-throttle)>3) ){
+        //[tb lf_setMotorSpeeds:dir forId1:3 speed2:throttle forId2:4];
+        [cb callMethod:RACER_JOYAXIS p1:dir p2:throttle p3:0];
+
+        if ( (dir ==0) && throttle==0) {
+            
+            [self performBlock:^{
+                //[tb lf_setMotorSpeeds:0 forId1:3 speed2:0 forId2:4];
+                [cb callMethod:RACER_JOYAXIS p1:0 p2:0 p3:0];
+
+            } afterDelay: .2];
+
+        }
         lastDir = dir;
         lastThrottle= throttle;
     }

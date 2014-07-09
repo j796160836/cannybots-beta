@@ -420,4 +420,19 @@ void dumpCmd(const NT_cmd cmd) {
     [self sendData:data];
 }
 
+- (void) lf_setMotorSpeeds:(int16_t)speed1 forId1:(uint8_t)sid1 speed2:(int16_t)speed2 forId2:(uint8_t)sid2 {
+    
+    uint8_t msg[NT_MSG_SIZE] = {
+        NT_DEFAULT_MSG_HEADER(),
+        NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_MOTOR_SPEED, sid1, speed1),
+        NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_MOTOR_SPEED, sid2, speed2),
+        NT_CREATE_CMD_NOP,
+        NT_CREATE_CMD_NOP
+    };
+    NT_MSG_CALC_CRC(msg);
+    
+    NSData *data = [NSData dataWithBytesNoCopy:(void*)msg length:NT_MSG_SIZE freeWhenDone:NO];
+    [self sendData:data];
+}
+
 @end

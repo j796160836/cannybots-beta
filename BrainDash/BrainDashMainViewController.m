@@ -75,6 +75,7 @@
     
     HelloWorld* scene = [HelloWorld scene];
     // Run whatever scene we'd like to run here.
+    
     if(director.runningScene)
         [director replaceScene:scene];
     else
@@ -86,6 +87,13 @@
     
 }
 
+- (void) reloadScene {
+    
+    CCScene *currentScene = [CCDirector sharedDirector].runningScene;
+    CCScene *newScene = [[[currentScene class] alloc] init];
+    [[CCDirector sharedDirector] replaceScene:newScene];
+    
+}
 
 
 
@@ -235,6 +243,7 @@
 
 - (void) viewDidAppear:(BOOL)animated {
     theBrain.appDelegate = self;
+    [self reloadScene];
 }
 
 - (void) viewWillDisappear:(BOOL)animated {

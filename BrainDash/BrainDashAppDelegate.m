@@ -19,7 +19,7 @@
     TheBrain*       theBrain = [TheBrain sharedInstance];
     BrainSpeakBLE*  bsle     = [BrainSpeakBLE sharedInstance];
     theBrain.writer=bsle;
-    bsle.delegate = theBrain;
+    //bsle.delegate = theBrain;
     
     return YES;
 }
