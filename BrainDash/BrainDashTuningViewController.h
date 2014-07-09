@@ -7,9 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "TheBrain.h"
 
-@interface BrainDashTuningViewController : UIViewController <NTCommandReceiver, UITextFieldDelegate>
+@interface BrainDashTuningViewController : UIViewController <UITextFieldDelegate>
 @property (weak, nonatomic) IBOutlet UITextField *pTextField;
 @property (weak, nonatomic) IBOutlet UITextField *iTextField;
 @property (weak, nonatomic) IBOutlet UITextField *dTExtField;

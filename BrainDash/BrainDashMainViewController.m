@@ -7,7 +7,6 @@
 //
 
 #import "BrainDashMainViewController.h"
-//#import "CannybotsLineFollowing.h"
 
 #import <CannybotsController.h>
 #import "CannybotsRacer.h"
@@ -109,10 +108,11 @@
 
 #pragma mark - Flipside View
 
-- (void)flipsideViewControllerDidFinish:(BrainDashFlipsideViewController *)controller
+/*- (void)flipsideViewControllerDidFinish:(BrainDashFlipsideViewController *)controller
 {
     [self dismissViewControllerAnimated:YES completion:nil];
 }
+ */
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
@@ -195,15 +195,10 @@
     _statusLabel.text = resultString;
     
     
-    TheBrain* tb = [TheBrain sharedInstance];
     
-    uint16_t vel =200;
-    uint16_t pos =200 + RADIANS_TO_DEGREES(radians)*2;
+    //uint16_t vel =200;
+    //uint16_t pos =200 + RADIANS_TO_DEGREES(radians)*2;
     
-    [tb setEndlessTurnMode:NO forId:2];
-    [tb setServoVelocity:vel forId:2];
-    [tb setServoPosition:pos forId:2];
-
 }
 
 - (IBAction)panDetected:(UIGestureRecognizer *)sender {

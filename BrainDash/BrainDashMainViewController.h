@@ -7,11 +7,10 @@
 //
 
 
-#import "TheBrain.h"
 #import "HelloWorldScene.h"
 #import <cocos2d.h>
 
-@interface BrainDashMainViewController : UIViewController <BrainDashFlipsideViewControllerDelegate, CCDirectorDelegate>
+@interface BrainDashMainViewController : UIViewController <CCDirectorDelegate>
 
 @property (weak, nonatomic) IBOutlet UIView *joypadView;
 @property (weak, nonatomic) IBOutlet UIView *gestureView;

@@ -8,11 +8,8 @@
 
 #import "BrainDashTuningViewController.h"
 
-#import "CannybotsLineFollowing.h"
 
 @interface BrainDashTuningViewController () {
-    TheBrain            *theBrain;
-
 }
 
 @property (nonatomic, assign) id currentResponder;
@@ -37,7 +34,6 @@
     [singleTap setNumberOfTapsRequired:1];
     [singleTap setNumberOfTouchesRequired:1];
     [self.view addGestureRecognizer:singleTap];
-    theBrain = [TheBrain sharedInstance];
     [self revertPressed:nil];
 
 }
@@ -60,12 +56,9 @@
 */
 
 - (void) viewDidAppear:(BOOL)animated {
-    theBrain.appDelegate = self;
 }
 
 - (void) viewWillDisappear:(BOOL)animated {
-    theBrain.appDelegate = nil;
-
 }
 
 -(IBAction)textFieldReturn:(id)sender
@@ -140,30 +133,12 @@
 
 - (IBAction)savePressed:(id)sender {
     
-    lfconfig cfg;
-    
-    cfg.deviceId = [[_deviceIdTextField text] intValue];
-    cfg.p = [[_pTextField text] intValue];
-    cfg.i = [[_iTextField text] intValue];
-    cfg.d = [[_dTExtField text] intValue];
-    cfg.rgbCol = _ledColourSegment.selectedSegmentIndex;
-    cfg.rgbBrightness = [_ledBrightnessTextField.text intValue];
-    cfg.IRBias[0] = [_IRBias1TextField.text intValue];
-    cfg.IRBias[1] = [_IRBias2TextField.text intValue];
-    cfg.IRBias[2] = [_IRBias3TextField.text intValue];
-    
-    [theBrain lf_cfg_write_config:cfg];
-    
-   
 }
 - (IBAction)revertPressed:(id)sender {
-    [theBrain lf_cfg_get_config];
-
 }
 
 - (void) didReceiveCommand:(uint8_t)cmd forId:(uint8_t)_id withArg:(int16_t)arg1 {
-    
-    NSLog(@"CMD=%d, id=%d, arg=%d", cmd, _id, arg1);
+/*
     if (NT_CMD_LINEFOLLOW_CONFIG_GET == cmd) {
         if (LINEFOLLOW_CFG_PID_P == _id){
             _pTextField.text = [NSString stringWithFormat:@"%d", arg1];
@@ -197,6 +172,7 @@
             NSLog(@"WARNING: unrecognised CFG value: %d",_id);
         }
     }
+ */
 }
 
 

@@ -10,7 +10,6 @@
 #import <Foundation/Foundation.h>
 #import <CoreBluetooth/CBPeripheralManager.h>
 #import "UARTPeripheral.h"
-#import "TheBrain.h"
 
 #import "CannybotsController.h"
 
@@ -19,7 +18,7 @@
 
 
 
-@interface BrainSpeakBLE : NSObject <UARTPeripheralDelegate, CBCentralManagerDelegate, NTSender>
+@interface BrainSpeakBLE : NSObject <UARTPeripheralDelegate, CBCentralManagerDelegate>
 
 
 typedef enum {
@@ -31,10 +30,10 @@ typedef enum {
 
 @property (nonatomic, assign) ConnectionStatus                connectionStatus;
 
-@property (nonatomic, retain) id<NTReceiver>                  delegate;
 @property (nonatomic, retain) id<CannybotsReceiver>           cbdelegate;
 
 
+- (void)sendData:(NSData*)newData;
 
 + (id)sharedInstance;
 

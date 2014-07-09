@@ -17,8 +17,6 @@
 #import "NSObject+performBlockAfterDelay.h"
 
 
-#import "TheBrain.h"
-
 #import "CannybotsController.h"
 #import "CannybotsRacer.h"
 
@@ -75,7 +73,6 @@
 }
 
 -(void)tick:(float)delta {
-    TheBrain* tb = [TheBrain sharedInstance];
     static int lastDir = 0;
     static int lastThrottle= 0;
     int dir      = MOTOR_MAX_SPEED*leftJoystick.velocity.x;

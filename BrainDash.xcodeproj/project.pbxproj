@@ -9,16 +9,11 @@
 /* Begin PBXBuildFile section */
 		B01EEBDF1948F94F00E6D3A4 /* Speed High Rot.png in Resources */ = {isa = PBXBuildFile; fileRef = B01EEBDD1948F94F00E6D3A4 /* Speed High Rot.png */; };
 		B01EEBE01948F94F00E6D3A4 /* Speed Low Rot.png in Resources */ = {isa = PBXBuildFile; fileRef = B01EEBDE1948F94F00E6D3A4 /* Speed Low Rot.png */; };
-		B076061319541E950094046F /* NTBLE.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B076060B19541E950094046F /* NTBLE.cpp */; };
-		B076061419541E950094046F /* NTMessaging.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B076060D19541E950094046F /* NTMessaging.cpp */; };
-		B076061519541E950094046F /* NTProtocol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B076060F19541E950094046F /* NTProtocol.cpp */; };
-		B076061619541E950094046F /* NTUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B076061119541E950094046F /* NTUtils.cpp */; };
 		B0B067BD196D542B00ABC209 /* CannybotsController.mm in Sources */ = {isa = PBXBuildFile; fileRef = B0B067BC196D542B00ABC209 /* CannybotsController.mm */; };
 		B0BE4123196093E2003F530B /* Cannybots.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B0BE4121196093E2003F530B /* Cannybots.cpp */; };
 		B0C87347196742D600238594 /* Clock.png in Resources */ = {isa = PBXBuildFile; fileRef = B0C87346196742D600238594 /* Clock.png */; };
 		B0C8734E19674B8800238594 /* HighScores.m in Sources */ = {isa = PBXBuildFile; fileRef = B0C8734B19674B8800238594 /* HighScores.m */; };
 		B0C8734F19674B8800238594 /* HighScoresViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B0C8734D19674B8800238594 /* HighScoresViewController.m */; };
-		B916F51F190506920057388D /* TheBriain.m in Sources */ = {isa = PBXBuildFile; fileRef = B916F51E190506920057388D /* TheBriain.m */; };
 		B916F522190529B40057388D /* BrainSpeakBLE.m in Sources */ = {isa = PBXBuildFile; fileRef = B916F521190529B40057388D /* BrainSpeakBLE.m */; };
 		B92C59DE18FEC8FE005EC882 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59DD18FEC8FE005EC882 /* Foundation.framework */; };
 		B92C59E018FEC8FE005EC882 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59DF18FEC8FE005EC882 /* CoreGraphics.framework */; };
@@ -114,14 +109,6 @@
 		B01EEBDD1948F94F00E6D3A4 /* Speed High Rot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Speed High Rot.png"; sourceTree = "<group>"; };
 		B01EEBDE1948F94F00E6D3A4 /* Speed Low Rot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Speed Low Rot.png"; sourceTree = "<group>"; };
 		B02B512C196C62A2006EEC2B /* CannybotsRacer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CannybotsRacer.h; path = ../../../avr/CannybotsRacer/CannybotsRacer.h; sourceTree = "<group>"; };
-		B076060B19541E950094046F /* NTBLE.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NTBLE.cpp; sourceTree = "<group>"; };
-		B076060C19541E950094046F /* NTBLE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NTBLE.h; sourceTree = "<group>"; };
-		B076060D19541E950094046F /* NTMessaging.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NTMessaging.cpp; sourceTree = "<group>"; };
-		B076060E19541E950094046F /* NTMessaging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NTMessaging.h; sourceTree = "<group>"; };
-		B076060F19541E950094046F /* NTProtocol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NTProtocol.cpp; sourceTree = "<group>"; };
-		B076061019541E950094046F /* NTProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NTProtocol.h; sourceTree = "<group>"; };
-		B076061119541E950094046F /* NTUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NTUtils.cpp; sourceTree = "<group>"; };
-		B076061219541E950094046F /* NTUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NTUtils.h; sourceTree = "<group>"; };
 		B076061819541F680094046F /* CannybotsLineFollowing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CannybotsLineFollowing.h; sourceTree = "<group>"; };
 		B0B067BC196D542B00ABC209 /* CannybotsController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CannybotsController.mm; sourceTree = "<group>"; };
 		B0B067BF196D559C00ABC209 /* CannybotsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CannybotsController.h; sourceTree = "<group>"; };
@@ -134,8 +121,6 @@
 		B0C8734C19674B8800238594 /* HighScoresViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HighScoresViewController.h; sourceTree = "<group>"; };
 		B0C8734D19674B8800238594 /* HighScoresViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HighScoresViewController.m; sourceTree = "<group>"; };
 		B0DE19F819635207005B5821 /* SimpleFIFO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SimpleFIFO.h; path = ../../../avr/libraries/SimpleFIFO/SimpleFIFO.h; sourceTree = "<group>"; };
-		B916F51D190506920057388D /* TheBrain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TheBrain.h; sourceTree = "<group>"; };
-		B916F51E190506920057388D /* TheBriain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TheBriain.m; sourceTree = "<group>"; };
 		B916F520190529B40057388D /* BrainSpeakBLE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrainSpeakBLE.h; sourceTree = "<group>"; };
 		B916F521190529B40057388D /* BrainSpeakBLE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrainSpeakBLE.m; sourceTree = "<group>"; };
 		B92AB26B19055D0600A9556D /* libObjectiveChipmunk-iPhone.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libObjectiveChipmunk-iPhone.a"; path = "Libraries/cocos2d-iphone/build/Debug-iphoneos/libObjectiveChipmunk-iPhone.a"; sourceTree = "<group>"; };
@@ -251,22 +236,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		B076060A19541E950094046F /* NTProtocol */ = {
-			isa = PBXGroup;
-			children = (
-				B076060B19541E950094046F /* NTBLE.cpp */,
-				B076060C19541E950094046F /* NTBLE.h */,
-				B076060D19541E950094046F /* NTMessaging.cpp */,
-				B076060E19541E950094046F /* NTMessaging.h */,
-				B076060F19541E950094046F /* NTProtocol.cpp */,
-				B076061019541E950094046F /* NTProtocol.h */,
-				B076061119541E950094046F /* NTUtils.cpp */,
-				B076061219541E950094046F /* NTUtils.h */,
-			);
-			name = NTProtocol;
-			path = ../../../../../../Documents/Arduino/libraries/NTProtocol;
-			sourceTree = "<group>";
-		};
 		B076061719541F680094046F /* CannybotsLineFollowing */ = {
 			isa = PBXGroup;
 			children = (
@@ -304,8 +273,6 @@
 		B916F51C190506920057388D /* TheBrain */ = {
 			isa = PBXGroup;
 			children = (
-				B916F51D190506920057388D /* TheBrain.h */,
-				B916F51E190506920057388D /* TheBriain.m */,
 				B916F520190529B40057388D /* BrainSpeakBLE.h */,
 				B916F521190529B40057388D /* BrainSpeakBLE.m */,
 			);
@@ -321,7 +288,6 @@
 				B0DE19F819635207005B5821 /* SimpleFIFO.h */,
 				B0BE4120196093E2003F530B /* Cannybots */,
 				B076061719541F680094046F /* CannybotsLineFollowing */,
-				B076060A19541E950094046F /* NTProtocol */,
 				B9AD5E5C193EF58A00BC9631 /* graphics */,
 				B9AD5E1D193E64C800BC9631 /* icons */,
 				B9F68B3419055C9F00F6654D /* cocos2d-ios.xcodeproj */,
@@ -708,24 +674,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B076061619541E950094046F /* NTUtils.cpp in Sources */,
 				B92C59EA18FEC8FE005EC882 /* main.m in Sources */,
 				B916F522190529B40057388D /* BrainSpeakBLE.m in Sources */,
 				B0C8734F19674B8800238594 /* HighScoresViewController.m in Sources */,
 				B9AD5E62193EF9D400BC9631 /* BrainDashLineFollowingViewController.m in Sources */,
 				B9A660161905AA35004869BF /* SneakyButtonSkinnedBase.m in Sources */,
-				B076061319541E950094046F /* NTBLE.cpp in Sources */,
 				B9A6600E1905AA07004869BF /* HelloWorldScene.m in Sources */,
 				B0BE4123196093E2003F530B /* Cannybots.cpp in Sources */,
 				B92C5A6418FEFD1D005EC882 /* NSString+hex.m in Sources */,
 				B9AD5E76194071DA00BC9631 /* BrainDashSettingsViewController.m in Sources */,
 				B92C5A6118FEFD1D005EC882 /* UARTPeripheral.m in Sources */,
 				B92C59F718FEC8FE005EC882 /* BrainDashFlipsideViewController.m in Sources */,
-				B076061519541E950094046F /* NTProtocol.cpp in Sources */,
 				B9A660151905AA35004869BF /* SneakyJoystickSkinnedBase.m in Sources */,
 				B92C5A6218FEFD1D005EC882 /* CBUUID+StringExtraction.m in Sources */,
-				B076061419541E950094046F /* NTMessaging.cpp in Sources */,
-				B916F51F190506920057388D /* TheBriain.m in Sources */,
 				B92C59EE18FEC8FE005EC882 /* BrainDashAppDelegate.m in Sources */,
 				B9AD5E73193F66E800BC9631 /* BrainDashTuningViewController.m in Sources */,
 				B9F68B2919055A0D00F6654D /* SneakyJoystick.m in Sources */,
