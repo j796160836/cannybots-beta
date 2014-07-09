@@ -287,6 +287,12 @@ public:
         addOutboundMessage(msg);
     }
     
+    void callMethod(cb_id cid, int16_t p1,int16_t p2,int16_t p3) {
+        Message* msg = new Message();
+        createMessage(msg, cid, p1, p2, p3);
+        addOutboundMessage(msg);
+    }
+    
 
     
     

@@ -219,8 +219,8 @@ void Cannybots::readSerial(HardwareSerial &ser) {
     while (ser.available()>0) {
         lastChar = c;
         c =  ser.read();
-        Serial.print(" ");
-        Serial.print(c, HEX);
+        //Serial.print(" ");
+        //Serial.print(c, HEX);
         
         if (foundStart && (serialBufPtr<SERIAL_BUF_SIZE)) {
             serialBuffer[serialBufPtr++] = c;
@@ -230,7 +230,7 @@ void Cannybots::readSerial(HardwareSerial &ser) {
         }
         
         if (serialBufPtr>=CB_MAX_MSG_SIZE) {
-            Serial.println("<EOC>");
+            //Serial.println("<EOC>");
             foundStart = false;
             Message* msg = new Message(serialBuffer, CB_MAX_MSG_SIZE);
             inboundMsgFIFO.enqueue(msg);
@@ -270,7 +270,7 @@ const char* Cannybots::getDeviceId() {
 void Cannybots::processOutboundMessageQueue() {
 
     for (int i = 0; i < outboundMsgFIFO.count(); i++) {
-        CB_DBG("processOutboundMessageQueue(%d)", i+1);
+        //CB_DBG("processOutboundMessageQueue(%d)", i+1);
         Message* msg = outboundMsgFIFO.dequeue();
 #ifdef ARDUINO
 #if defined(ARDUINO_AVR_LEONARDO)  || defined(ARDUINO_AVR_A_STAR_32U4)
