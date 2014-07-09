@@ -69,13 +69,45 @@
     [self sendMessage:&msg];
 }
 
+- (void) registerHandler:(cb_id)cid withBlockFor_INT16_3:(cb_callback_int16_3)block {
+    NSLog(@"registerHandler: %d", cid.cid);
+    cb->registerHandler(cid, Cannybots::CB_INT16_3, (void*)CFBridgingRetain(block));
+    
+}
+
+- (void) deregisterHandler:(cb_id)cid  {
+    NSLog(@"degisterHandler: %d", cid.cid);
+
+    CFBridgingRelease(cb->descriptors[cid.cid].data);
+    cb->descriptors[cid.cid].data=0;
+    
+}
+
 
 - (void) didReceiveData:(NSData *)data {
-    long      len = [data length];
+    //long      len = [data length];
     uint8_t * buf = (uint8_t*)[data bytes];
     
     NSString* hexString = [data hexRepresentationWithSpaces:YES];
     NSLog(@"Received: %@", hexString);
+    
+    uint8_t cid = buf[CB_MSG_OFFSET_CMD];
+    //NSLog(@"cmd= %d", cid);
+    cb_descriptor desc = cb->descriptors[cid];
+    
+    if (desc.isMethod) {
+        //NSLog(@"isMethod");
+        
+        if (desc.type == Cannybots::CB_INT16_3) {
+            //NSLog(@"is CB_INT16_3");
+            //NSLog(@"block @ %x", desc.data);
+            if (desc.data) {
+            ((__bridge cb_callback_int16_3)desc.data)( mk16bit( buf[CB_MSG_OFFSET_DATA+1],buf[CB_MSG_OFFSET_DATA+0]),
+                                                       mk16bit( buf[CB_MSG_OFFSET_DATA+3],buf[CB_MSG_OFFSET_DATA+2]),
+                                                       mk16bit( buf[CB_MSG_OFFSET_DATA+5],buf[CB_MSG_OFFSET_DATA+4]));
+            }
+        }
+    }
 
 }
 

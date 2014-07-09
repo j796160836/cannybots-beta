@@ -149,7 +149,8 @@ public:
 
 class Cannybots
 {
-private:
+public:
+    //TODO: private
     cb_descriptor descriptors[CB_MAX_DESCRIPTORS];
     
 public:
@@ -200,6 +201,12 @@ public:
     
     // Function handlers
     void registerHandler(const cb_id _id, cb_callback_int16_int16_int16);
+    
+    
+    // 'generic' callback poitners (e.g. iOSblocks)
+    void registerHandler(const cb_id _id, uint8_t type, void* callback);
+
+    
     
     // Scripting
     
@@ -274,7 +281,6 @@ public:
     
     // REmote invocation
     
-    //add test message
     void callMethod(cb_id cid, int16_t p1) {
         Message* msg = new Message();
         createMessage(msg, cid, p1, 0, 0);

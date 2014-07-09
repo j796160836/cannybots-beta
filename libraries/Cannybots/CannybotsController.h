@@ -12,6 +12,9 @@
 #import "CannybotsTypes.h"
 
 
+
+typedef void (^cb_callback_int16_3)(int16_t, int16_t, int16_t);
+
 @protocol CannybotsReceiver
 - (void) didReceiveData:(NSData*)data;
 @end
@@ -23,6 +26,10 @@
 + (id)sharedInstance;
 
 
+
 - (void) callMethod:(cb_id)cid p1:(int16_t)p1 p2:(int16_t)p2 p3:(int16_t)p3;
+
+- (void) registerHandler:(cb_id)cid withBlockFor_INT16_3:(cb_callback_int16_3)block;
+- (void) deregisterHandler:(cb_id)cid;
 
 @end

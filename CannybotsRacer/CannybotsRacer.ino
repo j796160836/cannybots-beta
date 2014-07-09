@@ -28,11 +28,11 @@ void loop() {
   //CB_DBG("EndLoop. freemem=(%d)",cb.getFreeMemory());
 }
 
-void lf_updateMotorSpeeds(int speedA, int speedB, int dummy) {
+void lf_updateMotorSpeeds(int speedA, int speedB, int _dummy) {
   CB_DBG("%d,%d", speedA, speedB)
 }
 
-void lf_updateAxis(int xAxis, int yAxis, int dummy) {
+void lf_updateAxis(int xAxis, int yAxis, int _dummy) {
   CB_DBG("axis=%d,%d", xAxis, yAxis);
 }
 void lf_updatePID(int Kp, int Ki, int Kd) {

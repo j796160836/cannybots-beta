@@ -133,6 +133,19 @@ void Cannybots::registerHandler(const cb_id _id, cb_callback_int16_int16_int16 c
     descriptors[offset].isNV = false;
 }
 
+// abritrary (e..g iOS blcok handlers0
+void Cannybots::registerHandler(const cb_id _id, uint8_t type, void* callback) {
+    uint16_t offset =_id.cid;
+    descriptors[offset].cid = _id;
+    descriptors[offset].data = (void*)callback;
+    descriptors[offset].size = 0;
+    descriptors[offset].isMethod = true;
+    descriptors[offset].type = type;
+    
+    descriptors[offset].isPublished = false;
+    descriptors[offset].isNV = false;
+}
+
 // Scripting
 
 void Cannybots::registerScritableVariable(const cb_id _id, const char* name) {
