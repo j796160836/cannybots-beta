@@ -7,7 +7,10 @@
 //
 
 #import "BrainDashMainViewController.h"
-#import "CannybotsLineFollowing.h"
+//#import "CannybotsLineFollowing.h"
+
+#import <CannybotsController.h>
+#import "CannybotsRacer.h"
 
 // add a Project reference to cocos2d-ios.xcodeproj, using the dialog box and not the drag drop!! (xcode bug)
 // (rstart xcode helps)
@@ -22,7 +25,7 @@
 
 
 @interface BrainDashMainViewController () {
-    TheBrain            *theBrain;
+    CannybotsController* cb;
     CCNode* myGame;
 }
 @end
@@ -82,8 +85,8 @@
         [director runWithScene:scene];
     
     
-    
-    theBrain = [TheBrain sharedInstance];
+    cb = [CannybotsController sharedInstance];
+
     
 }
 
@@ -101,7 +104,7 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
-    theBrain=nil;
+    cb=nil;
 }
 
 #pragma mark - Flipside View
@@ -168,14 +171,7 @@
     _statusLabel.text = resultString;
     
     
-    TheBrain* tb = [TheBrain sharedInstance];
 
-    uint16_t vel =200;
-    uint16_t pos =500*scale;
-    
-    [tb setEndlessTurnMode:NO forId:1];
-    [tb setServoVelocity:vel forId:1];
-    [tb setServoPosition:pos forId:1];
     
 }
 
@@ -226,45 +222,33 @@
     
     int speed= (int)(sender.value * 255);
     NSLog(@"Speed = %d", speed);
-    [theBrain lf_speed:speed];
 }
 - (IBAction)modeChanged:(UISegmentedControl *)sender {
     
     if ( 0 == sender.selectedSegmentIndex) {
-        [theBrain lf_stop];
+//        [theBrain lf_stop];
     } else if ( 1 == sender.selectedSegmentIndex) {
-        [theBrain lf_go];
+  //      [theBrain lf_go];
     }
     
 }
-
 
 
 
 - (void) viewDidAppear:(BOOL)animated {
-    theBrain.appDelegate = self;
+    
+    [cb registerHandler:RACER_LINEFOLLOWING_MODE withBlockFor_INT16_3: ^(int16_t p1, int16_t p2, int16_t p3)
+    {
+        [self.modeSegment setSelectedSegmentIndex:p1>0?1:0];
+    }];
+
+    
     [self reloadScene];
 }
 
+
 - (void) viewWillDisappear:(BOOL)animated {
-    theBrain.appDelegate = nil;
-    
-}
-
-
-
-- (void) didReceiveCommand:(uint8_t)cmd forId:(uint8_t)_id withArg:(int16_t)arg1 {
-    
-    NSLog(@"CMD=%d, id=%d, arg=%d", cmd, _id, arg1);
-    if (NT_CMD_LINEFOLLOW_MOVE == cmd) {
-        if (LINEFOLLOW_STOP == _id){
-            [self.modeSegment setSelectedSegmentIndex:0];
-        } else if (LINEFOLLOW_GO == _id){
-            [self.modeSegment setSelectedSegmentIndex:1];
-        } else {
-            NSLog(@"WARNING: unrecognised CMD value: %d",_id);
-        }
-    }
+    [cb deregisterHandler:RACER_LINEFOLLOWING_MODE];
 }
 
 
