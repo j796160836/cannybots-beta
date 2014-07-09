@@ -188,7 +188,6 @@ void process_ble2uart_q() {
 
 void setup() {
   Serial.begin(9600, RX_PIN, TX_PIN);        // UART Baud is limited to 9600 when the BLE stack is on.
-
   NRF_WDT->CRV = 32768 * 2;   // Timeout period of 2 s
   NRF_WDT->TASKS_START = 1;   // start the watchdog 
 }

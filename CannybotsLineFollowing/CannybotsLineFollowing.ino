@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Line Following
 
@@ -35,6 +35,7 @@ AnalogScanner scanner;
 #endif
 
 
+#ifdef V7
 // PIN Assignments
 // IR sensor pins
 #define IR1 A9
@@ -48,6 +49,21 @@ const int pinA1 = 5;
 const int pinA2 = 6;
 const int pinB1 = 10;
 const int pinB2 = 11;
+#else 
+#define IR1 A8
+#define IR2 A9
+#define IR3 A10
+
+// motor control pins
+
+// motor control pins
+const int pinA1 = 6; 
+const int pinA2 = 5; 
+const int pinB1 = 4;
+const int pinB2 = 3;
+const int pin_MODE = 7;
+
+#endif
 
 //reading from IR sensors
 int IR1_val = 0, IR2_val = 0, IR3_val = 0;
@@ -64,7 +80,7 @@ int yAxisValue = 0;
 int xAxisValue = 0;
 
 
-int baseCruiseSpeed = 100;
+int baseCruiseSpeed = 80;
 int cruiseSpeed = baseCruiseSpeed;
 
 boolean isLineFollowingMode = true;
@@ -76,7 +92,7 @@ volatile unsigned long lastCommandTime = millis();
 // read the IR sensors:
 // set limit on reading. The reading can be very high and inaccurate on pitch black
 void read_ir_sensors() {
-  
+
   IR1_val = constrain(ANALOG_READ(IR1) - IRbias[0], 0, IR_MAX); //left looking from behind
   IR2_val = constrain(ANALOG_READ(IR2) - IRbias[1], 0, IR_MAX); //centre
   IR3_val = constrain(ANALOG_READ(IR3) - IRbias[2], 0, IR_MAX); //right
@@ -87,12 +103,24 @@ void read_ir_sensors() {
 }
 
 
-
-// motor controller function
 void motor(int _speedA, int _speedB)
 {
    _speedA = constrain(_speedA, -255, 255);
    _speedB = constrain(_speedB, -255, 255);
+   
+   digitalWrite(pinA1,_speedA >=0 ? HIGH:LOW) ;
+   analogWrite (pinA2, abs(_speedA));
+   
+   digitalWrite(pinB1, _speedB >=0 ? LOW:HIGH);
+   analogWrite (pinB2,abs(_speedB));
+}
+
+
+// motor controller function
+void motor_V4(int _speedA, int _speedB)
+{
+  _speedA = constrain(_speedA, -255, 255);
+  _speedB = constrain(_speedB, -255, 255);
   if (_speedA >= 0) {
     analogWrite(pinA1, _speedA);
     analogWrite(pinA2, 0);
@@ -137,13 +165,14 @@ void printvalues ()
   static unsigned long lastPrint = millis();
   if ( millis() - lastPrint < 250 )  return;
   lastPrint = millis();
-  DBG_PRINTF(    "%lu: IR(%u,%u,%u) Kpd(%d,%d) e(%d) PeDe(%d,%d) Sab(%d,%d) Mab(%d,%d), XY(%d,%d)", 
-    millis(), 
-    IR1_val, IR2_val, IR3_val, 
-    Kp, Kd, error, P_error, D_error, 
-    speedA, speedB, manualA, manualB, 
-    xAxisValue, yAxisValue
-    );
+  
+  DBG_PRINTF(    "%lu: IR(%u,%u,%u) Kpd(%d,%d) e(%d) PeDe(%d,%d) Sab(%d,%d) Mab(%d,%d), XY(%d,%d)",
+                 millis(),
+                 IR1_val, IR2_val, IR3_val,
+                 Kp, Kd, error, P_error, D_error,
+                 speedA, speedB, manualA, manualB,
+                 xAxisValue, yAxisValue
+            );
 }
 
 
@@ -155,7 +184,7 @@ void lf_loop()
 {
   read_ir_sensors();
 
-  isLineFollowingMode = IR2_val >= IR_MAX;              
+  isLineFollowingMode =  IR2_val >= WHITE_THRESHOLD;
   lf_report_followingMode(isLineFollowingMode);
 
 
@@ -163,12 +192,12 @@ void lf_loop()
     // process IR readings via PID
     error_last = error;                                   // store previous error before new one is caluclated
     error = constrain(IR1_val - IR3_val, -30, 30);        // set bounds for error
-    P_error = error * Kp;                                 // calculate proportional term
-    D_error = (error - error_last) * Kd;                  // calculate differential term
+    P_error = error * Kp/10;                                 // calculate proportional term
+    D_error = (error - error_last) * Kd/10;                  // calculate differential term
     correction = P_error + D_error;
     cruiseSpeed = baseCruiseSpeed + manualA;
-    speedA = constrain(cruiseSpeed + correction, -200, 200);
-    speedB = constrain(cruiseSpeed - correction, -200, 200);
+    speedA = constrain(cruiseSpeed - correction, -200, 200);
+    speedB = constrain(cruiseSpeed + correction, -200, 200);
   } else {
     // in manual mode
     if ((millis() - lastCommandTime) > 2000) {
@@ -254,67 +283,61 @@ void lf_speed(int16_t speed) {
   manualA = speed;
 }
 
+
+
 void calculateMotorSpeedFromJoystick(int xAxisValue, int yAxisValue, int* motor1, int* motor2) {
-       // direction (X axis)  anf throttle (Y axis)
-      int throttle  = yAxisValue;
-      int direction = yAxisValue>0?-xAxisValue:xAxisValue  ;
+  // direction (X axis)  
+  // throttle  (Y axis)
+  
+  // handle throttle
+  #define MOTOR_MAX_SPEED 255
+  bool isForward = yAxisValue > 0;  
+  long x2 = (long)xAxisValue*(long)xAxisValue;
+  long y2 = (long)yAxisValue*(long)yAxisValue;
+  
+  int throttle = constrain(sqrt( x2 + y2) , -MOTOR_MAX_SPEED,MOTOR_MAX_SPEED);
+  throttle = map (throttle, -255, 255, 270, 270 + 180);
+  throttle = sin( radians(throttle) ) * MOTOR_MAX_SPEED;
 
-      // perfomr some remapping...
+  float throttleRatio = (1.0/MOTOR_MAX_SPEED)* throttle;
 
-      
-      // dead zone the xaxis
-      if ( abs(xAxisValue) < 50 ) {
-        direction = 0;
-      } else {
-        direction = map (direction, -255, 255, 270, 270+180);
-        direction = sin( radians(direction) ) * MOTOR_MAX_SPEED;
-      }
+  
 
-      // create a wider azimuth between forward and back
-      if ( abs(yAxisValue) < 25 ) {
-        throttle = 0; 
-      } else if ( yAxisValue<-25 && yAxisValue > -50 ) {
-        throttle = -50;
-      } else if ( yAxisValue>25 && yAxisValue < 50 ) {
-        throttle = 50;
-      } else {
-        throttle = map (throttle, -255, 255, 270, 270+180);
-        throttle = sin( radians(throttle) ) * MOTOR_MAX_SPEED;
-      }
-      
-      // TODO: at high speed dampen the direction?
-
-      int leftMotor, leftMotorScaled = 0; //left Motor helper variables
-      float leftMotorScale = 0;
-
-      int rightMotor, rightMotorScaled = 0; //right Motor helper variables
-      float rightMotorScale = 0;
-
-      float maxMotorScale = 0; //holds the mixed output scaling factor
+  int leftMotorSpeed  = 0;
+  int rightMotorSpeed = 0;
+  rightMotorSpeed = leftMotorSpeed  = throttleRatio * MOTOR_MAX_SPEED; 
 
 
-      //mix throttle and direction
-      leftMotor = throttle + direction;
-      rightMotor = throttle - direction;
+  // handle direction  
+  // only calc left & right if outside of X axis deadzone
+  unsigned int xMag  = abs(xAxisValue);
 
-      //print the initial mix results
+  if ( xMag > 25  ) {
+    bool isLeft = xAxisValue<0;
+    int direction = map (xAxisValue, -255, 255, 270, 270 + 180);
+    direction = sin( radians(direction) ) * MOTOR_MAX_SPEED;
 
-      //calculate the scale of the results in comparision base 8 bit PWM resolution
-      leftMotorScale =   leftMotor / 255.0;
-      leftMotorScale =   abs(leftMotorScale);
-      rightMotorScale =  rightMotor / 255.0;
-      rightMotorScale =  abs(rightMotorScale);
+    float directionRatio = abs((1.0/MOTOR_MAX_SPEED) * direction);
+    
+    int speed = throttleRatio * MOTOR_MAX_SPEED;
+    if (isLeft) {
+        leftMotorSpeed  = (1.0-directionRatio*2) * speed;
+        rightMotorSpeed = directionRatio * speed;
+    } else {
+        leftMotorSpeed  = directionRatio * speed;      
+        rightMotorSpeed = (1.0-directionRatio*2) * speed;
+    }    
+  } 
+  
+  // re-apply fwd/back sign.
+  leftMotorSpeed = leftMotorSpeed * (isForward?1:-1);
+  rightMotorSpeed = rightMotorSpeed * (isForward?1:-1);
 
+  
+  DBG_PRINTF("%lu: xAxisValue,yAxisValue(%d,%d) =  throttle(%d),  Left,Right(%d,%d)", millis(), xAxisValue, yAxisValue, throttle, leftMotorSpeed, rightMotorSpeed);
 
-      //choose the max scale value if it is above 1
-      maxMotorScale = max(leftMotorScale, rightMotorScale);
-      maxMotorScale = max(1, maxMotorScale);
-
-      //and apply it to the mixed values
-      leftMotorScaled = constrain(leftMotor / maxMotorScale, -255, 255);
-      rightMotorScaled = constrain(rightMotor / maxMotorScale, -255, 255);
-      *motor1 = leftMotorScaled;
-      *motor2 = rightMotorScaled; 
+  *motor1 = rightMotorSpeed;
+  *motor2 = leftMotorSpeed;
 }
 
 
@@ -573,9 +596,28 @@ uint8_t  linefollow_processCommand(uint8_t cmd, uint8_t id, int16_t p1) {
 }
 
 
-
-
 void setup() {
+#ifdef IGNORE && ARDUINO_AVR_A_STAR_32U4
+  // brownout detection
+  // from:  http://www.pololu.com/docs/0J61/7
+  pinMode(13, OUTPUT);
+  if (MCUSR & (1 << BORF))
+  {
+    // A brownout reset occurred.  Blink the LED
+    // quickly for 2 seconds.
+    for (uint8_t i = 0; i < 2; i++)
+    {
+      digitalWrite(13, HIGH);
+      delay(100);
+      digitalWrite(13, LOW);
+      delay(100);
+    }
+  }
+  MCUSR = 0; 
+#else
+//#error not comiling using the Polulu A* bootload, are u sure you dont want brownout detection? if so comment this line
+#endif
+
 #ifdef USE_ANALOG_LIB
   int scanOrder[IR_BIAS_NUM_SENSORS] = {IR1, IR2, IR3};
   scanner.setScanOrder(IR_BIAS_NUM_SENSORS, scanOrder);
@@ -583,6 +625,7 @@ void setup() {
   delay(1); // Wait for the first scans to occur.
 #endif
 
+#if 0
   pinMode(INFO_LED, OUTPUT);
   // C
   info_blink(1, 500, 100);
@@ -593,7 +636,7 @@ void setup() {
   info_blink(1, 200, 100);
   info_blink(1, 500, 100);
   info_blink(1, 200, 100);
-
+#endif
 
   Serial.begin(9600);
   Serial1.begin(9600);
@@ -612,12 +655,17 @@ void setup() {
   lf_rgb_brightness(lf_cfg_get_led_brightness());
   int i;
   for (i = 0; i < IR_BIAS_NUM_SENSORS; i++);
-    lf_ir_bias(i, lf_cfg_get_ir_bias(i));
+  lf_ir_bias(i, lf_cfg_get_ir_bias(i));
 
   pinMode(pinA1, OUTPUT);
   pinMode(pinA2, OUTPUT);
   pinMode(pinB1, OUTPUT);
   pinMode(pinB2, OUTPUT);
+  pinMode(pin_MODE, OUTPUT);
+  digitalWrite(pin_MODE, HIGH); //to set controller to Phase/Enable mode
+
+  digitalWrite(13, HIGH);
+
 }
 
 

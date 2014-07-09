@@ -81,7 +81,7 @@ void NT_processOutboundMessageQueue() {
 #endif
 #else // UART
         
-#ifdef ARDUINO_AVR_LEONARDO  // or a-star
+#if defined(ARDUINO_AVR_LEONARDO)  || defined(ARDUINO_AVR_A_STAR_32U4)
         //Serial.println("SENDING!");
         Serial1.write(">>");
         Serial1.write(msg->payload, NT_MSG_SIZE);
