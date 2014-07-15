@@ -109,7 +109,7 @@
 		B01EEBDD1948F94F00E6D3A4 /* Speed High Rot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Speed High Rot.png"; sourceTree = "<group>"; };
 		B01EEBDE1948F94F00E6D3A4 /* Speed Low Rot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Speed Low Rot.png"; sourceTree = "<group>"; };
 		B02B512C196C62A2006EEC2B /* CannybotsRacer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CannybotsRacer.h; path = ../../../avr/CannybotsRacer/CannybotsRacer.h; sourceTree = "<group>"; };
-		B076061819541F680094046F /* CannybotsLineFollowing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CannybotsLineFollowing.h; sourceTree = "<group>"; };
+		B069D2C5197145E800F4378A /* CannyLapCounter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CannyLapCounter.h; path = ../../../avr/CannyLapCounter/CannyLapCounter.h; sourceTree = "<group>"; };
 		B0B067BC196D542B00ABC209 /* CannybotsController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CannybotsController.mm; sourceTree = "<group>"; };
 		B0B067BF196D559C00ABC209 /* CannybotsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CannybotsController.h; sourceTree = "<group>"; };
 		B0B067C2196D7EAA00ABC209 /* CannybotsTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CannybotsTypes.h; sourceTree = "<group>"; };
@@ -120,7 +120,6 @@
 		B0C8734B19674B8800238594 /* HighScores.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HighScores.m; sourceTree = "<group>"; };
 		B0C8734C19674B8800238594 /* HighScoresViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HighScoresViewController.h; sourceTree = "<group>"; };
 		B0C8734D19674B8800238594 /* HighScoresViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HighScoresViewController.m; sourceTree = "<group>"; };
-		B0DE19F819635207005B5821 /* SimpleFIFO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SimpleFIFO.h; path = ../../../avr/libraries/SimpleFIFO/SimpleFIFO.h; sourceTree = "<group>"; };
 		B916F520190529B40057388D /* BrainSpeakBLE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrainSpeakBLE.h; sourceTree = "<group>"; };
 		B916F521190529B40057388D /* BrainSpeakBLE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrainSpeakBLE.m; sourceTree = "<group>"; };
 		B92AB26B19055D0600A9556D /* libObjectiveChipmunk-iPhone.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libObjectiveChipmunk-iPhone.a"; path = "Libraries/cocos2d-iphone/build/Debug-iphoneos/libObjectiveChipmunk-iPhone.a"; sourceTree = "<group>"; };
@@ -236,15 +235,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		B076061719541F680094046F /* CannybotsLineFollowing */ = {
-			isa = PBXGroup;
-			children = (
-				B076061819541F680094046F /* CannybotsLineFollowing.h */,
-			);
-			name = CannybotsLineFollowing;
-			path = ../../../avr/CannybotsLineFollowing;
-			sourceTree = "<group>";
-		};
 		B0BE4120196093E2003F530B /* Cannybots */ = {
 			isa = PBXGroup;
 			children = (
@@ -283,11 +273,10 @@
 		B92C59D118FEC8FE005EC882 = {
 			isa = PBXGroup;
 			children = (
+				B069D2C5197145E800F4378A /* CannyLapCounter.h */,
 				B02B512C196C62A2006EEC2B /* CannybotsRacer.h */,
 				B0C8734919674B8800238594 /* HighScores */,
-				B0DE19F819635207005B5821 /* SimpleFIFO.h */,
 				B0BE4120196093E2003F530B /* Cannybots */,
-				B076061719541F680094046F /* CannybotsLineFollowing */,
 				B9AD5E5C193EF58A00BC9631 /* graphics */,
 				B9AD5E1D193E64C800BC9631 /* icons */,
 				B9F68B3419055C9F00F6654D /* cocos2d-ios.xcodeproj */,

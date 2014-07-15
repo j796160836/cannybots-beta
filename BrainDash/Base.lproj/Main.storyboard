@@ -804,14 +804,14 @@
                                 <rect key="frame" x="203" y="92" width="88" height="31"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" name="Helvetica-Bold" family="Helvetica" pointSize="15"/>
-                                <state key="normal" title="Save">
+                                <state key="normal" title="Ready!">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
-                                    <action selector="postScore" destination="siB-pn-VGu" eventType="touchUpInside" id="UeO-ae-8aq"/>
+                                    <action selector="readyPressed:" destination="siB-pn-VGu" eventType="touchUpInside" id="4tJ-Ni-hgL"/>
                                 </connections>
                             </button>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Your Name" minimumFontSize="14" id="m2H-Nb-DZT">
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Driver" borderStyle="roundedRect" placeholder="Your Name" minimumFontSize="14" id="m2H-Nb-DZT">
                                 <rect key="frame" x="11" y="92" width="88" height="31"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
@@ -820,7 +820,7 @@
                                     <outlet property="delegate" destination="siB-pn-VGu" id="QZ5-Ty-XVA"/>
                                 </connections>
                             </textField>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Score" clearsOnBeginEditing="YES" minimumFontSize="14" id="eYU-Fl-HiG">
+                            <textField hidden="YES" opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Score" clearsOnBeginEditing="YES" minimumFontSize="14" id="eYU-Fl-HiG">
                                 <rect key="frame" x="116" y="92" width="88" height="31"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
@@ -829,6 +829,16 @@
                                     <outlet property="delegate" destination="siB-pn-VGu" id="RFL-pJ-cj4"/>
                                 </connections>
                             </textField>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="jIm-UF-p60">
+                                <rect key="frame" x="5" y="140" width="58" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Clear All">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="clearPressed:" destination="siB-pn-VGu" eventType="touchUpInside" id="VMq-Hk-xa5"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     </view>

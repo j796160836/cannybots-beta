@@ -221,12 +221,13 @@
 - (IBAction)modeChanged:(UISegmentedControl *)sender {
     
     if ( 0 == sender.selectedSegmentIndex) {
-//        [theBrain lf_stop];
+        [cb callMethod:RACER_LINEFOLLOWING_MODE p1:0];
     } else if ( 1 == sender.selectedSegmentIndex) {
-  //      [theBrain lf_go];
+        [cb callMethod:RACER_LINEFOLLOWING_MODE p1:1 p2:0 p3:0];
     }
     
 }
+
 
 
 
@@ -245,7 +246,6 @@
 - (void) viewWillDisappear:(BOOL)animated {
     [cb deregisterHandler:RACER_LINEFOLLOWING_MODE];
 }
-
 
 
 @end

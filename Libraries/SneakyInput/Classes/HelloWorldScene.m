@@ -12,8 +12,6 @@
 #import "SneakyJoystickSkinnedDPadExample.h"
 #import "SneakyButton.h"
 #import "SneakyButtonSkinnedBase.h"
-#import "ColoredCircleSprite.h"
-#import "CannybotsLineFollowing.h"
 #import "NSObject+performBlockAfterDelay.h"
 
 
@@ -67,16 +65,23 @@
 		
         [self schedule:@selector(tick:) interval:1.0f/15.0f];
         
+        [self schedule:@selector(keepAlive:) interval:1.0f];
+        
 	}
 	return self;
     
+}
+-(void)keepAlive:(float)delta {
+    CannybotsController* cb = [CannybotsController sharedInstance];
+
+    [cb callMethod:RACER_PING p1:0];
 }
 
 -(void)tick:(float)delta {
     static int lastDir = 0;
     static int lastThrottle= 0;
-    int dir      = MOTOR_MAX_SPEED*leftJoystick.velocity.x;
-    int throttle = MOTOR_MAX_SPEED*leftJoystick.velocity.y;
+    int dir      = 255*leftJoystick.velocity.x;
+    int throttle = 255*leftJoystick.velocity.y;
 
     // deadzone check
     dir      =      abs(dir) < 10  ? 0 : dir;
@@ -86,13 +91,13 @@
     
     if ( (abs(lastDir-dir) > 3) || (abs(lastThrottle-throttle)>3) ){
         //[tb lf_setMotorSpeeds:dir forId1:3 speed2:throttle forId2:4];
-        [cb callMethod:RACER_JOYAXIS p1:dir p2:throttle p3:0];
+        [cb callMethod:RACER_JOYAXIS p1:dir p2:throttle];
 
         if ( (dir ==0) && throttle==0) {
             
             [self performBlock:^{
                 //[tb lf_setMotorSpeeds:0 forId1:3 speed2:0 forId2:4];
-                [cb callMethod:RACER_JOYAXIS p1:0 p2:0 p3:0];
+                [cb callMethod:RACER_JOYAXIS p1:0 p2:0];
 
             } afterDelay: .2];
 
@@ -102,6 +107,5 @@
     }
 
 }
-
 
 @end

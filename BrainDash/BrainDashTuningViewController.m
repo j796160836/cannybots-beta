@@ -8,6 +8,8 @@
 
 #import "BrainDashTuningViewController.h"
 
+#import "CannybotsController.h"
+#import "CannybotsRacer.h"
 
 @interface BrainDashTuningViewController () {
 }
@@ -56,9 +58,34 @@
 */
 
 - (void) viewDidAppear:(BOOL)animated {
+
+    CannybotsController* cb = [CannybotsController sharedInstance];
+    [cb registerHandler:RACER_PID withBlockFor_INT16_3: ^(int16_t p1, int16_t p2, int16_t p3)
+     {
+         _pTextField.text = [NSString stringWithFormat:@"%d", p1];
+         _iTextField.text = [NSString stringWithFormat:@"%d", p2];
+         _dTExtField.text = [NSString stringWithFormat:@"%d", p3];
+         _pStepper.value = p1;
+         _iStepper.value = p2;
+         _dStepper.value = p3;
+     }];
+    
+    [cb registerHandler:RACER_IRBIAS withBlockFor_INT16_3: ^(int16_t p1, int16_t p2, int16_t p3)
+     {
+         _IRBias1TextField.text =[NSString stringWithFormat:@"%d", p1];
+         _IRBias2TextField.text =[NSString stringWithFormat:@"%d", p2];
+         _IRBias3TextField.text =[NSString stringWithFormat:@"%d", p3];
+     }];
+    
+    
+    [cb callMethod:RACER_CONFIG p1:0 p2:0 p3:0];
+
 }
 
 - (void) viewWillDisappear:(BOOL)animated {
+    CannybotsController* cb = [CannybotsController sharedInstance];
+    [cb deregisterHandler:RACER_PID];
+    [cb deregisterHandler:RACER_IRBIAS];
 }
 
 -(IBAction)textFieldReturn:(id)sender
@@ -132,47 +159,22 @@
 
 
 - (IBAction)savePressed:(id)sender {
+    CannybotsController* cb = [CannybotsController sharedInstance];
+
+    [cb callMethod:RACER_PID
+                p1:[[_pTextField text] intValue]
+                p2:[[_iTextField text] intValue]
+                p3:[[_dTExtField text] intValue]];
     
+    [cb callMethod:RACER_IRBIAS
+                p1:[[_IRBias1TextField text] intValue]
+                p2:[[_IRBias2TextField text] intValue]
+                p3:[[_IRBias3TextField text] intValue]];
+
 }
 - (IBAction)revertPressed:(id)sender {
-}
-
-- (void) didReceiveCommand:(uint8_t)cmd forId:(uint8_t)_id withArg:(int16_t)arg1 {
-/*
-    if (NT_CMD_LINEFOLLOW_CONFIG_GET == cmd) {
-        if (LINEFOLLOW_CFG_PID_P == _id){
-            _pTextField.text = [NSString stringWithFormat:@"%d", arg1];
-            _pStepper.value = arg1;
-        } else if (LINEFOLLOW_CFG_PID_I == _id){
-            _iTextField.text = [NSString stringWithFormat:@"%d", arg1];
-            _iStepper.value = arg1;
-        } else if (LINEFOLLOW_CFG_PID_D == _id){
-            _dTExtField.text = [NSString stringWithFormat:@"%d", arg1];
-            _dStepper.value = arg1;
-        } else if ( LINEFOLLOW_CFG_DEVICE_ID == _id){
-            NSLog(@"device id = %d", arg1);
-            _deviceIdTextField.text = [NSString stringWithFormat:@"%d", arg1];
-        } else if ( LINEFOLLOW_CFG_RGB_COLOUR == _id){
-            NSLog(@"RGB col= %d", arg1);
-            _ledColourSegment.selectedSegmentIndex = arg1;
-        } else if ( LINEFOLLOW_CFG_RGB_BRIGHTNESS == _id){
-            NSLog(@"RGB bri= %d", arg1);
-            _ledBrightnessTextField.text =[NSString stringWithFormat:@"%d", arg1];
-            _ledBrightnessStepper.value = arg1;
-        } else if ( LINEFOLLOW_CFG_IR_BIAS_1 == _id){
-            NSLog(@"IR1= %d", arg1);
-            _IRBias1TextField.text =[NSString stringWithFormat:@"%d", arg1];
-        } else if ( LINEFOLLOW_CFG_IR_BIAS_2 == _id){
-            NSLog(@"IR2= %d", arg1);
-            _IRBias2TextField.text =[NSString stringWithFormat:@"%d", arg1];
-        } else if ( LINEFOLLOW_CFG_IR_BIAS_3 == _id){
-            NSLog(@"IR3= %d", arg1);
-            _IRBias3TextField.text =[NSString stringWithFormat:@"%d", arg1];
-        } else {
-            NSLog(@"WARNING: unrecognised CFG value: %d",_id);
-        }
-    }
- */
+    CannybotsController* cb = [CannybotsController sharedInstance];
+    [cb callMethod:RACER_CONFIG p1:0 p2:0 p3:0];
 }
 
 

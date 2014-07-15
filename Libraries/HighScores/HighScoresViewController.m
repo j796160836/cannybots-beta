@@ -7,6 +7,8 @@
 //
 
 #import "HighScoresViewController.h"
+#import "CannybotsController.h"
+#import "CannyLapCounter.h"
 
 
 @implementation HighScoresViewController
@@ -46,6 +48,7 @@
 	}];
 }
 
+/*
 -(IBAction)postScore{
 	[nameField resignFirstResponder];
 	[scoreField resignFirstResponder];
@@ -67,7 +70,7 @@
 
     [self loadLocalScores];
 }
-
+*/
 
 
 //local high scores
@@ -106,7 +109,7 @@
 	}
 	else {
 		
-		cell.detailTextLabel.text = [NSString stringWithFormat:@"%0.2f", [[highScoreDict objectForKey:@"score"] intValue]/100.0];
+		cell.detailTextLabel.text = [NSString stringWithFormat:@"%0.2f", [[highScoreDict objectForKey:@"score"] intValue]/1000.0];
 		
 		NSString *temp = [[NSString alloc] initWithFormat:@"%d. %@", row + 1, [highScoreDict objectForKey:@"name"]];
 		cell.textLabel.text = temp;
@@ -127,6 +130,61 @@
 - (void)dealloc {
 	//[highScoreTable removeFromSuperview];
 }
+
+//////////////
+
+- (void) viewDidAppear:(BOOL)animated {
+    CannybotsController* cb = [CannybotsController sharedInstance];
+    
+    [cb registerHandler:LAPCOUNTER_LAPTIME withBlockFor_INT16_1: ^(int16_t p1)
+     {
+         [self recordLapTime: p1 ];
+     }];
+    
+}
+
+
+- (void) viewWillDisappear:(BOOL)animated {
+    CannybotsController* cb = [CannybotsController sharedInstance];
+    [cb deregisterHandler:LAPCOUNTER_LAPTIME];
+}
+
+
+
+- (IBAction)readyPressed:(id)sender {
+  	[nameField resignFirstResponder];
+    [self resetLapCounter];
+}
+
+- (IBAction)clearPressed:(id)sender {
+    [HighScores clearLocalHighScores];
+    [self loadLocalScores];
+}
+
+
+- (void) resetLapCounter {
+    CannybotsController* cb = [CannybotsController sharedInstance];
+    [cb callMethod:LAPCOUNTER_GETREADY p1:0];
+    NSLog(@"Reset laptime");
+
+}
+
+- (void) recordLapTime:(float)time {
+    NSLog(@"Lap time %f", time);
+    
+    NSMutableArray *temp = [[NSMutableArray alloc] init];
+	[temp addObject:[nameField text]];
+	[temp addObject:[NSNumber numberWithFloat:time]];
+	
+	NSMutableArray *temp1 = [[NSMutableArray alloc] init];
+	[temp1 addObject:@"name"];
+	[temp1 addObject:@"score"];
+    
+	[HighScores addNewHighScore:[NSDictionary dictionaryWithObjects:temp forKeys:temp1] postGlobally:NO withDelegate:self];
+    
+    [self loadLocalScores];
+}
+
 
 
 @end
