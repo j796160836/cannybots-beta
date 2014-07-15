@@ -1,6 +1,10 @@
 
 #include "Cannybots.h"
 
+#ifdef __RFduino__
+#include <RFduinoBLE.h>
+#endif
+
 
 
 
@@ -63,11 +67,17 @@ const cb_type Cannybots::CB_UINT16_ARRAY=10;
 const cb_type Cannybots::CB_INT32_ARRAY=11;
 const cb_type Cannybots::CB_UINT32_ARRAY=12;
 const cb_type Cannybots::CB_FLOAT_ARRAY=13;
-const cb_type Cannybots::CB_INT16_3=14;
-const cb_type Cannybots::CB_FLOAT_3=15;
+const cb_type Cannybots::CB_INT16_1=14;
+const cb_type Cannybots::CB_INT16_2=15;
+const cb_type Cannybots::CB_INT16_3=16;
+const cb_type Cannybots::CB_FLOAT_1=17;
+const cb_type Cannybots::CB_FLOAT_2=18;
+const cb_type Cannybots::CB_FLOAT_3=19;
 
 
 Cannybots Cannybots::instance;
+
+
 
 void Cannybots::setConfigStorage(const char* magic, uint16_t start) {
     
@@ -125,7 +135,32 @@ void Cannybots::registerHandler(const cb_id _id, cb_callback_int16_int16_int16 c
     descriptors[offset].size = 0;
     descriptors[offset].isMethod = true;
     descriptors[offset].type = CB_INT16_3;
+    
+    descriptors[offset].isPublished = false;
+    descriptors[offset].isNV = false;
+}
 
+// Function handlers
+void Cannybots::registerHandler(const cb_id _id, cb_callback_int16_int16 callback) {
+    uint16_t offset =_id.cid;
+    descriptors[offset].cid = _id;
+    descriptors[offset].data = (void*)callback;
+    descriptors[offset].size = 0;
+    descriptors[offset].isMethod = true;
+    descriptors[offset].type = CB_INT16_2;
+    
+    descriptors[offset].isPublished = false;
+    descriptors[offset].isNV = false;
+}
+
+void Cannybots::registerHandler(const cb_id& _id, cb_callback_int16 callback) {
+    uint16_t offset =_id.cid;
+    descriptors[offset].cid = _id;
+    descriptors[offset].data = (void*)callback;
+    descriptors[offset].size = 0;
+    descriptors[offset].isMethod = true;
+    descriptors[offset].type = CB_INT16_1;
+    
     descriptors[offset].isPublished = false;
     descriptors[offset].isNV = false;
 }
@@ -177,7 +212,7 @@ uint16_t Cannybots::getLastError() {
 
 void Cannybots::begin() {
 #ifdef ARDUINO
-
+    
     CB_INBOUND_SERIAL_PORT.begin(CB_INBOUND_SERIAL_BAUD);
     
 #ifdef ARDUINO_AVR_A_STAR_32U4
@@ -199,12 +234,23 @@ void Cannybots::begin() {
     MCUSR = 0;
 #endif
 #endif
-
+    
+#ifdef __RFduino__
+    RFduinoBLE.customUUID = BLE_UUID;
+    RFduinoBLE.deviceName = BLE_LOCALNAME;
+    RFduinoBLE.advertisementData = BLE_ADVERTISEMENT_DATA;
+    RFduinoBLE.begin();
+    
+#endif
 }
 
 void Cannybots::update() {
 #ifdef ARDUINO
+#ifdef __RFduino__
+    // not polled, event driven in: RFduinoBLE_onReceive()
+#else
     readSerial(Serial1);
+#endif
 #endif
     processOutboundMessageQueue();
     processInboundMessageQueue();
@@ -241,14 +287,24 @@ void Cannybots::readSerial(HardwareSerial &ser) {
 }
 #endif
 
+#ifdef __RFduino__
+void RFduinoBLE_onReceive(char *data, int len) {
+    Message* msg = new Message((uint8_t*)data, len);
+    Cannybots& cb = Cannybots::getInstance();
 
+    cb.addInboundMessage(msg);
+}
+#endif
 
 void Cannybots::processInboundMessageQueue() {
     
     for (int i = 0; i < inboundMsgFIFO.count(); i++) {
-        //CB_DBG("processInboundMessageQueue(%d)", i+1);
-
+        //§       CB_DBG("processInboundMessageQueue(%d)", i+1);
+        
         Message* msg = inboundMsgFIFO.dequeue();
+#ifdef ARDUINO
+        lastInboundMessageTime = millis();
+#endif
         processMessage(msg);
         delete msg;
     }
@@ -257,9 +313,9 @@ void Cannybots::processInboundMessageQueue() {
 
 const char* Cannybots::getDeviceId() {
     return NULL;
-// iOS
-//
-//    char  *currentDeviceId = [[[[UIDevice currentDevice] identifierForVendor]UUIDString] UTF8String];
+    // iOS
+    //
+    //    char  *currentDeviceId = [[[[UIDevice currentDevice] identifierForVendor]UUIDString] UTF8String];
     
     // RFduino
     //uint64_t id = getDeviceId();
@@ -268,7 +324,7 @@ const char* Cannybots::getDeviceId() {
 }
 
 void Cannybots::processOutboundMessageQueue() {
-
+    
     for (int i = 0; i < outboundMsgFIFO.count(); i++) {
         //CB_DBG("processOutboundMessageQueue(%d)", i+1);
         Message* msg = outboundMsgFIFO.dequeue();
@@ -277,8 +333,15 @@ void Cannybots::processOutboundMessageQueue() {
         Serial1.write(">>");
         Serial1.write(msg->payload, CB_MAX_MSG_SIZE);
 #else
+        
+#ifdef __RFduino__
+        CB_DBG("BLE len = %d", msg->size);
+         RFduinoBLE.send((char*)msg->payload, msg->size);
+#else
         Serial.write(">>");
         Serial.write(msg->payload, CB_MAX_MSG_SIZE);
+#endif //__RFduino__
+
 #endif // ARDUINO_AVR_LEONARDO
 #endif // ARDUINO
         
@@ -288,24 +351,44 @@ void Cannybots::processOutboundMessageQueue() {
 
 // Command processing
 
-
+#import <cstring>
 
 void Cannybots::processMessage(Message* msg ) {
     //CB_DBG("processMessage()",0);
 	
+    // just print non-CB messages as strings
+    if ( (msg->payload[0] != 'C'  ||  (msg->payload[1] != 'B' ) ) ) {
+        //CB_DBG("Non CB message", 0);
+        msg->payload[ (msg->size)-1]=0;
+        CB_DBG("DBG:%s", msg->payload);
+        return;
+    }
     uint8_t cmd = msg->payload[CB_MSG_OFFSET_CMD];
     //CB_DBG("cmd= %d", cmd);
     cb_descriptor desc = descriptors[cmd];
     
     if (desc.isMethod) {
         //CB_DBG("isMethod",0);
-
-        if (desc.type == CB_INT16_3) {
-            //CB_DBG("is CB_INT16_3",0);
-            ((cb_callback_int16_int16_int16)desc.data)( mk16bit( msg->payload[CB_MSG_OFFSET_DATA+1],msg->payload[CB_MSG_OFFSET_DATA+0]),
-                                                        mk16bit( msg->payload[CB_MSG_OFFSET_DATA+3],msg->payload[CB_MSG_OFFSET_DATA+2]),
-                                                        mk16bit( msg->payload[CB_MSG_OFFSET_DATA+5],msg->payload[CB_MSG_OFFSET_DATA+4]));
+        switch (desc.type) {
+            case CB_INT16_3:
+                ((cb_callback_int16_int16_int16)desc.data)(
+                                                           mk16bit( msg->payload[CB_MSG_OFFSET_DATA+1],msg->payload[CB_MSG_OFFSET_DATA+0]),
+                                                           mk16bit( msg->payload[CB_MSG_OFFSET_DATA+3],msg->payload[CB_MSG_OFFSET_DATA+2]),
+                                                           mk16bit( msg->payload[CB_MSG_OFFSET_DATA+5],msg->payload[CB_MSG_OFFSET_DATA+4]));
+                break;
+            case CB_INT16_2:
+                ((cb_callback_int16_int16)desc.data)(
+                                                     mk16bit( msg->payload[CB_MSG_OFFSET_DATA+1],msg->payload[CB_MSG_OFFSET_DATA+0]),
+                                                     mk16bit( msg->payload[CB_MSG_OFFSET_DATA+3],msg->payload[CB_MSG_OFFSET_DATA+2]));
+                break;
+            case CB_INT16_1:
+                ((cb_callback_int16)desc.data)(
+                                                     mk16bit( msg->payload[CB_MSG_OFFSET_DATA+1],msg->payload[CB_MSG_OFFSET_DATA+0]));
+                break;
+            default:
+                break;
         }
+        
     }
 }
 

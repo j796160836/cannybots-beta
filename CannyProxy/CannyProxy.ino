@@ -2,6 +2,9 @@
 #include <RFduinoGZLL.h>
 #include <stdint.h>
 
+#define WATCHDOG_SETUP(seconds) NRF_WDT->CRV = 32768 * seconds; NRF_WDT->TASKS_START = 1;
+#define WATCHDOG_RELOAD() NRF_WDT->RR[0] = WDT_RR_RR_Reload;
+
 /////////////////////////////////////////////////////////
 // Config
 
@@ -9,6 +12,12 @@
 #define BLE_LOCALNAME            "Cannybots"
 #define BLE_ADVERTISEMENT_DATA   "CB_LFB_001"   
 // Note: BLE_ADVERTISEMENT_DATA must be < 16 bytes.
+
+#define BLE_TX_POWER_LEVEL  -20
+#define GZLL_TX_POWER_LEVEL -20
+// x one of;  (low) -20, -16, -12, -8, -4, 0, +4 (high)
+// RFduino default is +4
+
 
 // TODO: append devideID to advertising data
 
@@ -24,6 +33,11 @@
 
 #define TX_PIN 5
 #define RX_PIN 6
+
+
+static char dbg_buffer[20] = {'>', '>'};
+#define DBG(FMT, ...) snprintf(dbg_buffer+2, 18, FMT, __VA_ARGS__); writeUART((uint8_t*)dbg_buffer,20);
+
 
 
 /////////////////////////////////////////////////////////
@@ -103,14 +117,17 @@ void RFduinoGZLL_onReceive(device_t device, int rssi, char *data, int len)
 
 // BLE
 void RFduinoBLE_onAdvertisement(bool start) {
+    DBG("RFd_BLE_A=%d",start);
 }
 
 void RFduinoBLE_onConnect() {
   ble_connected = true;
+    DBG("RFd_BLE_CON",0);
 }
 
 void RFduinoBLE_onDisconnect() {
   ble_connected = false;
+  DBG("RFd_BLE_DIS",0);
 }
 
 void RFduinoBLE_onReceive(char *data, int len) {
@@ -150,8 +167,10 @@ void  ble_rfduino_manageRadios() {
     RFduinoBLE.advertisementData = BLE_ADVERTISEMENT_DATA;
     //RFduinoBLE.advertisementInterval(millis);
     
-    //RFduinoBLE.txPowerLevel(x); // x one of; -20, -16, -12, -8, -4, 0, +4
+    RFduinoBLE.txPowerLevel= BLE_TX_POWER_LEVEL;
     RFduinoBLE.begin();
+    DBG("RFd_BLE_ON",0);
+
 
   } else if (2 == state  ) {
     state = 3;
@@ -159,7 +178,9 @@ void  ble_rfduino_manageRadios() {
     while (RFduinoBLE.radioActive);
     RFduinoBLE.end();
     while (RFduinoBLE.radioActive);
+    RFduinoGZLL.txPowerLevel = GZLL_TX_POWER_LEVEL;
     RFduinoGZLL.begin(HOST);
+    DBG("RFd_GZL_ON",0);
   } else if (4 == state) {
     state = 0;
   }
@@ -182,18 +203,18 @@ void process_ble2uart_q() {
 }
 
 
-
 /////////////////////////////////////////////////////////
 // Standard arduino entry points.
 
 void setup() {
   Serial.begin(9600, RX_PIN, TX_PIN);        // UART Baud is limited to 9600 when the BLE stack is on.
-  NRF_WDT->CRV = 32768 * 2;   // Timeout period of 2 s
-  NRF_WDT->TASKS_START = 1;   // start the watchdog 
+  WATCHDOG_SETUP(2);
+  DBG("",0);
+  DBG("RFd_Setup",0);
 }
 
 void loop() {  
-  NRF_WDT->RR[0] = WDT_RR_RR_Reload;    // reload the watchdog timer
+WATCHDOG_RELOAD() 
   ble_rfduino_manageRadios();
   process_ble2uart_q();
   process_uart2ble_q();

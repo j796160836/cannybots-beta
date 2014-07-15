@@ -7,13 +7,35 @@
 #define DEBUG 1
 #define INFO_LED 13
 
+// BLE advertising, (when run on RFduino)
+
+#define BLE_UUID                 "7e400001-b5a3-f393-e0a9-e50e24dcca9e"
+
+#ifndef BLE_LOCALNAME
+#define BLE_LOCALNAME            "Cannybots"
+#endif
+
+#ifndef BLE_ADVERTISEMENT_DATA
+#define BLE_ADVERTISEMENT_DATA   "CB_DEF_001"
+#endif
+// Note: BLE_ADVERTISEMENT_DATA must be < 16 bytes.
+
+#define BLE_TX_POWER_LEVEL  -20
+
 // Transport buffers
 #define SERIAL_BUF_SIZE 32
 #define CB_MAX_OUT_Q_DEPTH 4
 #define CB_MAX_IN_Q_DEPTH 4
 
 // Connection settings
+#ifdef __RFduino__
+// this is really jsut for debugging, the message will come from BLE_onReceive
+#define CB_INBOUND_SERIAL_PORT Serial
+#else
+// Assume A*
 #define CB_INBOUND_SERIAL_PORT Serial1
+#endif
+
 #define CB_INBOUND_SERIAL_BAUD 9600
 
 
@@ -35,7 +57,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "CannybotsTypes.h"
+#include <CannybotsTypes.h>
 
 
 #ifdef DEBUG
@@ -51,6 +73,17 @@ static char dbg_buffer[256];
 #endif
 
 
+#ifdef __RFduino__
+#define WATCHDOG_SETUP(seconds) NRF_WDT->CRV = 32768 * seconds; NRF_WDT->TASKS_START = 1;
+#define WATCHDOG_RELOAD() NRF_WDT->RR[0] = WDT_RR_RR_Reload;
+#define BLE_BEGIN_CRITICAL_SECTION() while (!RFduinoBLE.radioActive); while (RFduinoBLE.radioActive);
+#define BLE_END_CRITICAL_SECTION()
+#else
+#define WATCHDOG_SETUP(seconds) 
+#define WATCHDOG_RELOAD() 
+#define BLE_BEGIN_CRITICAL_SECTION() 
+#define BLE_END_CRITICAL_SECTION()
+#endif
 
 
 template<typename T, int rawSize>
@@ -173,15 +206,19 @@ public:
     const static cb_type CB_INT32_ARRAY;
     const static cb_type CB_UINT32_ARRAY;
     const static cb_type CB_FLOAT_ARRAY;
+    const static cb_type CB_INT16_1;
+    const static cb_type CB_INT16_2;
     const static cb_type CB_INT16_3;
+    const static cb_type CB_FLOAT_1;
+    const static cb_type CB_FLOAT_2;
     const static cb_type CB_FLOAT_3;
 
     
     static Cannybots instance; // Guaranteed to be destroyed.
     static Cannybots& getInstance()
     {
-        // not instatiated on first use, do 'controlled' setup in Cannybots::begin()
-        // the definition is in th e.cpp because AVR compilation targer complains about missing ATEXIT
+        // not instatiated on first use, instead do 'controlled' setup in Cannybots::begin()
+        // the definition is in the .cpp because AVR compilation targert complains about missing ATEXIT used for dtors of static vars in function.
         // see: http://forum.arduino.cc/index.php/topic,73177.0.html
         return instance;
     }
@@ -201,6 +238,8 @@ public:
     
     // Function handlers
     void registerHandler(const cb_id _id, cb_callback_int16_int16_int16);
+    void registerHandler(const cb_id _id, cb_callback_int16_int16);
+    void registerHandler(const cb_id& _id, cb_callback_int16);
     
     
     // 'generic' callback poitners (e.g. iOSblocks)
@@ -213,6 +252,10 @@ public:
     void registerScritableVariable(const cb_id _id, const char* name);
 #ifdef ARDUINO
     void registerScritableVariable(const cb_id _id, const __FlashStringHelper*);
+    
+    unsigned long getLastInboundCommandTime() {
+        return lastInboundMessageTime;
+    }
 #endif
     
     // GUI
@@ -263,7 +306,7 @@ public:
     
     
     // Message Creation Helpers
-    
+    // TODO generalise, and make use of para count
     void createMessage(Message* msg, cb_id cid, int16_t p1, int16_t p2, int16_t p3) {
         uint8_t tmpMsg[CB_MAX_MSG_SIZE] = {
             'C', 'B', 0,
@@ -272,6 +315,32 @@ public:
             hiByteFromInt(p1),loByteFromInt(p1),
             hiByteFromInt(p2),loByteFromInt(p2),
             hiByteFromInt(p3),loByteFromInt(p3),
+            0,0,  0,0,  0,0, 0,0
+        };
+        memcpy((char*)msg->payload, (char*)tmpMsg, CB_MAX_MSG_SIZE);
+        msg->size = CB_MAX_MSG_SIZE;
+    }
+    void createMessage(Message* msg, cb_id cid, int16_t p1, int16_t p2) {
+        uint8_t tmpMsg[CB_MAX_MSG_SIZE] = {
+            'C', 'B', 0,
+            Cannybots::CB_INT16_2, cid.cid,
+            2,
+            hiByteFromInt(p1),loByteFromInt(p1),
+            hiByteFromInt(p2),loByteFromInt(p2),
+            0,0,
+            0,0,  0,0,  0,0, 0,0
+        };
+        memcpy((char*)msg->payload, (char*)tmpMsg, CB_MAX_MSG_SIZE);
+        msg->size = CB_MAX_MSG_SIZE;
+    }
+    void createMessage(Message* msg, cb_id cid, int16_t p1) {
+        uint8_t tmpMsg[CB_MAX_MSG_SIZE] = {
+            'C', 'B', 0,
+            Cannybots::CB_INT16_2, cid.cid,
+            1,
+            hiByteFromInt(p1),loByteFromInt(p1),
+            0,0,
+            0,0,
             0,0,  0,0,  0,0, 0,0
         };
         memcpy((char*)msg->payload, (char*)tmpMsg, CB_MAX_MSG_SIZE);
@@ -299,7 +368,9 @@ public:
 private:
     
     // Singleton
-    Cannybots () {};
+    Cannybots () {
+        lastInboundMessageTime = 0;
+    };
     Cannybots(Cannybots const&);        // Don't Implement
     void operator=(Cannybots const&);   // Don't implement
     
@@ -322,7 +393,9 @@ private:
     bool foundStart;
     char c, lastChar;
     void readSerial(HardwareSerial &ser);
+    
 #endif
+    unsigned long lastInboundMessageTime;
 
 };
 

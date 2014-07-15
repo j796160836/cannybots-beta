@@ -9,7 +9,7 @@ Cannybots& cb = Cannybots::getInstance();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
+//#define USE_ANALOG_LIB
 #ifdef USE_ANALOG_LIB
 // see: https://github.com/merose/AnalogScanner
 #include <AnalogScanner.h>
@@ -19,6 +19,10 @@ AnalogScanner scanner;
 #define ANALOG_READ analogRead
 #endif
 
+
+bool sign(double x) { return ((x>0)-(x<0)); }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -26,33 +30,76 @@ AnalogScanner scanner;
 
 // Pinout wiring
 
-#define IR1 A8
-#define IR2 A9
-#define IR3 A10
+// REdbot
+#define IR_MAX 100
+#define WHITE_THRESHOLD 100
 
-#define pinA1 6 
-#define pinA2 5
-#define pinB1 4
-#define pinB2 3
-#define pin_MODE 7
+#define IR1 A9
+#define IR2 A8
+#define IR3 A6
+#define pinA1 5 
+#define pinA2 6
+#define pinB1 10
+#define pinB2 11
+
+
+
+// white bot
+//#define IR1 A8
+//#define IR2 A9
+//#define IR3 A10
+// orange bot (Custom PCB)
+//#define IR1 A6
+//#define IR2 A8
+//#define IR3 A11
+
+// small white bot
+//#define pinA1 6 
+//#define pinA2 5
+//#define pinB1 4
+//#define pinB2 3
+//#define pin_MODE 7
+
+// orange bot (Custom PCB)
+//#define pinA1 3 
+//#define pinA2 5
+//#define pinB1 6
+//#define pinB2 9
+//#define pin_MODE 2
+//#define BOT_TYPE_CUSTOM_PCB 1
+//#define IR_MAX 1000
+//#define WHITE_THRESHOLD 700
+
+// Joystick
+
+#define XAXIS_DEADZONE 50
+
 
 // IR Sensor settings
 
 #define NUM_IR_SENSORS   3
-#define IR_MAX 1000
-#define WHITE_THRESHOLD 700
+
 
 // Motor settings
 #define NUM_MOTORS       2
 #define MOTOR_MAX_SPEED 255
 
+// Battery Voltage sensing
+#ifdef BOT_TYPE_CUSTOM_PCB
+#define BATTERY_PIN A1
+#endif 
+
+// Indicator LED
+#define STATUS_LED 13
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // App State
 
 // Pid
-int Kp, Ki, Kd;
+int Kp = 10;
+int Ki = 0;
+int Kd = 7;
 int I_limit = 100;
 int P_error = 0;
 int I_error = 0;
@@ -75,7 +122,7 @@ int manualB = 0;
 int yAxisValue = 0;
 int xAxisValue = 0;
 
-int IRval[NUM_IR_SENSORS];
+int IRvals[NUM_IR_SENSORS];
 int IRbias[NUM_IR_SENSORS];
 
 volatile unsigned long lastCommandTime = millis();
@@ -90,29 +137,45 @@ void setup() {
   pinMode(pinA2, OUTPUT);
   pinMode(pinB1, OUTPUT);
   pinMode(pinB2, OUTPUT);
+#ifdef BOT_TYPE_CUSTOM_PCB 
   pinMode(pin_MODE, OUTPUT);
   digitalWrite(pin_MODE, HIGH); //to set controller to Phase/Enable mode
-  digitalWrite(13, HIGH);
+#endif
+
+  pinMode(STATUS_LED, OUTPUT);
+  digitalWrite(STATUS_LED, HIGH);
+#ifdef USE_ANALOG_LIB
+  int scanOrder[NUM_IR_SENSORS+1] = {IR1, IR2, IR3, BATTERY_PIN};
+  scanner.setScanOrder(NUM_IR_SENSORS+1, scanOrder);
+  scanner.beginScanning();
+  delay(1); // Wait for the first scans to occur.
+#endif
   cannybots_setup();
 }
 
 
 void loop() {
   read_ir_sensors();
-
-  isLineFollowingMode =  IRval[1] >= WHITE_THRESHOLD;
+  //lf_emitIRValues(IRvals[0], IRvals[1], IRvals[2]);
+  
+  isLineFollowingMode =  IRvals[1] >= WHITE_THRESHOLD;
+  isLineFollowingMode=0;
   lf_report_followingMode(isLineFollowingMode);
 
   if (isLineFollowingMode) {
     calculate_PID();
   } else {
     // in manual mode
-    if ((millis() - lastCommandTime) > 2000) {
+    if ( (millis() - cb.getLastInboundCommandTime()) > 2000) {
       // no command has been received in the last 2 seconds, err on the side of caution and stop!
       speedA = speedB = 0;
     } else {
-      speedA = manualA;
-      speedB = manualB;
+
+#define MAX_MOTOR_DELTA_DIVISOR    150.0
+#define MAX_MOTOR_DELTA             2.0
+
+      speedA = speedA + min((manualA-speedA)/MAX_MOTOR_DELTA_DIVISOR, MAX_MOTOR_DELTA*sign(manualA-speedA));
+      speedB = speedB + min((manualB-speedB)/MAX_MOTOR_DELTA_DIVISOR, MAX_MOTOR_DELTA*sign(manualB-speedB));
     }
   }
   motor(speedA, speedB);  
@@ -131,7 +194,7 @@ void loop() {
 void calculate_PID() {
   // process IR readings via PID
     error_last = error;                                   // store previous error before new one is caluclated
-    error = constrain(IRval[0] - IRval[2], -30, 30);        // set bounds for error
+    error = constrain(IRvals[0] - IRvals[2], -30, 30);        // set bounds for error
     P_error = error * Kp / 10;                               // calculate proportional term
     D_error = (error - error_last) * Kd / 10;                // calculate differential term
     correction = P_error + D_error;
@@ -167,9 +230,11 @@ void calculateMotorSpeedFromJoystick(int xAxisValue, int yAxisValue, int* motor1
   // only calc left & right if outside of X axis deadzone
   unsigned int xMag  = abs(xAxisValue);
 
-  if ( xMag > 25  ) {
+  if ( xMag > XAXIS_DEADZONE  ) {
     bool isLeft = xAxisValue < 0;
-    int direction = map (xAxisValue, -255, 255, 270, 270 + 180);
+    // adjust for the fact that the XAXIS_DEADZONE moves the start speed from 0 to XAXIS_DEADZONE
+    int direction = map (xAxisValue+ (isForward?XAXIS_DEADZONE:-XAXIS_DEADZONE), -255-XAXIS_DEADZONE, 255+XAXIS_DEADZONE, -255,255);
+    direction = map (xAxisValue, -255, 255, 270, 270 + 180);
     direction = sin( radians(direction) ) * MOTOR_MAX_SPEED;
 
     float directionRatio = abs((1.0 / MOTOR_MAX_SPEED) * direction);
@@ -189,7 +254,7 @@ void calculateMotorSpeedFromJoystick(int xAxisValue, int yAxisValue, int* motor1
   rightMotorSpeed = rightMotorSpeed * (isForward ? 1 : -1);
 
 
-  //CB_DBG("%lu: xAxisValue,yAxisValue(%d,%d) =  throttle(%d),  Left,Right(%d,%d) - freemem=(%d)", millis(), xAxisValue, yAxisValue, throttle, leftMotorSpeed, rightMotorSpeed, cb.getFreeMemory());
+  CB_DBG("%lu: xAxisValue,yAxisValue(%d,%d) =  throttle(%d),  Left,Right(%d,%d)", millis(), xAxisValue, yAxisValue, throttle, leftMotorSpeed, rightMotorSpeed);
 
   *motor1 = rightMotorSpeed;
   *motor2 = leftMotorSpeed;
@@ -207,13 +272,13 @@ void calculateMotorSpeedFromJoystick(int xAxisValue, int yAxisValue, int* motor1
 // set limit on reading. The reading can be very high and inaccurate on pitch black
 void read_ir_sensors() {
 
-  IRval[0] = constrain(ANALOG_READ(IR1) - IRbias[0], 0, IR_MAX); //left looking from behind
-  IRval[1] = constrain(ANALOG_READ(IR2) - IRbias[1], 0, IR_MAX); //centre
-  IRval[2] = constrain(ANALOG_READ(IR3) - IRbias[2], 0, IR_MAX); //right
+  IRvals[0] = constrain(ANALOG_READ(IR1) - IRbias[0], 0, IR_MAX); //left looking from behind
+  IRvals[1] = constrain(ANALOG_READ(IR2) - IRbias[1], 0, IR_MAX); //centre
+  IRvals[2] = constrain(ANALOG_READ(IR3) - IRbias[2], 0, IR_MAX); //right
 }
 
 
-void motor(int _speedA, int _speedB)
+void motor_customPCB(int _speedA, int _speedB)
 {
   _speedA = constrain(_speedA, -255, 255);
   _speedB = constrain(_speedB, -255, 255);
@@ -221,8 +286,56 @@ void motor(int _speedA, int _speedB)
   digitalWrite(pinA1, _speedA >= 0 ? HIGH : LOW) ;
   analogWrite (pinA2, abs(_speedA));
 
-  digitalWrite(pinB1, _speedB >= 0 ? LOW : HIGH);
+  digitalWrite(pinB1, _speedB >= 0 ? HIGH : LOW);
   analogWrite (pinB2, abs(_speedB));
+}
+
+
+// motor controller function
+void motor(int _speedA, int _speedB) // V4
+{
+  _speedA = constrain(_speedA, -255, 255);
+  _speedB = constrain(_speedB, -255, 255);
+  if (_speedA >= 0) {
+    analogWrite(pinA1, _speedA);
+    analogWrite(pinA2, 0);
+  } else {
+    analogWrite(pinA1, 0);
+    analogWrite(pinA2, abs(_speedA));
+  }
+  if (_speedB >= 0) {
+    analogWrite(pinB1, _speedB);
+    analogWrite(pinB2, 0);
+  } else {
+    analogWrite(pinB1, 0);
+    analogWrite(pinB2, abs(_speedB));
+  }
+}
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Utils
+
+
+void printvalues ()
+{
+  static unsigned long lastPrint = millis();
+  if ( millis() - lastPrint < 1000 )  return;
+  lastPrint = millis();
+
+  CB_DBG(    "%lu: IR(%u,%u,%u) Kpd(%d,%d) e(%d) PeDe(%d,%d) Sab(%d,%d) Mab(%d,%d), XY(%d,%d), MEM(%d), ", //VCC(%d)",
+                 millis(),
+                 IRvals[0], IRvals[1], IRvals[2],
+                 Kp, Kd, error, P_error, D_error,
+                 speedA, speedB, manualA, manualB,
+                 xAxisValue, yAxisValue,
+                 cb.getFreeMemory()
+                 //ANALOG_READ(BATTERY_PIN)
+            );
 }
 
 void lf_report_followingMode(bool isLineMode) {
@@ -241,45 +354,8 @@ void lf_report_followingMode(bool isLineMode) {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
-// Utils
-
-
-void printvalues ()
-{
-  static unsigned long lastPrint = millis();
-  if ( millis() - lastPrint < 250 )  return;
-  lastPrint = millis();
-
-  CB_DBG(    "%lu: IR(%u,%u,%u) Kpd(%d,%d) e(%d) PeDe(%d,%d) Sab(%d,%d) Mab(%d,%d), XY(%d,%d), MEM(%d)",
-                 millis(),
-                 IRval[0], IRval[1], IRval[2],
-                 Kp, Kd, error, P_error, D_error,
-                 speedA, speedB, manualA, manualB,
-                 xAxisValue, yAxisValue,
-                 cb.getFreeMemory()
-            );
-}
-
-
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
 // Remote comms
 
-
-void cannybots_setup() {
-  cb.setConfigStorage("CBLF", 64);
-  cb.registerHandler(RACER_CRUISESPEED, lf_updateMotorSpeeds);
-  cb.registerHandler(RACER_LINEFOLLOWING_MODE, lf_updateLineFollowingMode);
-  cb.registerHandler(RACER_PID, lf_updatePID);
-  cb.registerHandler(RACER_IRBIAS, lf_updateBias);
-  cb.registerHandler(RACER_JOYAXIS, lf_updateAxis);
-  cb.registerHandler(RACER_CONFIG, lf_emitConfig);
-  cb.begin();
-}
 
 void lf_updateMotorSpeeds(int _speedA, int _speedB, int _dummy) {
   //CB_DBG("%d,%d", _speedA, _speedB)
@@ -294,6 +370,7 @@ void lf_updateAxis(int xAxis, int yAxis, int _dummy) {
     manualA = yAxisValue > 0 ? yAxisValue : 0;
   } else if ( (0 == xAxisValue) && (yAxisValue == 0) ) {
     manualA = manualB = 0;
+    speedA = speedB = 0;
     motor(0, 0);                  // immediate stop
   } else {
     calculateMotorSpeedFromJoystick(xAxisValue, yAxisValue, &manualA, &manualB);
@@ -307,6 +384,7 @@ void lf_updatePID(int _Kp, int _Ki, int _Kd) {
   Kp = _Kp;
   Ki = _Ki;
   Kd = _Kd;
+//  #error  TODO:save eeprom
 }
 
 void lf_updateBias (int b1, int b2, int b3) {
@@ -322,10 +400,34 @@ void lf_updateLineFollowingMode(int isLFMode, int _d1, int _d2) {
 }
 
 void lf_emitConfig(int _d1, int _d2, int _d3) {
-  cb.callMethod(RACER_PID, 1, 2, 3);
-  cb.callMethod(RACER_IRBIAS, 4, 5, 6);
+  cb.callMethod(RACER_PID, Kp, Ki, Kd);
+  cb.callMethod(RACER_IRBIAS, IRbias[0], IRbias[1], IRbias[2]);
+}
+
+void lf_emitIRValues(int v1, int v2, int v3) {
+  //cb.callMethod(RACER_IRVALS, v1,v2,v3);
 }
 
 
+void lf_ping(int v1) {
+    //CB_DBG("ping", v1)
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+void cannybots_setup() {
+  cb.setConfigStorage("CBLF", 64);
+  cb.registerHandler(RACER_CRUISESPEED, lf_updateMotorSpeeds);
+  cb.registerHandler(RACER_LINEFOLLOWING_MODE, lf_updateLineFollowingMode);
+  cb.registerHandler(RACER_PID, lf_updatePID);
+  cb.registerHandler(RACER_IRBIAS, lf_updateBias);
+  cb.registerHandler(RACER_JOYAXIS, lf_updateAxis);
+  cb.registerHandler(RACER_CONFIG, lf_emitConfig);
+  cb.registerHandler(RACER_IRVALS, lf_emitIRValues);
+  cb.registerHandler(RACER_PING, lf_ping);
+  cb.begin();
+}
 
 

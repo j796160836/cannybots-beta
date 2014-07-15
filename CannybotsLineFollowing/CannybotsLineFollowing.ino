@@ -34,6 +34,7 @@ AnalogScanner scanner;
 #define ANALOG_READ analogRead
 #endif
 
+#define V7
 
 #ifdef V7
 // PIN Assignments
@@ -103,7 +104,7 @@ void read_ir_sensors() {
 }
 
 
-void motor(int _speedA, int _speedB)
+void motor_V5(int _speedA, int _speedB)
 {
    _speedA = constrain(_speedA, -255, 255);
    _speedB = constrain(_speedB, -255, 255);
@@ -117,7 +118,7 @@ void motor(int _speedA, int _speedB)
 
 
 // motor controller function
-void motor_V4(int _speedA, int _speedB)
+void motor(int _speedA, int _speedB) // V4
 {
   _speedA = constrain(_speedA, -255, 255);
   _speedB = constrain(_speedB, -255, 255);
@@ -204,8 +205,9 @@ void lf_loop()
       // no command has been received in the last 2 seconds, err on the side of caution and stop!
       speedA = speedB = 0;
     } else {
-      speedA = manualA;
-      speedB = manualB;
+      // 
+      speedA= manualA;
+      speedB= manualB;
     }
   }
   printvalues();
@@ -661,9 +663,10 @@ void setup() {
   pinMode(pinA2, OUTPUT);
   pinMode(pinB1, OUTPUT);
   pinMode(pinB2, OUTPUT);
+#ifdef V8
   pinMode(pin_MODE, OUTPUT);
   digitalWrite(pin_MODE, HIGH); //to set controller to Phase/Enable mode
-
+#endif
   digitalWrite(13, HIGH);
 
 }

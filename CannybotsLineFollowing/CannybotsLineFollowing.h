@@ -1,8 +1,8 @@
 
 #define MOTOR_MAX_SPEED 255
 
-#define IR_MAX 1000
-#define WHITE_THRESHOLD 700
+#define IR_MAX 100
+#define WHITE_THRESHOLD 40
 
 
 

@@ -60,6 +60,8 @@ extern "C" {
 #endif
     // Callback prototypes
     typedef void (*cb_callback_int16_int16_int16) (int16_t p1, int16_t p2, int16_t p3);
+    typedef void (*cb_callback_int16_int16) (int16_t p1, int16_t p2);
+    typedef void (*cb_callback_int16) (int16_t p1);
     typedef void (cb_callback_gui) ();
     
 #ifdef __cplusplus
