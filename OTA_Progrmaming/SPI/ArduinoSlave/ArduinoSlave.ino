@@ -22,6 +22,8 @@ void setup (void)
   pinMode(MOSI, INPUT);
   pinMode(SS, INPUT);
   
+  pinMode(13, OUTPUT);
+  
   // turn on SPI in slave mode
   SPCR |= _BV(SPE);
   
@@ -63,6 +65,10 @@ void loop (void)
   //Serial.println(intCount,DEC);
   if (process_it)
     {
+    digitalWrite(13,HIGH);
+    delay(200);
+    digitalWrite(13,LOW);
+
     buf [pos] = 0;  
     Serial.println (buf);
     pos = 0;

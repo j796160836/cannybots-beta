@@ -12,9 +12,10 @@ void setup (void)
   pinMode(SCK, OUTPUT);
   pinMode(MISO, INPUT);
   pinMode(MOSI, OUTPUT);
-  pinMode(SS, OUTPUT);
-  
+#ifdef __RFduino__
+  pinMode(SS, OUTPUT);  
   digitalWrite(SS, HIGH);  // ensure SS stays high for now
+#endif
 
   // Put SCK, MOSI, SS pins into output mode
   // also put SCK, MOSI into LOW state, and SS into HIGH state.
@@ -22,7 +23,12 @@ void setup (void)
   SPI.begin ();
 
   // Slow down the master a bit
+#ifdef __RFduino__
+  //SPI.setFrequency(125);
+#else
+// a no-op on RFduino SDK v2.0.3
   SPI.setClockDivider(SPI_CLOCK_DIV8);
+#endif  
   
 }  // end of setup
 
