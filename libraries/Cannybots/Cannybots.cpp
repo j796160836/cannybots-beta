@@ -7,6 +7,12 @@
 
 
 
+#ifdef ARDUINO
+#include <Arduino.h>
+#include <EEPROM.h>
+#endif
+
+
 
 // class: CAnnybots
 // define statics
@@ -425,4 +431,79 @@ int16_t Cannybots::getFreeMemory() {
 #endif
 }
 
+///////////////////////////////////////////////////////////////////////
+// Non-volatile methods
+
+// limit the number of writes, just in case we get stuck in a loop during dev!
+int nvWritesSinceBoot=0;
+bool  Cannybots::nvSetByte(uint16_t address, uint8_t b) {
+    nvWritesSinceBoot++;
+    if (nvWritesSinceBoot < 1000) {
+        
+#ifdef ARDUINO
+        
+#ifdef __RFduino__
+        
+        // see:  https://github.com/RFduino/RFduino/tree/master/libraries/RFduinoNonBLE/examples/Flash/FlashInteger
+#else
+        EEPROM.write(address, b);
+#endif
+#endif
+    } else {
+        //WARN("exceeded max EEPROM writes for this session");
+    }
+    return 0;
+}
+
+
+uint8_t  Cannybots::nvGetByte(uint16_t address) {
+    uint8_t b = 0;
+#ifdef ARDUINO
+    
+#ifdef __RFduino__
+    // see:  https://github.com/RFduino/RFduino/tree/master/libraries/RFduinoNonBLE/examples/Flash/FlashInteger
+#else
+    b = EEPROM.read(address);
+#endif
+#endif
+    return b;
+}
+
+
+
+bool Cannybots::nvSetInt(uint16_t address, uint16_t b) {
+    uint8_t b1 = hiByteFromInt(b);
+    uint8_t b2 = loByteFromInt(b);
+    
+    nvSetByte(address,b1);
+    nvSetByte(address+1,b2);
+    return 0;
+}
+
+
+
+uint16_t Cannybots::nvGetInt(uint16_t address) {
+    uint8_t b1 = nvGetByte(address);
+    uint8_t b2 = nvGetByte(address+1);
+    int16_t b = mk16bit(b2,b1);
+    return b;
+}
+
+
+bool Cannybots::nvSetupConfig() {
+    nvSetByte(0, 'C');
+    nvSetByte(1, 'N');
+    nvSetByte(2, 'Y');
+    nvSetByte(3, 'B');
+    return 0;
+}
+
+bool Cannybots::nvIsValidConfig() {
+    uint8_t b1 = nvGetByte(0);
+    uint8_t b2 = nvGetByte(1);
+    uint8_t b3 = nvGetByte(2);
+    uint8_t b4 = nvGetByte(3);
+    
+    return (  (b1 == 'C') && (b2 == 'N') && (b3 == 'Y') && (b4 == 'B') );
+}
 

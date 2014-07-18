@@ -363,8 +363,16 @@ public:
     }
     
 
+    // Non-Volatile RAM
     
+    bool  nvSetByte(uint16_t address, uint8_t b);
+    uint8_t  nvGetByte(uint16_t address);
+    bool nvSetInt(uint16_t address, uint16_t b);
+    uint16_t nvGetInt(uint16_t address);
+    bool nvSetupConfig();
+    bool nvIsValidConfig();
     
+
 private:
     
     // Singleton

@@ -41,8 +41,8 @@ void lapTime(int16_t p1) {
 
 void sendLapTime(unsigned long lapTime) {
   cb.callMethod(LAPCOUNTER_LAPTIME, lapTime);
-  Keyboard.print("Laptime: ");
-  Keyboard.println(lapTime/1000.0);
+  Keyboard.println("");//("Laptime: ");
+  Keyboard.print(lapTime/1000.0);
 }
 
 
@@ -80,7 +80,7 @@ void loop()
   static bool okToSend = false;
   long distanceReading = getDistance();
   static long distance=0;
-  CB_DBG("Dist: %d - %d", distanceReading, distance);
+  //CB_DBG("Dist: %d - %d", distanceReading, distance);
   if (!trained) {
     trainedAverage =  (trainedAverage * .8)  + (distanceReading*.2);
     if ((timeNow - trainStartTime) > (TRAINING_SETTLE_TIME)) {

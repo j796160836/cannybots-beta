@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Libraries
 
+
 #include <Cannybots.h>
 #include "CannybotsRacer.h"
 Cannybots& cb = Cannybots::getInstance();
@@ -97,9 +98,9 @@ bool sign(double x) { return ((x>0)-(x<0)); }
 // App State
 
 // Pid
-int Kp = 10;
+int Kp = 0;
 int Ki = 0;
-int Kd = 7;
+int Kd = 0;
 int I_limit = 100;
 int P_error = 0;
 int I_error = 0;
@@ -109,7 +110,7 @@ int error_last = 0; // to calculate D_error = error - error_last
 int correction = 0; //error after PID filter
 
 bool isLineFollowingMode = true;
-
+bool forceManualMode = false;
 int baseCruiseSpeed = 80;
 int cruiseSpeed = baseCruiseSpeed;
 
@@ -126,6 +127,43 @@ int IRvals[NUM_IR_SENSORS];
 int IRbias[NUM_IR_SENSORS];
 
 volatile unsigned long lastCommandTime = millis();
+
+// NV settings
+#include <EEPROM.h>
+
+#define NV_ID                           "CBLF"
+#define NV_BASE                         64
+#define NV_VERSION                      0
+#define NV_PID_P                        1
+#define NV_PID_I                        2
+#define NV_PID_D                        3
+#define NV_PID_ALGO_TYPE                4
+#define NV_DEFAULT_CRUISESPEED          5
+#define NV_MAX_MANUAL_CRUISESPEED       6
+#define NV_MAX_MOTOR_SPEED              7
+#define NV_MOTOR_ALGO_TYPE              8
+#define NV_M1_A_PIN                     9
+#define NV_M1_B_PIN                    10
+#define NV_M1_SENSE_PIN                11
+#define NV_M2_A_PIN                    12
+#define NV_M2_B_PIN                    13
+#define NV_M2_SENSE_PIN                14
+#define NV_MDRIVER_MODE_PIN            15
+#define NV_BAT_PIN                     16
+//   bits [0..7] =  [ HAS_MDRRIVEMODE, HAT_MOTOR_SENSE, HAS_BAT_SENSE, M1_POSITIVESPEED_IS_FWD, M2_POSITIVESPEED_IS_FWD, n/a, n/a, n/a],
+#define NV_FEATURES_MASK1              17  
+#define NV_IR_MAX                      18 // UINT
+#define NV_IR_WHITE_THRESHOLD          20 // UINT
+#define NV_XAXIS_DEADZONE              22 // BYTE
+#define NV_BOT_ID                      23 // UINT
+#define NV_MAX_MOTOR_DELTA             24
+#define NV_MAX_MOTOR_DELTA_DIV         25
+#define NV_IRPIN_1                     30
+#define NV_IRPIN_2                     31
+#define NV_IRPIN_3                     32
+#define NV_IRBIAS_1                    40 // INT8
+#define NV_IRBIAS_2                    41 // INT8
+#define NV_IRBIAS_3                    42 // INT8
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -156,10 +194,12 @@ void setup() {
 
 void loop() {
   read_ir_sensors();
-  //lf_emitIRValues(IRvals[0], IRvals[1], IRvals[2]);
+  lf_emitIRValues(IRvals[0], IRvals[1], IRvals[2]);
   
   isLineFollowingMode =  IRvals[1] >= WHITE_THRESHOLD;
-  isLineFollowingMode=0;
+  if (forceManualMode)
+    isLineFollowingMode=0;
+    
   lf_report_followingMode(isLineFollowingMode);
 
   if (isLineFollowingMode) {
@@ -171,7 +211,10 @@ void loop() {
       speedA = speedB = 0;
     } else {
 
+      
+// number of divisions between current and target motor speed            
 #define MAX_MOTOR_DELTA_DIVISOR    150.0
+// max motor speed change
 #define MAX_MOTOR_DELTA             2.0
 
       speedA = speedA + min((manualA-speedA)/MAX_MOTOR_DELTA_DIVISOR, MAX_MOTOR_DELTA*sign(manualA-speedA));
@@ -190,17 +233,26 @@ void loop() {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Algorithms
 
-
+#ifdef BOT_TYPE_CUSTOM_PCB
+#define PID_DIV 10
+#else
+#define PID_DIV 1
+#endif
 void calculate_PID() {
   // process IR readings via PID
     error_last = error;                                   // store previous error before new one is caluclated
     error = constrain(IRvals[0] - IRvals[2], -30, 30);        // set bounds for error
-    P_error = error * Kp / 10;                               // calculate proportional term
-    D_error = (error - error_last) * Kd / 10;                // calculate differential term
+    P_error = error * Kp / PID_DIV;                               // calculate proportional term
+    D_error = (error - error_last) * Kd / PID_DIV;                // calculate differential term
     correction = P_error + D_error;
     cruiseSpeed = baseCruiseSpeed + manualA;
+#ifdef BOT_TYPE_CUSTOM_PCB
     speedA = constrain(cruiseSpeed - correction, -200, 200);
     speedB = constrain(cruiseSpeed + correction, -200, 200);
+#else
+    speedA = constrain(cruiseSpeed + correction, -200, 200);
+    speedB = constrain(cruiseSpeed - correction, -200, 200);
+#endif
 }
 
 
@@ -384,7 +436,9 @@ void lf_updatePID(int _Kp, int _Ki, int _Kd) {
   Kp = _Kp;
   Ki = _Ki;
   Kd = _Kd;
-//  #error  TODO:save eeprom
+  cb.nvSetByte(NV_PID_P, Kp);
+  cb.nvSetByte(NV_PID_I, Ki);
+  cb.nvSetByte(NV_PID_D, Kd);
 }
 
 void lf_updateBias (int b1, int b2, int b3) {
@@ -392,11 +446,15 @@ void lf_updateBias (int b1, int b2, int b3) {
   IRbias[0] = b1;
   IRbias[1] = b2;
   IRbias[2] = b3;
+  cb.nvSetByte(NV_IRBIAS_1, IRbias[0]);
+  cb.nvSetByte(NV_IRBIAS_2, IRbias[1]);
+  cb.nvSetByte(NV_IRBIAS_3, IRbias[2]);
+
 }
 
-void lf_updateLineFollowingMode(int isLFMode, int _d1, int _d2) {
-  CB_DBG("LF=%d", isLFMode)
-  isLineFollowingMode=isLFMode;
+void lf_updateLineFollowingMode(int _forceManualMode, int _d1, int _d2) {
+  CB_DBG("ForceManual=%d", _forceManualMode)
+  forceManualMode=_forceManualMode;
 }
 
 void lf_emitConfig(int _d1, int _d2, int _d3) {
@@ -405,7 +463,11 @@ void lf_emitConfig(int _d1, int _d2, int _d3) {
 }
 
 void lf_emitIRValues(int v1, int v2, int v3) {
-  //cb.callMethod(RACER_IRVALS, v1,v2,v3);
+  static unsigned long lastCall = millis();
+  if (millis() - lastCall > 200) {
+    cb.callMethod(RACER_IRVALS, v1,v2,v3);
+    lastCall = millis();
+  }
 }
 
 
@@ -418,7 +480,7 @@ void lf_ping(int v1) {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 void cannybots_setup() {
-  cb.setConfigStorage("CBLF", 64);
+  cb.setConfigStorage(NV_ID, NV_BASE);
   cb.registerHandler(RACER_CRUISESPEED, lf_updateMotorSpeeds);
   cb.registerHandler(RACER_LINEFOLLOWING_MODE, lf_updateLineFollowingMode);
   cb.registerHandler(RACER_PID, lf_updatePID);
@@ -428,6 +490,22 @@ void cannybots_setup() {
   cb.registerHandler(RACER_IRVALS, lf_emitIRValues);
   cb.registerHandler(RACER_PING, lf_ping);
   cb.begin();
+  getNVSettings();
 }
 
+void getNVSettings() {
+  Kp=cb.nvGetByte(NV_PID_P);
+  Ki=cb.nvGetByte(NV_PID_I);
+  Kd=cb.nvGetByte(NV_PID_D);
+  IRbias[0] = cb.nvGetByte(NV_IRBIAS_1);
+  IRbias[1] = cb.nvGetByte(NV_IRBIAS_2);
+  IRbias[2] = cb.nvGetByte(NV_IRBIAS_3);
+ 
+}
+
+void setNVDefaults() {
+  cb.nvSetByte(NV_IRBIAS_1, 0 );
+  cb.nvSetByte(NV_IRBIAS_2, 0 );
+  cb.nvSetByte(NV_IRBIAS_3, 0 );
+}
 
