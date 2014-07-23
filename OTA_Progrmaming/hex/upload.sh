@@ -1,4 +1,5 @@
 #DEV=/dev/cu.usbmodem26221
+#DEV=/dev/cu.usbserial-DC008NOM
 DEV=/dev/tty.usbserial-DC008J1H
 
 #BAUD=57600
@@ -28,7 +29,9 @@ VERBOSE='-v -v -v -v'
 
 $BIN -C$CONF $VERBOSE -patmega32u4 -cstk500v1 -P$DEV -b$BAUD -e -Ulock:w:0x3F:m -Uefuse:w:0xc8:m -Uhfuse:w:0xd0:m -Ulfuse:w:0xff:m
 
-#flash
+
+#flash sketch
+
 $BIN -C$CONF $VERBOSE -patmega32u4 -c $PROTO -P$DEV -b$BAUD -D -Uflash:w:./Blink.cpp.hex:i
 
 

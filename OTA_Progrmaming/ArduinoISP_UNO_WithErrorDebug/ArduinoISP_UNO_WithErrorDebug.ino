@@ -49,7 +49,7 @@
 #include <HardwareSerial.h>
 int avrisp();
 
-
+/*
 #ifdef DEBUG_LVL
 #include <SoftwareSerial.h>
 SoftwareSerial mySerial(3, 4); // RX, TX
@@ -61,6 +61,30 @@ SoftwareSerial mySerial(3, 4); // RX, TX
 #define DEBUG(x)
 #define DEBUGC(x,y) 
 #endif
+*/
+#define DEBUG_LVL 1
+
+#ifdef DEBUG_LVL
+#ifdef __RFduino__
+#define ERROR(x) Serial.println(x);
+#define DEBUG(x) Serial.println(x);
+#define DEBUGC(x,y) Serial.println(x,y);
+
+#else
+#include <SoftwareSerial.h>
+SoftwareSerial mySerial(3, 4); // RX, TX
+#define ERROR(x) mySerial.println(x);
+#define DEBUG(x) mySerial.println(x);
+#define DEBUGC(x,y) mySerial.println(x,y);
+#endif
+
+#else
+#define ERROR(x)
+#define DEBUG(x)
+#define DEBUGC(x,y)
+#endif
+
+
 
 #include "pins_arduino.h"
 #ifdef __RFduino__

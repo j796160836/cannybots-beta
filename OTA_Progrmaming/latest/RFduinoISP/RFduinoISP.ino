@@ -78,7 +78,7 @@ void WRITE_OUT(char* str) {
   }
 }
 void WRITE_OUT(byte c) {
-  radioInFifo.enqueue(c); 
+  radioOutFifo.enqueue(c); 
 }
 
 void pulse(int pin, int times);

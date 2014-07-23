@@ -42,21 +42,87 @@
 // - The AVRISP/STK500 (mk I) protocol is used in the arduino bootloader
 // - The SPI functions herein were developed for the AVR910_ARD programmer
 // - More information at http://code.google.com/p/mega-isp
-#include <SPI.h>
+
+// #define ARDUINOISP 1
+
+#include <Arduino.h>
+#include <HardwareSerial.h>
+
 #include <RFduinoGZLL.h>
 #include <SimpleFIFO.h>
 
-SimpleFIFO<byte,512> radioInFifo;
-SimpleFIFO<byte,512> radioOutFifo;
+#define MAX_BUF 255
+#define TX_BUF_MAX 8
+SimpleFIFO<uint8_t, MAX_BUF> radioInFifo;
+SimpleFIFO<uint8_t, MAX_BUF> radioOutFifo;
+uint8_t radioTxBuf[TX_BUF_MAX];          // GZLL radio packet llimit
+
+device_t role = HOST;  // This is the DEVICE code
+
+volatile bool doLowReset = false;
+volatile bool doHighReset = false;
+volatile bool isPiggyBacking = false;
+
+
+
+//#define DEBUG_LVL 1
+
+#ifdef DEBUG_LVL
+#ifdef __RFduino__
+#define ERROR(x) Serial.println("ERR:"x);
+#define DEBUG(x) Serial.println("INF:"x);
+#define DEBUGC(x,y) Serial.println(x,y);
+
+#else
+#include <SoftwareSerial.h>
+SoftwareSerial mySerial(3, 4); // RX, TX
+#define ERROR(x) mySerial.println(x);
+#define DEBUG(x) mySerial.println(x);
+#define DEBUGC(x,y) mySerial.println(x,y);
+#endif
+
+#else
+#define ERROR(x)
+#define DEBUG(x)
+#define DEBUGC(x,y)
+#endif
 
 #include "pins_arduino.h"
-#define RESET     SS
 
-// was 9,8,7
-#define LED_HB    0
-#define LED_ERR   1
-#define LED_PMODE 2  
+
+//#define WRITE_OUT Serial.print
+void WRITE_OUT(char* str) {
+  int l = strlen(str);
+
+  for (int i = 0; i < l; i++) {
+    WRITE_OUT(str[i]);
+  }
+}
+void WRITE_OUT(char c) {
+  // /try/ to avoid a race condition!
+  // what are the proper mutextes we can use on the ARM RFduiono!!!
+
+  radioOutFifo.enqueue(c);
+}
+
+
+#ifdef __RFduino__
+
+
+#include <SPI.h>
+#define RESET     6
+#define LED_HB    2
+#define LED_ERR   2
+#define LED_PMODE 2
 #define PROG_FLICKER true
+#else
+#define RESET     10
+#define LED_HB    13
+#define LED_ERR   8
+#define LED_PMODE 7
+#define PROG_FLICKER true
+#endif
+
 
 #define HWVER 2
 #define SWMAJ 1
@@ -70,28 +136,24 @@ SimpleFIFO<byte,512> radioOutFifo;
 #define STK_NOSYNC  0x15
 #define CRC_EOP     0x20 //ok it is a space...
 
-//#define WRITE_OUT Serial.print
-void WRITE_OUT(char* str) {
-  int l = strlen(str);
-    for (int i=0; i<l; i++) {
-      WRITE_OUT(str[i]);
-  }
-}
-void WRITE_OUT(byte c) {
-  radioOutFifo.enqueue(c); 
-}
-
 void pulse(int pin, int times);
 
 void setup() {
-  Serial.begin(19200);
+  Serial.begin(9600);
   pinMode(LED_PMODE, OUTPUT);
   pulse(LED_PMODE, 2);
   pinMode(LED_ERR, OUTPUT);
   pulse(LED_ERR, 2);
   pinMode(LED_HB, OUTPUT);
   pulse(LED_HB, 2);
-  
+#ifdef DEBUG_LVL
+#ifdef __RFduino__
+  Serial.begin(9600);
+#else
+  mySerial.begin(9600);
+#endif
+  DEBUG("!!!");
+#endif
   rfd_setup();
 }
 
@@ -99,7 +161,7 @@ int error = 0;
 int pmode = 0;
 // address for reading and writing, set by 'U' command
 int here;
-uint8_t buff[256]; // global block storage
+uint8_t buff[1024]; // global block storage
 
 #define beget16(addr) (*addr * 256 + *(addr+1) )
 typedef struct param {
@@ -133,6 +195,7 @@ void heartbeat() {
 }
 
 
+
 void loop(void) {
   // is pmode active?
   if (pmode) digitalWrite(LED_PMODE, HIGH);
@@ -143,25 +206,29 @@ void loop(void) {
 
   // light the heartbeat LED
   heartbeat();
-  if (radioInFifo.count()>0) {
+  rfd_loop();
+  if (radioInFifo.count() > 0) {
     avrisp();
   }
-  
-  rfd_loop();
 }
 
 uint8_t getch() {
- // #error read for character received from radio
-// add a fifo and return 1 char at a time.
-  //while (!Serial.available());
-  //return Serial.read();
-  while (radioInFifo.count() == 0);
-  return radioInFifo.dequeue();
+  while (radioInFifo.count() == 0) {
+    //DEBUG(".");
+    //delay(5);
+  }
+  uint8_t ch = radioInFifo.dequeue();
+
+  //DEBUG("getch:");
+  //DEBUGC(ch, HEX);
+  return ch;
 }
 void fill(int n) {
   for (int x = 0; x < n; x++) {
     buff[x] = getch();
+
   }
+  DEBUG("done fill");
 }
 
 #define PTIME 30
@@ -180,38 +247,40 @@ void prog_lamp(int state) {
     digitalWrite(LED_PMODE, state);
 }
 
+
 void spi_init() {
-  uint8_t x;
-  /*
-  Remapping the SPI pins 
-To remap the SPI pins from the default MISO (GPIO 3), SCK (GPIO 4), MOSI (GPIO 5), SS/CS (GPIO 6) to any of the 
-available GPIOs open up the variant.h file in the \variants\RFduino folder and modify the following definitions. 
-Example: 
-#define PIN_SPI_SS (6u) 
-#define PIN_SPI_MOSI (5u) 
-#define PIN_SPI_MISO (3u) 
-#define PIN_SPI_SCK (4u) 
-*/
+#ifdef __RFduino__
+  SPI.begin();
   SPI.setFrequency(125);
-  //SPCR = 0x53;
-  //x = SPSR;
-  //x = SPDR;
+
+#else
+  uint8_t x;
+  SPCR = 0x53;
+  x = SPSR;
+  x = SPDR;
+#endif
 }
 
-void spi_waitOLD() {
-  // wait for SPI to be ready.
-/*  do {
+void spi_wait() {
+#ifdef __RFduino__
+#else
+  do {
   }
-  while (!(SPSR & (1 << SPIF)));*/
+  while (!(SPSR & (1 << SPIF)));
+#endif
 }
 
 uint8_t spi_send(uint8_t b) {
-//  uint8_t reply;
-//  SPDR = b;
-//  spi_wait();
-//  reply = SPDR;
-//  return reply;
+#ifdef __RFduino__
   return SPI.transfer (b);
+
+#else
+  uint8_t reply;
+  SPDR = b;
+  spi_wait();
+  reply = SPDR;
+  return reply;
+#endif
 }
 
 uint8_t spi_transaction(uint8_t a, uint8_t b, uint8_t c, uint8_t d) {
@@ -223,6 +292,9 @@ uint8_t spi_transaction(uint8_t a, uint8_t b, uint8_t c, uint8_t d) {
   return spi_send(d);
 }
 
+
+
+
 void empty_reply() {
   if (CRC_EOP == getch()) {
     WRITE_OUT((char)STK_INSYNC);
@@ -230,6 +302,7 @@ void empty_reply() {
   }
   else {
     error++;
+    ERROR("empty_reply");
     WRITE_OUT((char)STK_NOSYNC);
   }
 }
@@ -242,6 +315,7 @@ void breply(uint8_t b) {
   }
   else {
     error++;
+    ERROR("breply");
     WRITE_OUT((char)STK_NOSYNC);
   }
 }
@@ -291,6 +365,7 @@ void set_parameters() {
 }
 
 void start_pmode() {
+  DEBUG("start_pmode");
   spi_init();
   // following delays may not work on all targets...
   pinMode(RESET, OUTPUT);
@@ -307,6 +382,7 @@ void start_pmode() {
 }
 
 void end_pmode() {
+  DEBUG("end_pmode");
   pinMode(MISO, INPUT);
   pinMode(MOSI, INPUT);
   pinMode(SCK, INPUT);
@@ -350,6 +426,8 @@ int current_page(int addr) {
 
 void write_flash(int length) {
   fill(length);
+  DEBUG("Fill done");
+
   if (CRC_EOP == getch()) {
     WRITE_OUT((char) STK_INSYNC);
     WRITE_OUT((char) write_flash_pages(length));
@@ -357,6 +435,7 @@ void write_flash(int length) {
   else {
     error++;
     WRITE_OUT((char) STK_NOSYNC);
+    ERROR("write_flash");
   }
 }
 
@@ -385,6 +464,8 @@ uint8_t write_eeprom(int length) {
   int remaining = length;
   if (length > param.eepromsize) {
     error++;
+    ERROR("write_eeprom");
+
     return STK_FAILED;
   }
   while (remaining > EECHUNK) {
@@ -411,16 +492,23 @@ uint8_t write_eeprom_chunk(int start, int length) {
 }
 
 void program_page() {
+  DEBUG("program_page");
+
   char result = (char) STK_FAILED;
   int length = 256 * getch();
   length += getch();
   char memtype = getch();
   // flash memory @here, (length) bytes
   if (memtype == 'F') {
+    DEBUG("Write Flash, length:");
+    DEBUGC(length, DEC);
+
     write_flash(length);
     return;
   }
   if (memtype == 'E') {
+    DEBUG("Write eeprom");
+
     result = (char)write_eeprom(length);
     if (CRC_EOP == getch()) {
       WRITE_OUT((char) STK_INSYNC);
@@ -428,7 +516,9 @@ void program_page() {
     }
     else {
       error++;
+      ERROR("program_page");
       WRITE_OUT((char) STK_NOSYNC);
+
     }
     return;
   }
@@ -471,6 +561,8 @@ void read_page() {
   length += getch();
   char memtype = getch();
   if (CRC_EOP != getch()) {
+    ERROR("read_page");
+
     error++;
     WRITE_OUT((char) STK_NOSYNC);
     return;
@@ -483,7 +575,11 @@ void read_page() {
 }
 
 void read_signature() {
+  DEBUG("read_signature");
+
   if (CRC_EOP != getch()) {
+    ERROR("read_signature");
+
     error++;
     WRITE_OUT((char) STK_NOSYNC);
     return;
@@ -506,6 +602,7 @@ void read_signature() {
 int avrisp() {
   uint8_t data, low, high;
   uint8_t ch = getch();
+
   switch (ch) {
     case '0': // signon
       error = 0;
@@ -575,12 +672,16 @@ int avrisp() {
       // expecting a command, not CRC_EOP
       // this is how we can get back in sync
     case CRC_EOP:
+      ERROR("avrispCRC_EOP");
+
       error++;
       WRITE_OUT((char) STK_NOSYNC);
       break;
 
       // anything else we will return STK_UNKNOWN
     default:
+      ERROR("avrispDEFAULT");
+
       error++;
       if (CRC_EOP == getch())
         WRITE_OUT((char)STK_UNKNOWN);
@@ -590,192 +691,82 @@ int avrisp() {
 }
 
 
+//////////////////////////
 
 
+// in RFduino lib v2.0.3 the datarate is 2Mbit
 
-
-/*
-This sketch sets us a DEVICE device to demonstrate 
-a serial link between RFDuino modules
-
-This test behaves as a serial pass thru between two RFduinos,
-and will reset a target Arduino UNO with GPIO6 for over-air programming
-
-This code uses buffering Serial and Radio packets
-Also uses using timout to finding end of serial data
-
-Made by Joel Murphy, Summer 2014
-Free to use and share. This code presented as-is. No promises!
-
-*/
-
-#include <RFduinoGZLL.h>
-
-device_t role = DEVICE0;  // This is the DEVICE code
-
-const int numBuffers = 10;              // buffer depth
-char serialBuffer[numBuffers] [32];  	// buffers to hold serial data
-int bufferLevel = 0;                 	// counts which buffer array we are using
-int serialIndex[numBuffers];         	// Buffer position counter
-int numPackets = 0;                  	// number of packets to send/receive on radio
-int serialBuffCounter = 0;
-unsigned long serialTimer;              // used to time end of serial message
-
-char radioBuffer[300];		        // buffer to hold radio data
-int radioIndex = 0;                  	// used in sendToHost to protect len value
-int packetCount = 0;                    // used to keep track of packets in received radio message
-int packetsReceived = 0;                // used to count incoming packets
-
-boolean serialToSend = false;     // set when serial data is ready to go to radio
-boolean radioToSend = false;      // set when radio data is ready to go to serial
-boolean serialTiming = false;     // used to time end of serial message
-
-unsigned long lastPoll;         // used to time null message to host
-unsigned int pollTime = 100;    // time between polls when idling
-
-int resetPin = 6;               // GPIO6 is connected to Arduino UNO pin with 1uF cap in series
-boolean toggleReset = false;    // reset flat
-
-
-void rfd_setup(){
-  
+void rfd_setup() {
   RFduinoGZLL.begin(role);  // start the GZLL stack
-  //Serial.begin(57600);     // start the serial port
-  
-  serialIndex[0] = 1;          // save buffer[0][0] to hold number of packets!
-  for(int i=1; i<numBuffers; i++){
-    serialIndex[i] = 0;        // initialize indexes to 0
-  }
-  
-
-  lastPoll = millis();    // set time to perfom next poll 
-  
-  pinMode(resetPin,OUTPUT);      // set direction of GPIO6
-  digitalWrite(resetPin,HIGH);   // take Arduino out of reset
-  
-  
+  pinMode(RESET, OUTPUT);     // set direction of GPIO6
+  digitalWrite(RESET, HIGH);  // take Arduino out of reset
 }
 
+void rfd_loop() {
+  // HOST can't intiate transfer, handled using a 'piggyback' in onReceive callback
+  if (doLowReset) {
+    digitalWrite(RESET, LOW);
+    doLowReset = false;
+  }
 
+  if (doHighReset) {
+    digitalWrite(RESET, HIGH);
+    doHighReset = false;
+  }
 
-void rfd_loop(){
-  
-  if(serialTiming){                      // if the serial port is active
-    if(millis() - serialTimer > 2){      // if the time is up
-      if(serialIndex[bufferLevel] == 0){bufferLevel--;}  // don't send more buffers than we have!
-      serialBuffer[0][0] = bufferLevel +1;	// drop the number of packets into zero position
-      serialBuffCounter = 0;          		// keep track of how many buffers we send
-      serialTiming = false;	       // clear serialTiming flag
-      serialToSend = true;             // set serialToSend flag
-      lastPoll = millis();             // put off sending a scheduled poll
-      RFduinoGZLL.sendToHost(NULL,0);  // send a poll right now to get the ack back
+  static unsigned long lastCall = millis();
+  if ( (millis() - lastCall) > 250) {
+    if (radioOutFifo.count() != 0 ) {
+      DEBUG("Outbuf count:");
+      DEBUGC(radioOutFifo.count(), DEC);
     }
+    lastCall = millis();
   }
 
-    
-  if (millis() - lastPoll > 50){  // make sure to ping the host if they want to send packet
-    if(!serialTiming && !serialToSend){  // don't poll if we are doing something important!
-      RFduinoGZLL.sendToHost(NULL,0);
-    }
-    lastPoll = millis();          // set timer for next poll time
-  }
-  
-
-if(radioToSend){                   // when data comes in on the radio
-  for(int i=0; i<radioIndex; i++){
-    //Serial.write(();  // send it out the serial port
-    radioInFifo.enqueue(radioBuffer[i]);
-  }
-  radioIndex = 0;                  // reset radioInex counter
-  radioToSend = false;             // reset radioToSend flag
 }
-
-
-
-/*
-dont need this part, SPI is used instead in the AVR ISP code
-
-if(Serial.available()){
-  while(Serial.available() > 0){          // while the serial is active
-    serialBuffer[bufferLevel][serialIndex[bufferLevel]] = Serial.read();    
-    serialIndex[bufferLevel]++;           // count up the buffer size
-    if(serialIndex[bufferLevel] == 32){	  // when the buffer is full,
-      bufferLevel++;			  // next buffer please
-    }  // if we just got the last byte, and advanced the bufferLevel, the serialTimeout will catch it
-  }
-  serialTiming = true;                   // set serialTiming flag
-  serialTimer = millis();                // start time-out clock
-}
-*/
-}// end of loop
 
 
 void RFduinoGZLL_onReceive(device_t device, int rssi, char *data, int len)
 {
-  
-  if(serialToSend){	// send buffer to host during onReceive so as not to clog the radio
-    RFduinoGZLL.sendToHost(serialBuffer[serialBuffCounter], serialIndex[serialBuffCounter]);
-    serialBuffCounter++;	      // get ready for next buffered packet
-    if(serialBuffCounter == bufferLevel +1){// when we send all the packets
-      serialToSend = false; 		    // put down bufferToSend flag
-      bufferLevel = 0;			    // initialize bufferLevel
-      serialIndex[0] = 1;		    // leave room for packet count
-      for(int i=1; i<numBuffers; i++){	
-        serialIndex[i] = 0;		    // initialize serialInexes
+  if (len > 0) {
+    bool skipCommandPacket = false;
+
+    if (4 == len) {
+      if ( (data[0] == 'C')  && (data[1] == 'B') && (data[2] == 'R') ) {
+        skipCommandPacket = true;
+        doLowReset  = (data[3] == 0);
+        doHighReset = (data[3] == 1);
       }
     }
-  }
-  
-  
-  if(len > 0){
-    int startIndex = 0;	                // get ready to read this packet from 0
-    if(packetCount == 0){	        // if this first packet in transaction  
-      if(testFirstByte(data[0])){       // if we get a '$' or '#' 
-        char dummy[32];                 // set up a trash can
-        for(int i=0; i<len; i++){
-          dummy[i] = data[i];           // put everything in the trash
-        }                               
-        return;                         // get outa here!
-      }                         // if we didn't get a '$' or '#' the first byte = number of packets 
-      packetCount = data[0];	// get the number of packets to expect in message
-      startIndex = 1;		// skip the first byte when retrieving radio data
-    }		
-    for(int i = startIndex; i < len; i++){
-      radioBuffer[radioIndex] = data[i];  // read packet into radioBuffer
-      radioIndex++;                       // increment the radioBuffer index counter
-    }
-    packetsReceived++;                    // increment the packet counter
-    if(packetsReceived == packetCount){   // when we get all the packets
-      packetsReceived = 0;                // reset packets Received for next time
-      packetCount = 0;                    // reset packetCount for next time
-      radioToSend = true;	          // set radioToSend flag
-    }else{                                // if we're still expecting packets,
-      RFduinoGZLL.sendToHost(NULL,0);     // poll host for next packet
-    }
-  }
-   
-    lastPoll = millis();  // whenever we get an ACK, reset the lastPoll time 
 
-}
-  
-  
-  
-boolean testFirstByte(char z){  // test the first byte of a new radio packet for reset msg
-  boolean r;
-  switch(z){
-    case '$':                 // HOST sends '$' when its GPIO6 goes LOW
-      digitalWrite(resetPin,LOW);  // clear RESET pin
-      r = true;  
-      break;
-    case '#':                 // HOST sends '#' when its GPIO6 goes HIGH
-      digitalWrite(resetPin,HIGH); // set RESET pin
-      r = true;
-      break;   
-    default:
-      r = false;
-      break;
-  }
-  return r;
-}
-  
+    if (!skipCommandPacket) {
+      for (int i = 0; i < len ; i++) {
+        radioInFifo.enqueue(data[i]);
+      }
+    }
 
+  }// else {
+
+  // send any pending data on the GZLL 'piggyback', if not currently doing so.
+
+  if (!isPiggyBacking) {
+    isPiggyBacking = true;
+
+    int outLen = min(radioOutFifo.count(), TX_BUF_MAX);
+
+    if (outLen > 0) {
+      for (int i = 0; i < outLen ; i++) {
+        radioTxBuf[i] = radioOutFifo.dequeue();
+      }
+      RFduinoGZLL.sendToDevice(device, (char*)radioTxBuf, outLen);
+    }
+    /*
+    if (radioOutFifo.count() > 0) {
+      radioTxBuf[0] = radioOutFifo.dequeue();
+      RFduinoGZLL.sendToDevice(device, (char*)radioTxBuf, 1);
+    }
+    */
+    isPiggyBacking = false;
+  }
+  // data not sent this time, should be sent on next next zero-length 'poll' packet
+}
