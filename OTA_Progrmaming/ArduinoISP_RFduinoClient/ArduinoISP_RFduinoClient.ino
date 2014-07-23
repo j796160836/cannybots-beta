@@ -123,9 +123,7 @@ void loop() {
 
 
 void serialEvent() {
-  while (Serial.available() &&  ( radioOutFifo.count() < MAX_BUF-1)) {
-    radioOutFifo.enqueue(Serial.read());
-  }
+
   //serialDataReadyToSend = true;
 }
 
