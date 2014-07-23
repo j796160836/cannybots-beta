@@ -55,12 +55,12 @@ void setup() {
 
 unsigned long lastGzllPoll = millis();
 void pollGZLL() {
-    // get and pending data from the HOST
-  if ( (millis() - lastGzllPoll) > 25) {
+  // get and pending data from the HOST
+  if ( (millis() - lastGzllPoll) > 15) {
     RFduinoGZLL.sendToHost(NULL, 0);
     lastGzllPoll = millis();
   }
-    // process inbound data
+  // process inbound data
   if (radioInFifo.count() > 0) {
     while (radioInFifo.count() > 0) {
       Serial.write(radioInFifo.dequeue());
@@ -72,7 +72,12 @@ void pollGZLL() {
 
 void loop() {
 
+  while (Serial.available() &&  ( radioOutFifo.count() < (MAX_BUF - TX_BUF_MAX))) {
+    radioOutFifo.enqueue(Serial.read());
+  }
+
   pollGZLL();
+
 
   resetPinValue = digitalRead(resetPin);    // read the state of DTR
   if (resetPinValue != lastResetPinValue) { // if it's changed
@@ -94,12 +99,12 @@ void loop() {
     lastResetPinValue = resetPinValue;      // keep track of resetP in state
 
     RFduinoGZLL.sendToHost(resetMessage, 4);  // send message to DEVICE
-  }
+  } else {
 
 
-  static unsigned long lastGzllSend = millis();
-  if ( (millis() - lastGzllSend) > 50) {
-    if (serialDataReadyToSend) {
+    static unsigned long lastGzllSend = millis();
+    if ( (millis() - lastGzllSend) > 10) {
+      //if (serialDataReadyToSend) {
       int outLen = min(radioOutFifo.count(), TX_BUF_MAX);
 
       if (outLen > 0) {
@@ -109,17 +114,19 @@ void loop() {
         }
         RFduinoGZLL.sendToHost(radioTxBuf, outLen);
       }
-      serialDataReadyToSend = false;
+      //serialDataReadyToSend = false;
+      //}
+      lastGzllSend = millis();
     }
-    lastGzllSend = millis();
   }
 }
 
+
 void serialEvent() {
-  while (Serial.available()) {
+  while (Serial.available() &&  ( radioOutFifo.count() < MAX_BUF-1)) {
     radioOutFifo.enqueue(Serial.read());
   }
-  serialDataReadyToSend = true;  
+  //serialDataReadyToSend = true;
 }
 
 

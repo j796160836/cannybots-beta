@@ -52,7 +52,7 @@
 #include <SimpleFIFO.h>
 
 #define MAX_BUF 255
-#define TX_BUF_MAX 8
+#define TX_BUF_MAX 30
 SimpleFIFO<uint8_t, MAX_BUF> radioInFifo;
 SimpleFIFO<uint8_t, MAX_BUF> radioOutFifo;
 uint8_t radioTxBuf[TX_BUF_MAX];          // GZLL radio packet llimit
