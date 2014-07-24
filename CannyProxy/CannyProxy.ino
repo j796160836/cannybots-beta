@@ -3,7 +3,10 @@
 #include <stdint.h>
 
 //#define USE_SPI 1
-#ifdef USE_SPI
+#define USE_SPI_PROGRAMMER 1
+
+
+#if  defined(USE_SPI) || defined(USE_SPI_PROGRAMMER)
 #include <SPI.h>
 #endif
 
@@ -26,7 +29,7 @@
 
 // TODO: append devideID to advertising data
 
-#define TOGGLE_MILLIS 2500
+#define TOGGLE_MILLIS 1000
 
 #define Q_MAX_ENTRIES 12
 #define Q_ENTRY_SIZE 20
@@ -130,12 +133,23 @@ boolean volatile gzll_connected = false;
 
 
 // GZLL
-static unsigned long lastGZLLPacketTime = millis();
+volatile bool ISPConnected = false;
+
+volatile static unsigned long lastGZLLPacketTime = millis();
+
 void RFduinoGZLL_onReceive(device_t device, int rssi, char *data, int len)
 {
   gzll_connected = true;
   lastGZLLPacketTime = millis();
-  enqueue(data, len);
+  if (DEVICE1 == device ) {
+     ISPConnected = true;
+  }
+  
+  if (ISPConnected ) {
+     rfd_isp_RFduinoGZLL_onReceive(device, rssi, data, len);
+  } else {
+    enqueue(data, len);
+  }
   // TODO: fake pairing. check the device is the same as before...
   // TODO: timout connection and if no packet is receve > TIMOUT then go back to BLE/GZll flipping
   // MAYBE-TODO: check uart2ble here as Gazelle can only piggy back client device requests
@@ -158,7 +172,7 @@ void RFduinoBLE_onDisconnect() {
   DBG("RFd_BLE_DIS",0);
 }
 
-void RFduinoBLE_onReceive(char *data, int len) {
+void RFduinoBLE_onReceive(char *data, int len) {  
   enqueue(data, len);
 }
 
@@ -171,11 +185,14 @@ void  ble_rfduino_manageRadios() {
   static unsigned long lastTime = millis();
   unsigned long timeDelta = ( millis() - lastTime );
 
-  /*
-  if ( (millis() - lastGZLLPacketTime ) > 60000 ) {
-      gzll_connected=false;
+  if ( (millis() - lastGZLLPacketTime ) > 5000 ) {
+      if (gzll_connected) {
+        gzll_connected= ISPConnected = false;            
+        state=0;
+        lastTime =  millis();
+        timeDelta = 0;
+      }
   }
-  */
 
   if (ble_connected || gzll_connected) {
     return;
@@ -257,15 +274,24 @@ void setup() {
   //SPI.setClockDivider(SPI_CLOCK_DIV8);
 
 #endif // USE_SPI
-  
-  WATCHDOG_SETUP(2);
+
+
+  rfd_isp_setup();
+  WATCHDOG_SETUP(7);
   DBG("",0);
   DBG("RFd_Setup",0);
 }
 
 void loop() {  
-WATCHDOG_RELOAD() 
+   WATCHDOG_RELOAD();
+   //DBG("b,g,I=(%d,%d,%d)",ble_connected, gzll_connected, ISPConnected);
+
   ble_rfduino_manageRadios();
+
+  if (ISPConnected) {
+    rfd_isp_loop();
+    return;
+  }
   process_ble2uart_q();
   process_uart2ble_q();
 }

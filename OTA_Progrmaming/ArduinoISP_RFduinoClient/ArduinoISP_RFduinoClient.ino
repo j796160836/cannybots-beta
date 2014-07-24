@@ -39,8 +39,22 @@ Notes:
 When uploading the RFduino USB shield Green TX LED will flash whilst uploading
 The Red RX LED will flash when verifying.
 
+
+
+trouble shooting:
+
+Sympton:
+
+avrdude: Device signature = 0xffffff
+avrdude: Yikes!  Invalid device signature.
+         Double check connections and try again, or use -F to override
+
+
+can mean the target has not reset (is wire conneccted? is device on?)
+can mean that SPI is not connected correctly (-1 (255) from API
+
 */
-device_t role = DEVICE0;  //  DEVICE connects to the PC/Mac
+device_t role = DEVICE1;  //  The CannyProxt RFduiono ISP expects DEVICE1 to be a ISP client
 
 // Pinouts
 
