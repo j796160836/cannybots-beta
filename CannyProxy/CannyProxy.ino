@@ -2,6 +2,11 @@
 #include <RFduinoGZLL.h>
 #include <stdint.h>
 
+//#define USE_SPI 1
+#ifdef USE_SPI
+#include <SPI.h>
+#endif
+
 #define WATCHDOG_SETUP(seconds) NRF_WDT->CRV = 32768 * seconds; NRF_WDT->TASKS_START = 1;
 #define WATCHDOG_RELOAD() NRF_WDT->RR[0] = WDT_RR_RR_Reload;
 
@@ -31,12 +36,23 @@
 
 #define NT_MSG_SIZE 20
 
-#define TX_PIN 5
-#define RX_PIN 6
+#ifdef USE_SPI
+#define TX_PIN 1
+#define RX_PIN 0
+#else
+//#define TX_PIN 5
+//#define RX_PIN 6
+#define TX_PIN 1
+#define RX_PIN 0
+#endif
 
 
 static char dbg_buffer[20] = {'>', '>'};
+#ifdef USE_SPI
+#define DBG(FMT, ...) snprintf(dbg_buffer+2, 18, FMT, __VA_ARGS__); Serial.write((uint8_t*)dbg_buffer,20);Serial.println("");Serial.flush();
+#else
 #define DBG(FMT, ...) snprintf(dbg_buffer+2, 18, FMT, __VA_ARGS__); writeUART((uint8_t*)dbg_buffer,20);
+#endif // USE_SPI
 
 
 
@@ -70,9 +86,20 @@ char c=0, lastChar=0;
 
 
 void writeUART(const uint8_t* data, uint16_t len) {
+#ifdef USE_SPI
+   SPI.transfer ('>');
+   SPI.transfer ('>');
+   for (int i = 0 ; i <len ; i++) {
+           DBG("SPI:%x",data[i]);
+
+        SPI.transfer (data[i]);
+   }
+   
+#else
   Serial.write(">>");
   Serial.write( data, len);
   Serial.flush();              // crashes prior to rfduino 2.0.3
+#endif //USE_SPI  
 }
 
 void process_uart2ble_q() {
@@ -208,6 +235,28 @@ void process_ble2uart_q() {
 
 void setup() {
   Serial.begin(9600, RX_PIN, TX_PIN);        // UART Baud is limited to 9600 when the BLE stack is on.
+  
+#ifdef USE_SPI
+
+  // Put SCK, MOSI, SS pins into output mode
+  // also put SCK, MOSI into LOW state, and SS into HIGH state.
+  // Then put SPI hardware into Master mode and turn SPI on
+  pinMode(SCK, OUTPUT);
+  pinMode(MISO, INPUT);
+  pinMode(MOSI, OUTPUT);
+  //pinMode(SS, OUTPUT);  
+  //digitalWrite(SS, HIGH);  // ensure SS stays high for now
+
+
+  SPI.begin ();
+
+  // Slow down the master a bit
+  SPI.setFrequency(125);
+  // a no-op on RFduino SDK v2.0.3
+  //SPI.setClockDivider(SPI_CLOCK_DIV8);
+
+#endif // USE_SPI
+  
   WATCHDOG_SETUP(2);
   DBG("",0);
   DBG("RFd_Setup",0);

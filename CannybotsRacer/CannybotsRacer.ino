@@ -4,6 +4,7 @@
 // Libraries
 
 
+#include <SPI.h>
 #include <Cannybots.h>
 #include "CannybotsRacer.h"
 Cannybots& cb = Cannybots::getInstance();

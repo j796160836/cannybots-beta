@@ -1,6 +1,45 @@
 #include <RFduinoGZLL.h>
 #include <SimpleFIFO.h>
+/*
+Part 1:  Add Programmer
 
+edit:
+Applications/Arduino-1.5.6r2.app/Contents/Resources/Java/hardware/arduino/avr/programmers.txt
+
+append:
+
+rfduinoisp.name=RFduino as ISP (Cannybots)
+rfduinoisp.communication=serial
+rfduinoisp.protocol=avrisp
+rfduinoisp.speed=9600
+rfduinoisp.program.protocol=avrisp
+rfduinoisp.program.speed=9600
+rfduinoisp.program.tool=avrdude
+rfduinoisp.program.extra_params=-P{serial.port} -b{program.speed}
+
+
+part 2:  Uploading in IDE
+
+
+To upload using the programmer either
+
+1. press the 'shift' key when pressing th e 'Upload' button.
+The help text will change from 'Upload' to 'Upload Using Programmer'
+or
+2. Hold down shift while doing the standard upload keyboard shortcut of pressing CMD or ALT and U
+
+
+Part 3: Burn Bootloader
+
+Just set programmer to RFDuino as ISP and click Burn Bootloader in the Tool menu. No need to hold shift.
+
+
+Notes:
+
+When uploading the RFduino USB shield Green TX LED will flash whilst uploading
+The Red RX LED will flash when verifying.
+
+*/
 device_t role = DEVICE0;  //  DEVICE connects to the PC/Mac
 
 // Pinouts

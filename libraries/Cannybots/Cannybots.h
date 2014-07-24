@@ -395,11 +395,6 @@ private:
     bool         debug;
     
 #ifdef ARDUINO
-    // serial
-    uint8_t serialBuffer[SERIAL_BUF_SIZE+1];
-    int serialBufPtr;
-    bool foundStart;
-    char c, lastChar;
     void readSerial(HardwareSerial &ser);
     
 #endif

@@ -1,6 +1,8 @@
 
 #include "Cannybots.h"
 
+//#define USE_SPI
+
 #ifdef __RFduino__
 #include <RFduinoBLE.h>
 #endif
@@ -10,7 +12,11 @@
 #ifdef ARDUINO
 #include <Arduino.h>
 #include <EEPROM.h>
-#endif
+
+#ifdef USE_SPI
+#include <SPI.h>
+#endif USE_SPI
+#endif //ARDUINO
 
 
 
@@ -222,6 +228,7 @@ void Cannybots::begin() {
     CB_INBOUND_SERIAL_PORT.begin(CB_INBOUND_SERIAL_BAUD);
     
 #ifdef ARDUINO_AVR_A_STAR_32U4
+    // this really depends on the Pololu bootloader being present on  the device
     // brownout detection
     // from:  http://www.pololu.com/docs/0J61/7
     pinMode(13, OUTPUT);
@@ -238,8 +245,21 @@ void Cannybots::begin() {
         }
     }
     MCUSR = 0;
+#endif //
+    
+#ifdef USE_SPI
+    pinMode(SCK, INPUT);
+    pinMode(MISO, OUTPUT);
+    pinMode(MOSI, INPUT);
+    pinMode(SS, INPUT);
+    
+    // turn on SPI in slave mode
+    SPCR |= _BV(SPE);
+    SPI.attachInterrupt();
 #endif
-#endif
+
+    
+#endif // Arduino
     
 #ifdef __RFduino__
     RFduinoBLE.customUUID = BLE_UUID;
@@ -250,12 +270,38 @@ void Cannybots::begin() {
 #endif
 }
 
+
+// decalred and instatiated here as they are shared by both the C++ class (UART mode) an Interrupt handler (SPI mode) and Cannybots::Update
+
+// serial (UART & SPI) buffer
+uint8_t serialBuffer[SERIAL_BUF_SIZE+1];
+int serialBufPtr=0;
+bool foundStart=false;
+
+char c, lastChar;
+
+
+
+
 void Cannybots::update() {
 #ifdef ARDUINO
 #ifdef __RFduino__
     // not polled, event driven in: RFduinoBLE_onReceive()
 #else
+    // Arduino...
+#ifdef USE_SPI
+    // not polled, event driven using AVR SPI interrupt handler
+    if (serialBufPtr>=CB_MAX_MSG_SIZE) {
+        Serial.println("<EOC>");
+        foundStart = false;
+        Message* msg = new Message(serialBuffer, CB_MAX_MSG_SIZE);
+        inboundMsgFIFO.enqueue(msg);
+        
+        serialBufPtr=0;
+    }
+#else
     readSerial(Serial1);
+#endif
 #endif
 #endif
     processOutboundMessageQueue();
@@ -266,7 +312,25 @@ void Cannybots::update() {
 /////////////////////////////////////////////////////////////////////
 // comms
 
+
+
 #ifdef ARDUINO
+#ifdef USE_SPI
+
+// interrupt handler called on recept of SPI data
+ISR (SPI_STC_vect)
+{
+     c = SPDR;  // grab byte from SPI Data Register
+    if (foundStart && (serialBufPtr<SERIAL_BUF_SIZE)) {
+        serialBuffer[serialBufPtr++] = c;
+    } else if ( ('>' == c) && ('>' == lastChar) ) {
+        foundStart=true;
+        serialBufPtr=0;
+    }
+}
+
+
+#else
 void Cannybots::readSerial(HardwareSerial &ser) {
     while (ser.available()>0) {
         lastChar = c;
@@ -291,7 +355,8 @@ void Cannybots::readSerial(HardwareSerial &ser) {
         }
     }
 }
-#endif
+#endif // USE_SPI
+#endif // ARDUINO
 
 #ifdef __RFduino__
 void RFduinoBLE_onReceive(char *data, int len) {
@@ -300,7 +365,13 @@ void RFduinoBLE_onReceive(char *data, int len) {
 
     cb.addInboundMessage(msg);
 }
-#endif
+#endif // __RFduino__
+
+
+
+
+
+/////////
 
 void Cannybots::processInboundMessageQueue() {
     
@@ -366,7 +437,7 @@ void Cannybots::processMessage(Message* msg ) {
     if ( (msg->payload[0] != 'C'  ||  (msg->payload[1] != 'B' ) ) ) {
         //CB_DBG("Non CB message", 0);
         msg->payload[ (msg->size)-1]=0;
-        CB_DBG("DBG:%s", msg->payload);
+        CB_DBG("PM:%s", msg->payload);
         return;
     }
     uint8_t cmd = msg->payload[CB_MSG_OFFSET_CMD];
