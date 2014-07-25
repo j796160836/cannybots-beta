@@ -30,20 +30,49 @@ bool sign(double x) { return ((x>0)-(x<0)); }
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Config
 
+      
+// number of divisions between current and target motor speed            
+#define MAX_MOTOR_DELTA_DIVISOR     1.0
+// max motor speed change
+#define MAX_MOTOR_DELTA             255.0
+
+//#define MOTOR_A_POS_IS_FORWARD 1
+
+
 // Pinout wiring
 
+// Aiva
+#define BOT_TYPE_CUSTOM_PCB 1
+#define IR_MAX 1000
+#define WHITE_THRESHOLD 700
+
+#define IR1 A6
+#define IR2 A8
+#define IR3 A11
+
+#define pinA1 3 
+#define pinA2 5
+#define pinB1 6
+#define pinB2 9
+
+#define pin_MODE 2
+
+
+
 // REdbot
+/*
 #define IR_MAX 100
 #define WHITE_THRESHOLD 100
 
 #define IR1 A9
 #define IR2 A8
 #define IR3 A6
+
 #define pinA1 5 
 #define pinA2 6
 #define pinB1 10
 #define pinB2 11
-
+*/
 
 
 // white bot
@@ -112,7 +141,7 @@ int correction = 0; //error after PID filter
 
 bool isLineFollowingMode = true;
 bool forceManualMode = false;
-int baseCruiseSpeed = 80;
+int baseCruiseSpeed = 180;
 int cruiseSpeed = baseCruiseSpeed;
 
 int speedA = 0;
@@ -211,13 +240,6 @@ void loop() {
       // no command has been received in the last 2 seconds, err on the side of caution and stop!
       speedA = speedB = 0;
     } else {
-
-      
-// number of divisions between current and target motor speed            
-#define MAX_MOTOR_DELTA_DIVISOR    150.0
-// max motor speed change
-#define MAX_MOTOR_DELTA             2.0
-
       speedA = speedA + min((manualA-speedA)/MAX_MOTOR_DELTA_DIVISOR, MAX_MOTOR_DELTA*sign(manualA-speedA));
       speedB = speedB + min((manualB-speedB)/MAX_MOTOR_DELTA_DIVISOR, MAX_MOTOR_DELTA*sign(manualB-speedB));
     }
@@ -242,17 +264,19 @@ void loop() {
 void calculate_PID() {
   // process IR readings via PID
     error_last = error;                                   // store previous error before new one is caluclated
-    error = constrain(IRvals[0] - IRvals[2], -30, 30);        // set bounds for error
+    //error = constrain(IRvals[0] - IRvals[2], -30, 30);        // set bounds for error
+    error = IRvals[0] - IRvals[2];
+    
     P_error = error * Kp / PID_DIV;                               // calculate proportional term
     D_error = (error - error_last) * Kd / PID_DIV;                // calculate differential term
     correction = P_error + D_error;
     cruiseSpeed = baseCruiseSpeed + manualA;
-#ifdef BOT_TYPE_CUSTOM_PCB
-    speedA = constrain(cruiseSpeed - correction, -200, 200);
-    speedB = constrain(cruiseSpeed + correction, -200, 200);
+#ifdef MOTOR_A_POS_IS_FORWARD
+    speedA = constrain(cruiseSpeed - correction, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
+    speedB = constrain(cruiseSpeed + correction, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
 #else
-    speedA = constrain(cruiseSpeed + correction, -200, 200);
-    speedB = constrain(cruiseSpeed - correction, -200, 200);
+    speedA = constrain(cruiseSpeed + correction, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
+    speedB = constrain(cruiseSpeed - correction, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
 #endif
 }
 
@@ -308,9 +332,13 @@ void calculateMotorSpeedFromJoystick(int xAxisValue, int yAxisValue, int* motor1
 
 
   CB_DBG("%lu: xAxisValue,yAxisValue(%d,%d) =  throttle(%d),  Left,Right(%d,%d)", millis(), xAxisValue, yAxisValue, throttle, leftMotorSpeed, rightMotorSpeed);
-
+#ifdef MOTOR_A_POS_IS_FORWARD
   *motor1 = rightMotorSpeed;
   *motor2 = leftMotorSpeed;
+#else
+  *motor2 = rightMotorSpeed;
+  *motor1 = leftMotorSpeed;
+#endif
 }
 
 
@@ -330,6 +358,15 @@ void read_ir_sensors() {
   IRvals[2] = constrain(ANALOG_READ(IR3) - IRbias[2], 0, IR_MAX); //right
 }
 
+void motor(int _speedA, int _speedB) {
+  // TODO: read config from eeprom
+#ifdef BOT_TYPE_CUSTOM_PCB
+motor_customPCB(_speedA, _speedB);
+#else
+motor_ORG(_speedA, _speedB);
+#endif
+  
+}
 
 void motor_customPCB(int _speedA, int _speedB)
 {
@@ -345,7 +382,7 @@ void motor_customPCB(int _speedA, int _speedB)
 
 
 // motor controller function
-void motor(int _speedA, int _speedB) // V4
+void motor_ORG(int _speedA, int _speedB) // V4
 {
   _speedA = constrain(_speedA, -255, 255);
   _speedB = constrain(_speedB, -255, 255);

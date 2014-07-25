@@ -6,16 +6,19 @@
 // This sketch turns the Arduino into a AVRISP
 // using the following arduino pins:
 //
-// pin name:    not-mega:         mega(1280 and 2560)
-// slave reset: 10:               53
-// MOSI:        11:               51
-// MISO:        12:               50
-// SCK:         13:               52
+// pin name:    not-mega:         mega(1280 and 2560)    RFDuino
+// slave reset: 10:               53                      GPIO6  (SS - TODO: change to GPIO2)
+// MOSI:        11:               51                      GPIO5
+// MISO:        12:               50                      GPIO3
+// SCK:         13:               52                      GPIO4
 //
-// Put an LED (with resistor) on the following pins:
+// Put an LED (with resistor) on the following pins: (n/a to RFduino)
 // 9: Heartbeat   - shows the programmer is running
 // 8: Error       - Lights up if something goes wrong (use red if that makes sense)
 // 7: Programming - In communication with the slave
+//
+// 23 July 2013 by Wayne Keenan (www.cannybots.com)
+// -- RFduino support, GZLL Protocol
 //
 // 23 July 2011 Randall Bohn
 // -Address Arduino issue 509 :: Portability of ArduinoISP
@@ -43,7 +46,6 @@
 // - The SPI functions herein were developed for the AVR910_ARD programmer
 // - More information at http://code.google.com/p/mega-isp
 
-// #define ARDUINOISP 1
 
 #include <Arduino.h>
 #include <HardwareSerial.h>
@@ -747,7 +749,7 @@ void rfd_isp_RFduinoGZLL_onReceive(device_t device, int rssi, char *data, int le
       }
     }
 
-  }// else {
+  }
 
   // send any pending data on the GZLL 'piggyback', if not currently doing so.
 
@@ -762,13 +764,7 @@ void rfd_isp_RFduinoGZLL_onReceive(device_t device, int rssi, char *data, int le
       }
       RFduinoGZLL.sendToDevice(device, (char*)radioTxBuf, outLen);
     }
-    /*
-    if (radioOutFifo.count() > 0) {
-      radioTxBuf[0] = radioOutFifo.dequeue();
-      RFduinoGZLL.sendToDevice(device, (char*)radioTxBuf, 1);
-    }
-    */
+
     isPiggyBacking = false;
   }
-  // data not sent this time, should be sent on next next zero-length 'poll' packet
 }

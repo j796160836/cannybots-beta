@@ -43,11 +43,11 @@
 #define TX_PIN 1
 #define RX_PIN 0
 #else
-//#define TX_PIN 5
-//#define RX_PIN 6
+#define TX_PIN 5
+#define RX_PIN 6
 // Gold board
-#define TX_PIN 1
-#define RX_PIN 0
+//#define TX_PIN 1
+//#define RX_PIN 0 
 #endif
 
 
