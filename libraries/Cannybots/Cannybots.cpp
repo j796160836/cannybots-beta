@@ -425,7 +425,7 @@ void Cannybots::processOutboundMessageQueue() {
 
 // Command processing
 
-// ok on Arduiono 1.5.6r2 RFd SDK v2.0.3 but not the latest ARM gcccc for Arduino IDE 1.5.7 + RFd SDK v2.1
+// ok on Arduino 1.5.6r2 RFd SDK v2.0.3 but not the latest ARM gcc for Arduino IDE 1.5.7 + RFd SDK v2.1
 //#import <cstring>
 
 void Cannybots::processMessage(Message* msg ) {

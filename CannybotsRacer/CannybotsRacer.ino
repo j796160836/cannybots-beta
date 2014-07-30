@@ -2,6 +2,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Libraries
+//#include <AnalogScanner.h>
+#include <EEPROM.h>
 
 
 #include <SPI.h>
@@ -37,10 +39,10 @@ AnalogScanner scanner;
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Config
 
-#define PID_METHOD_2
-#define PID_SETPOINT        0
+#define PID_METHOD_1
+#define PID_SETPOINT        0.0
 // going lower than 25 resuts in spinning...
-#define PID_SAMPLE_TIME     100
+#define PID_SAMPLE_TIME     50
 #define PRINTVALS_INTERVAL   1000
 
 #define OFF_LINE_MAX_TIME 500
@@ -185,42 +187,14 @@ bool IRonBlack[NUM_IR_SENSORS];
 
 volatile unsigned long lastCommandTime = millis();
 
-// NV settings
-#include <EEPROM.h>
+unsigned long offTheLineTime = 0;
+unsigned long offLineLastTime = millis();
+bool resetSpeed = true;
 
-#define NV_ID                           "CBLF"
-#define NV_BASE                         64
-#define NV_VERSION                      0
-#define NV_PID_ALGO_TYPE                4
-#define NV_DEFAULT_CRUISESPEED          5
-#define NV_MAX_MANUAL_CRUISESPEED       6
-#define NV_MAX_MOTOR_SPEED              7
-#define NV_MOTOR_ALGO_TYPE              8
-#define NV_M1_A_PIN                     9
-#define NV_M1_B_PIN                    10
-#define NV_M1_SENSE_PIN                11
-#define NV_M2_A_PIN                    12
-#define NV_M2_B_PIN                    13
-#define NV_M2_SENSE_PIN                14
-#define NV_MDRIVER_MODE_PIN            15
-#define NV_BAT_PIN                     16
-//   bits [0..7] =  [ HAS_MDRRIVEMODE, HAT_MOTOR_SENSE, HAS_BAT_SENSE, M1_POSITIVESPEED_IS_FWD, M2_POSITIVESPEED_IS_FWD, n/a, n/a, n/a],
-#define NV_FEATURES_MASK1              17
-#define NV_IR_MAX                      18 // UINT
-#define NV_IR_WHITE_THRESHOLD          20 // UINT
-#define NV_XAXIS_DEADZONE              22 // BYTE
-#define NV_BOT_ID                      23 // UINT
-#define NV_MAX_MOTOR_DELTA             24
-#define NV_MAX_MOTOR_DELTA_DIV         25
-#define NV_IRPIN_1                     30
-#define NV_IRPIN_2                     31
-#define NV_IRPIN_3                     32
-#define NV_IRBIAS_1                    40 // INT8
-#define NV_IRBIAS_2                    41 // INT8
-#define NV_IRBIAS_3                    42 // INT8
-#define NV_PID_P                       50 // INT16
-#define NV_PID_I                       52 // INT16
-#define NV_PID_D                       54 // INT16
+volatile unsigned long loopNowTime = millis();
+volatile unsigned long loopLastTime = millis();
+volatile unsigned long loopDeltaTime = millis();
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -232,44 +206,38 @@ void setup() {
   pinMode(pinA2, OUTPUT);
   pinMode(pinB1, OUTPUT);
   pinMode(pinB2, OUTPUT);
+  pinMode(STATUS_LED, OUTPUT);
+  digitalWrite(STATUS_LED, HIGH);
+  
 #ifdef BOT_TYPE_CUSTOM_PCB
   pinMode(pin_MODE, OUTPUT);
   digitalWrite(pin_MODE, HIGH); //to set controller to Phase/Enable mode
 #endif
 
-  pinMode(STATUS_LED, OUTPUT);
-  digitalWrite(STATUS_LED, HIGH);
 #ifdef USE_ANALOG_LIB
-  int scanOrder[NUM_IR_SENSORS + 1] = {IR1, IR2, IR3, BATTERY_PIN};
-  scanner.setScanOrder(NUM_IR_SENSORS + 1, scanOrder);
-  scanner.beginScanning();
-  delay(1); // Wait for the first scans to occur.
+  //int scanOrder[NUM_IR_SENSORS + 1] = {IR1, IR2, IR3, BATTERY_PIN};
+  int scanOrder[NUM_IR_SENSORS] = {IR1, IR2, IR3};
+  scanner.setScanOrder(NUM_IR_SENSORS, scanOrder);
+  scanner.beginScanning();  
 #endif
-  setup_PID();
-
-  mycannybots_setup();
-
-
 
 #ifdef USE_IR_WAYPOINT_DETECTION
   irrecv.enableIRIn();
 #endif
 
+  setup_PID();
+  mycannybots_setup();
 }
 
-unsigned long offTheLineTime = 0;
-unsigned long offLineLastTime = millis();
-bool resetSpeed = true;
 
-unsigned long loopNowTime = millis();
-unsigned long loopLastTime = millis();
-unsigned long loopDeltaTime = millis();
 
 void loop() {
   loopNowTime = millis();
   loopDeltaTime = loopNowTime - loopLastTime;
   loopLastTime = loopNowTime;
   read_ir_sensors();
+  lf_emitIRValues(IRvals[0], IRvals[1], IRvals[2]);
+
 
   // count up the time spent off the line, rahter than switching to manual mode the instance the mid sensor goes of the line
   if ((IRvals[1] <= IR_MANUAL_THRESHOLD )) {
@@ -305,7 +273,7 @@ void loop() {
     // in manual mode
     if ( (millis() - cb.getLastInboundCommandTime()) > 2000) {
       // no command has been received in the last 2 seconds, err on the side of caution and stop!
-      speedA = speedB = 0;
+      speedA = speedB =  0;
     } else {
       // rate limit/ease the speed change
       speedA = speedA + min((manualA - speedA) / MAX_MOTOR_DELTA_DIVISOR, MAX_MOTOR_DELTA * sign(manualA - speedA));
@@ -313,7 +281,6 @@ void loop() {
     }
   }
   motor(speedA, speedB);
-  lf_emitIRValues(IRvals[0], IRvals[1], IRvals[2]);
   printvalues();
 
   cb.update();
@@ -405,9 +372,9 @@ void read_ir_sensors() {
   IRvals[1] = constrain(ANALOG_READ(IR2) - IRbias[1], 0, IR_MAX); //centre
   IRvals[2] = constrain(ANALOG_READ(IR3) - IRbias[2], 0, IR_MAX); //right
 
-  IRonBlack[0] = IRvals[0] < WHITE_THRESHOLD;
-  IRonBlack[1] = IRvals[1] < WHITE_THRESHOLD;
-  IRonBlack[2] = IRvals[2] < WHITE_THRESHOLD;
+  IRonBlack[0] = IRvals[0] > WHITE_THRESHOLD;
+  IRonBlack[1] = IRvals[1] > WHITE_THRESHOLD;
+  IRonBlack[2] = IRvals[2] > WHITE_THRESHOLD;
 }
 
 void motor(int _speedA, int _speedB) {

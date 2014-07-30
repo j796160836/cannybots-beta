@@ -16,7 +16,8 @@ void setup_PID() {
   read_ir_sensors();
   Setpoint = PID_SETPOINT;
   myPID.SetSampleTime(PID_SAMPLE_TIME);
-  myPID.SetOutputLimits(- (MOTOR_MAX_SPEED - baseCruiseSpeed), MOTOR_MAX_SPEED - baseCruiseSpeed);
+  //myPID.SetOutputLimits(- (MOTOR_MAX_SPEED - baseCruiseSpeed), MOTOR_MAX_SPEED - baseCruiseSpeed);
+  myPID.SetOutputLimits(-MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
   myPID.SetMode(AUTOMATIC);
 }
 
@@ -29,11 +30,11 @@ void calculate_PID() {
   } else {
     Input = 0; 
   }*/
-  Input = (IRvals[2] - IRvals[0])/100.0 ;
+  Input = (IRvals[2] - IRvals[0]) ;
   
   myPID.Compute();
 
-  cruiseSpeed = baseCruiseSpeed + manualA;
+  cruiseSpeed = baseCruiseSpeed;// + manualA;
 
 #ifdef MOTOR_A_POS_IS_FORWARD
   speedA = cruiseSpeed + Output;
@@ -89,7 +90,7 @@ void enable_PID() {
 
 void printvals_PID() {
   CB_DBG(    "%lu (%lu): IR(%u,%u,%u), IRonB(%d,%d,%d), Kpid(%d,%d,%d)/100, InOut(%d, %d)/100, Sab(%d,%d) Mab(%d,%d), XY(%d,%d), MEM(%d), ", //VCC(%d)",
-             millis(),
+             loopNowTime,
              loopDeltaTime,
              IRvals[0], IRvals[1], IRvals[2],
              IRonBlack[0], IRonBlack[1], IRonBlack[2],

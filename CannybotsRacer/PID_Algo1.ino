@@ -74,8 +74,9 @@ int getPID_D() {
 }
 
 void printvals_PID() {
-  CB_DBG(    "%lu: IR(%u,%u,%u) Kpd(%d,%d) e(%d) PeDe(%d,%d) Sab(%d,%d) Mab(%d,%d), XY(%d,%d), MEM(%d), ", //VCC(%d)",
-             millis(),
+  CB_DBG(    "%lu (%lu): IR(%u,%u,%u) Kpd(%d,%d) e(%d) PeDe(%d,%d) Sab(%d,%d) Mab(%d,%d), XY(%d,%d), MEM(%d), ", //VCC(%d)",
+             loopNowTime,
+             loopDeltaTime,
              IRvals[0], IRvals[1], IRvals[2],
              Kp, Kd, error, P_error, D_error,
              speedA, speedB, manualA, manualB,
