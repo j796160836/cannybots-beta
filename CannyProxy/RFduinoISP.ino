@@ -109,14 +109,14 @@ void WRITE_OUT(char c) {
 
 
 #ifdef __RFduino__
-
-
 #include <SPI.h>
-#define RESET     6
-#define LED_HB    2
-#define LED_ERR   2
-#define LED_PMODE 2
-#define PROG_FLICKER true
+#define RESET     2
+
+// not enough pins!!
+//#define LED_HB    7
+//#define LED_ERR   7
+//#define LED_PMODE 7
+#define PROG_FLICKER false
 #else
 #define RESET     10
 #define LED_HB    13
@@ -143,12 +143,15 @@ void pulse(int pin, int times);
 void rfd_isp_setup() {
 // only when not in CannyProxy
   //Serial.begin(9600);
+#ifdef USE_STATUS_LED
   pinMode(LED_PMODE, OUTPUT);
   pulse(LED_PMODE, 2);
   pinMode(LED_ERR, OUTPUT);
   pulse(LED_ERR, 2);
   pinMode(LED_HB, OUTPUT);
   pulse(LED_HB, 2);
+#endif
+
 #ifdef DEBUG_LVL
 #ifdef __RFduino__
 // only when not in CannyProxy
@@ -194,7 +197,9 @@ void heartbeat() {
   if (hbval > 192) hbdelta = -hbdelta;
   if (hbval < 32) hbdelta = -hbdelta;
   hbval += hbdelta;
+#ifdef USE_STATUS_LED  
   analogWrite(LED_HB, hbval);
+#endif  
   delay(20);
 }
 
@@ -202,13 +207,16 @@ void heartbeat() {
 
 void rfd_isp_loop(void) {
   // is pmode active?
+#ifdef USE_STATUS_LED
+  
   if (pmode) digitalWrite(LED_PMODE, HIGH);
   else digitalWrite(LED_PMODE, LOW);
   // is there an error?
   if (error) digitalWrite(LED_ERR, HIGH);
   else digitalWrite(LED_ERR, LOW);
 
-  // light the heartbeat LED
+#endif
+// light the heartbeat LED
   heartbeat();
   rfd_loop();
   if (radioInFifo.count() > 0) {
@@ -247,8 +255,11 @@ void pulse(int pin, int times) {
 }
 
 void prog_lamp(int state) {
+#ifdef USE_STATUS_LED
+
   if (PROG_FLICKER)
     digitalWrite(LED_PMODE, state);
+#endif
 }
 
 

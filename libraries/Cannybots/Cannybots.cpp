@@ -225,17 +225,13 @@ uint16_t Cannybots::getLastError() {
 void Cannybots::begin() {
 #ifdef ARDUINO
     
-    CB_INBOUND_SERIAL_PORT.begin(CB_INBOUND_SERIAL_BAUD);
-    
 #ifdef ARDUINO_AVR_A_STAR_32U4
-    // this really depends on the Pololu bootloader being present on  the device
-    // brownout detection
+    // this depends on the Pololu bootloader being present on  the device for brownout detection
     // from:  http://www.pololu.com/docs/0J61/7
     pinMode(13, OUTPUT);
     if (MCUSR & (1 << BORF))
     {
         // A brownout reset occurred.  Blink the LED
-        // quickly for 2 seconds.
         for (uint8_t i = 0; i < 5; i++)
         {
             digitalWrite(13, HIGH);
@@ -245,7 +241,7 @@ void Cannybots::begin() {
         }
     }
     MCUSR = 0;
-#endif //
+#endif // ARDUINO_AVR_A_STAR_32U4
     
 #ifdef USE_SPI
     pinMode(SCK, INPUT);
@@ -256,9 +252,10 @@ void Cannybots::begin() {
     // turn on SPI in slave mode
     SPCR |= _BV(SPE);
     SPI.attachInterrupt();
-#endif
+#else
+    CB_INBOUND_SERIAL_PORT.begin(CB_INBOUND_SERIAL_BAUD);
 
-    
+#endif // USE_SPI
 #endif // Arduino
     
 #ifdef __RFduino__
@@ -292,12 +289,12 @@ void Cannybots::update() {
 #ifdef USE_SPI
     // not polled, event driven using AVR SPI interrupt handler
     if (serialBufPtr>=CB_MAX_MSG_SIZE) {
-        Serial.println("<EOC>");
-        foundStart = false;
         Message* msg = new Message(serialBuffer, CB_MAX_MSG_SIZE);
-        inboundMsgFIFO.enqueue(msg);
-        
         serialBufPtr=0;
+        foundStart = false;
+        inboundMsgFIFO.enqueue(msg)
+        Serial.println("<EOC>");
+
     }
 #else
     readSerial(Serial1);

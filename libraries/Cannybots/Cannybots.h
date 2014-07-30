@@ -63,7 +63,7 @@
 #ifdef DEBUG
 #ifdef ARDUINO
 static char dbg_buffer[128];
-#define CB_DBG(FMT, ...) snprintf(dbg_buffer, 128, FMT, __VA_ARGS__); Serial.println(dbg_buffer);
+#define CB_DBG(FMT, ...) snprintf(dbg_buffer, 128, FMT, __VA_ARGS__); Serial.println(dbg_buffer); Serial.flush();
 #else
 static char dbg_buffer[256];
 #define CB_DBG(FMT, ...) printf("implement iOS log\n"); //printf(FMT, __VA_ARGS__);

@@ -89,16 +89,20 @@ bool foundStart = false;
 char c=0, lastChar=0;
 
 
-void writeUART(const uint8_t* data, uint16_t len) {
+void writeUART(const uint8_t* data, uint16_t len) {  
+  
+
 #ifdef USE_SPI
+   digitalWrite(SS, LOW);    // SS is pin 10
    SPI.transfer ('>');
    SPI.transfer ('>');
    for (int i = 0 ; i <len ; i++) {
-           DBG("SPI:%x",data[i]);
+        DBG("SPI:%x",data[i]);
 
         SPI.transfer (data[i]);
    }
-   
+   digitalWrite(SS, HIGH);
+
 #else
   Serial.write(">>");
   Serial.write( data, len);
@@ -262,15 +266,15 @@ void setup() {
   pinMode(SCK, OUTPUT);
   pinMode(MISO, INPUT);
   pinMode(MOSI, OUTPUT);
-  //pinMode(SS, OUTPUT);  
-  //digitalWrite(SS, HIGH);  // ensure SS stays high for now
+  pinMode(SS, OUTPUT);  
+  digitalWrite(SS, HIGH);  // ensure SS stays high for now
 
 
   SPI.begin ();
 
   // Slow down the master a bit
   SPI.setFrequency(125);
-  // a no-op on RFduino SDK v2.0.3
+  // Below is 'standard Arduino' but is actually a no-op on RFduino SDK v2.0.3
   //SPI.setClockDivider(SPI_CLOCK_DIV8);
 
 #endif // USE_SPI

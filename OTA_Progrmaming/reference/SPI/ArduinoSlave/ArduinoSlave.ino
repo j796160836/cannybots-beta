@@ -12,10 +12,10 @@ volatile int intCount=0;
 
 void setup (void)
 {
-  Serial.begin(115200);
-  delay(5000);
+  Serial.begin(9600);
+  //delay(5000);
   Serial.println("CLIENT2!");
-  delay(1000);
+  //delay(1000);
   // have to send on master in, *slave out*
   pinMode(SCK, INPUT);
   pinMode(MISO, OUTPUT);
@@ -53,8 +53,13 @@ ISR (SPI_STC_vect)
       buf [pos++] = c;      
     }  // end of room available
     
+    /*
     if (c == '!' ) {
       process_it = true;
+    }
+    */
+    if(pos==20) {
+        process_it = true;
     }
 
 }  // end of interrupt routine SPI_STC_vect
@@ -66,7 +71,7 @@ void loop (void)
   if (process_it)
     {
     digitalWrite(13,HIGH);
-    delay(200);
+    //delay(200);
     digitalWrite(13,LOW);
 
     buf [pos] = 0;  
@@ -75,5 +80,11 @@ void loop (void)
     process_it = false;
     }  // end of flag set
     
+    static int on = LOW;
+    static unsigned long last = millis();
+    if ((millis() - last) > 1000) {
+       last =millis();
+      digitalWrite(13, on = on==HIGH?LOW:HIGH); 
+    }
 }  // end of loop
 
