@@ -1,25 +1,35 @@
-
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// PID Method 1 
+//
+
 #ifdef PID_METHOD_1
+#define pid_t int
+#define pid_m 1
 
-int Kp = 0;
-int Ki = 0;
-int Kd = 0;
-int I_limit = 100;
-int P_error = 0;
-int I_error = 0;
-int D_error = 0;
-int error = 0;
-int error_last = 0; // to calculate D_error = error - error_last
-int correction = 0; //error after PID filter
+pid_t Kp = 0;
+pid_t Ki = 0;
+pid_t Kd = 0;
+
+pid_t P_error = 0;
+pid_t D_error = 0;
+pid_t error = 0;
+pid_t error_last = 0; // to calculate D_error = error - error_last
+pid_t correction = 0; //error after PID filter
 
 void setup_PID() {
   getPIDSettings();
 }
 
+unsigned long pidLastTime = millis();
 void calculate_PID() {
+ 
+  if ( (loopNowTime - pidLastTime) < PID_SAMPLE_TIME) {
+    return;
+  }
+  pidLastTime= loopNowTime;
+  
   // process IR readings via PID
   error_last = error;                                   // store previous error before new one is caluclated
   //error = constrain(IRvals[0] - IRvals[2], -30, 30);        // set bounds for error
@@ -55,30 +65,32 @@ void enable_PID() {
 }
 
 void setPID_P(int v) {
-  Kp = v;
+  Kp = v/pid_m;
 }
 void setPID_I(int v) {
-  Ki = v;
+  Ki = v/pid_m;
 }
 void setPID_D(int v) {
-  Kd = v;
+  Kd = v/pid_m;
 }
 int getPID_P() {
-  return Kp;
+  return Kp*pid_m;
 }
 int getPID_I() {
-  return Ki;
+  return Ki*pid_m;
 }
 int getPID_D() {
-  return Kd;
+  return Kd*pid_m;
 }
 
 void printvals_PID() {
-  CB_DBG(    "%lu (%lu): IR(%u,%u,%u) Kpd(%d,%d) e(%d) PeDe(%d,%d) Sab(%d,%d) Mab(%d,%d), XY(%d,%d), MEM(%d), ", //VCC(%d)",
+  CB_DBG(    "%lu(%lu@%lu): IR(%u,%u,%u) Kpd(%d,%d)/100 Sab(%d,%d) Mab(%d,%d), XY(%d,%d), MEM(%d), ", //VCC(%d)", // e(%d) PeDe(%d,%d)
              loopNowTime,
              loopDeltaTime,
+             loopcount,
              IRvals[0], IRvals[1], IRvals[2],
-             Kp, Kd, error, P_error, D_error,
+             Kp*100, Kd*100, 
+             //error, P_error, D_error,
              speedA, speedB, manualA, manualB,
              xAxisValue, yAxisValue,
              cb.getFreeMemory()

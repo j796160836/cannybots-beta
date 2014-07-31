@@ -1,10 +1,11 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
-//////// PID Method 2:  PID Library
-#include <PID_v1.h>
+//
+// PID Method 2:  PID Library
+//
 
 #ifdef PID_METHOD_2
-
+#include <PID_v1.h>
 
 double Setpoint, Input, Output;
 double Kp = 0.0, Ki = 0.0, Kd = 0.0;
@@ -15,10 +16,12 @@ void setup_PID() {
   getPIDSettings();
   read_ir_sensors();
   Setpoint = PID_SETPOINT;
+  Setpoint = -1.4f;
   myPID.SetSampleTime(PID_SAMPLE_TIME);
-  //myPID.SetOutputLimits(- (MOTOR_MAX_SPEED - baseCruiseSpeed), MOTOR_MAX_SPEED - baseCruiseSpeed);
-  myPID.SetOutputLimits(-MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
-  myPID.SetMode(AUTOMATIC);
+  myPID.SetOutputLimits(- (MOTOR_MAX_SPEED - baseCruiseSpeed), MOTOR_MAX_SPEED - baseCruiseSpeed);
+  //myPID.SetOutputLimits(-MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
+  //myPID.SetOutputLimits(0, MOTOR_MAX_SPEED);
+  disable_PID();
 }
 
 void calculate_PID() {
@@ -30,7 +33,8 @@ void calculate_PID() {
   } else {
     Input = 0; 
   }*/
-  Input = (IRvals[2] - IRvals[0]) ;
+  Input = (IRvals[2] - IRvals[0]) / 10.0 ;
+  
   
   myPID.Compute();
 
@@ -89,7 +93,7 @@ void enable_PID() {
 }
 
 void printvals_PID() {
-  CB_DBG(    "%lu (%lu): IR(%u,%u,%u), IRonB(%d,%d,%d), Kpid(%d,%d,%d)/100, InOut(%d, %d)/100, Sab(%d,%d) Mab(%d,%d), XY(%d,%d), MEM(%d), ", //VCC(%d)",
+  CB_DBG(    "%lu (%lu): IR(%u,%u,%u), IRonB(%d,%d,%d), Kpid(%d,%d,%d)/100, InOut(%d, %d)/100, Sab(%d,%d) Mab(%d,%d),MEM(%d), ", //VCC(%d)",
              loopNowTime,
              loopDeltaTime,
              IRvals[0], IRvals[1], IRvals[2],
@@ -97,7 +101,6 @@ void printvals_PID() {
              (int) (myPID.GetKp() * 100), (int)(myPID.GetKi() * 100), (int)(myPID.GetKd() * 100),
              (int) (Input * 100), (int)(Output * 100),
              speedA, speedB, manualA, manualB,
-             xAxisValue, yAxisValue,
              cb.getFreeMemory()
              //ANALOG_READ(BATTERY_PIN)
         );

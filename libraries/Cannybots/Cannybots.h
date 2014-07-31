@@ -44,7 +44,7 @@
 #define CB_MSG_OFFSET_DATA 6
 
 // Exchanged variables info
-#define CB_MAX_DESCRIPTORS 16
+#define CB_MAX_DESCRIPTORS 12   
 
 
 // helpers

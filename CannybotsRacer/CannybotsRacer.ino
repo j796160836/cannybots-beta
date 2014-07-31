@@ -28,6 +28,7 @@ AnalogScanner scanner;
 #define ANALOG_READ scanner.getValue
 #else
 #define ANALOG_READ analogRead
+#define ANALOG_READING_DELAY 10
 #endif
 
 
@@ -37,24 +38,25 @@ AnalogScanner scanner;
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
+//
 // Config
 
+// PID
 #define PID_METHOD_1
+
 #define PID_SETPOINT        0.0
-// going lower than 25 resuts in spinning...
-#define PID_SAMPLE_TIME     50
-#define PRINTVALS_INTERVAL   1000
+#define PID_SAMPLE_TIME     10
+#define PID_DIV             10
 
-#define OFF_LINE_MAX_TIME 500
+#define PRINTVALS_INTERVAL   200
 
+#define OFF_LINE_MAX_TIME 1000
+
+// Motors
 #define MOTOR_MAX_SPEED 255
 #define MOTOR_TEST_SPEED MOTOR_MAX_SPEED/2
-
-
 //#define MOTOR_A_IS_ON_RIGHT
 #define MOTOR_A_POS_IS_FORWARD 1
-
-
 // number of divisions between current and target motor speed
 #define MAX_MOTOR_DELTA_DIVISOR     1.0
 // max motor speed change
@@ -79,11 +81,7 @@ AnalogScanner scanner;
 #endif
 
 
-#ifdef BOT_TYPE_CUSTOM_PCB
-#define PID_DIV 10
-#else
-#define PID_DIV 1
-#endif
+
 
 
 // Pinout wiring
@@ -165,11 +163,12 @@ IRrecv irrecv(IR_WAYPOINT_DETECTION_PIN);
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
+//
 // App State
 
 bool isLineFollowingMode = true;
 bool forceManualMode = false;
-int baseCruiseSpeed = 125;
+int baseCruiseSpeed = 150;
 int cruiseSpeed = baseCruiseSpeed;
 
 int speedA = 0;
@@ -191,15 +190,18 @@ unsigned long offTheLineTime = 0;
 unsigned long offLineLastTime = millis();
 bool resetSpeed = true;
 
+
+// some counters
 volatile unsigned long loopNowTime = millis();
 volatile unsigned long loopLastTime = millis();
 volatile unsigned long loopDeltaTime = millis();
-
+unsigned long loopcount = 0;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
+//
+// Setup & Main Loop
 
 void setup() {
   pinMode(pinA1, OUTPUT);
@@ -230,11 +232,14 @@ void setup() {
 }
 
 
-
 void loop() {
+  // do some stats...  
+  loopcount++;
   loopNowTime = millis();
   loopDeltaTime = loopNowTime - loopLastTime;
   loopLastTime = loopNowTime;
+  
+  // read and publish R sensor values
   read_ir_sensors();
   lf_emitIRValues(IRvals[0], IRvals[1], IRvals[2]);
 
@@ -269,8 +274,8 @@ void loop() {
     enable_PID();
     calculate_PID();
   } else {
-    disable_PID();
     // in manual mode
+    disable_PID();
     if ( (millis() - cb.getLastInboundCommandTime()) > 2000) {
       // no command has been received in the last 2 seconds, err on the side of caution and stop!
       speedA = speedB =  0;
@@ -291,27 +296,29 @@ void loop() {
 }
 
 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 ////////////////////////////////////
 // Joystick to motor speed conversion
 
 void calculateMotorSpeedFromJoystick(int xAxisValue, int yAxisValue, int* motor1, int* motor2) {
-  // direction (X axis)
-  // throttle  (Y axis)
+  // direction (X axis) -255 .. +255
+  // throttle  (Y axis) -255 .. +255
 
   // handle throttle
   bool isForward = yAxisValue > 0;
   long x2 = (long)xAxisValue * (long)xAxisValue;
   long y2 = (long)yAxisValue * (long)yAxisValue;
 
+  // get the vecor length, constrain it to max motor speed and then remap to a phase angle range more suitable to an accelration curve
   int throttle = constrain(sqrt( x2 + y2) , -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
   throttle = map (throttle, -255, 255, 270, 270 + 180);
   throttle = sin( radians(throttle) ) * MOTOR_MAX_SPEED;
 
   float throttleRatio = (1.0 / MOTOR_MAX_SPEED) * throttle;
-
-
 
   int leftMotorSpeed  = 0;
   int rightMotorSpeed = 0;
@@ -319,7 +326,7 @@ void calculateMotorSpeedFromJoystick(int xAxisValue, int yAxisValue, int* motor1
 
 
   // handle direction
-  // only calc left & right if outside of X axis deadzone
+  // only calc left & right if outside of X axis deadzone (touch screens are terrible feedback devices, so be generous!)
   unsigned int xMag  = abs(xAxisValue);
 
   if ( xMag > XAXIS_DEADZONE  ) {
@@ -339,9 +346,9 @@ void calculateMotorSpeedFromJoystick(int xAxisValue, int yAxisValue, int* motor1
       leftMotorSpeed  = directionRatio * speed;
       rightMotorSpeed = (1.0 - directionRatio * 2) * speed;
     }
-  }
+  } // nothing, was outside X axis stick deadzone
 
-  // re-apply fwd/back sign.
+  // re-apply fwd/back sign from
   leftMotorSpeed = leftMotorSpeed * (isForward ? 1 : -1);
   rightMotorSpeed = rightMotorSpeed * (isForward ? 1 : -1);
 
@@ -368,8 +375,19 @@ void calculateMotorSpeedFromJoystick(int xAxisValue, int yAxisValue, int* motor1
 // set limit on reading. The reading can be very high and inaccurate on pitch black
 void read_ir_sensors() {
 
+#ifndef USE_ANALOG_LIB
+  //ANALOG_READ(IR1); delay(ANALOG_READING_DELAY);
+#endif  
   IRvals[0] = constrain(ANALOG_READ(IR1) - IRbias[0], 0, IR_MAX); //left looking from behind
+
+#ifndef USE_ANALOG_LIB
+  //ANALOG_READ(IR2); delay(ANALOG_READING_DELAY);
+#endif  
   IRvals[1] = constrain(ANALOG_READ(IR2) - IRbias[1], 0, IR_MAX); //centre
+  
+#ifndef USE_ANALOG_LIB
+  //ANALOG_READ(IR3); delay(ANALOG_READING_DELAY);
+#endif  
   IRvals[2] = constrain(ANALOG_READ(IR3) - IRbias[2], 0, IR_MAX); //right
 
   IRonBlack[0] = IRvals[0] > WHITE_THRESHOLD;
@@ -451,8 +469,10 @@ void lf_report_followingMode(bool isLineMode) {
   }
 }
 
-
-
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
 // Stored Settings  (EEPROM/Flash)
 
 void getPIDSettings() {
@@ -479,7 +499,8 @@ void setNVDefaults() {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
-// Remote comms
+//
+// Remotly called funcs
 
 
 void lf_updateMotorSpeeds(int _speedA, int _speedB, int _dummy) {
@@ -594,6 +615,10 @@ void irwaypoint_loop() {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Cannybots glulogic
 
 void mycannybots_setup() {
   cb.setConfigStorage(NV_ID, NV_BASE);
@@ -608,6 +633,10 @@ void mycannybots_setup() {
   cb.begin();
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
 /// Testing
 
 void test(int16_t p1, int16_t p2, int16_t p3) {
