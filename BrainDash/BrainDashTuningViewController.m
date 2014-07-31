@@ -77,7 +77,15 @@
          _IRBias3TextField.text =[NSString stringWithFormat:@"%d", p3];
      }];
     
-    
+
+    [cb registerHandler:RACER_IRVALS withBlockFor_INT16_3: ^(int16_t p1, int16_t p2, int16_t p3)
+     {
+         _IRReading1.text =[NSString stringWithFormat:@"%d", p1];
+         _IRReading2.text =[NSString stringWithFormat:@"%d", p2];
+         _IRReading3.text =[NSString stringWithFormat:@"%d", p3];
+     }];
+
+     
     [cb callMethod:RACER_CONFIG p1:0 p2:0 p3:0];
 
 }
@@ -86,6 +94,7 @@
     CannybotsController* cb = [CannybotsController sharedInstance];
     [cb deregisterHandler:RACER_PID];
     [cb deregisterHandler:RACER_IRBIAS];
+    [cb deregisterHandler:RACER_IRVALS];
 }
 
 -(IBAction)textFieldReturn:(id)sender

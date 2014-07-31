@@ -221,9 +221,9 @@
 - (IBAction)modeChanged:(UISegmentedControl *)sender {
     
     if ( 0 == sender.selectedSegmentIndex) {
-        [cb callMethod:RACER_LINEFOLLOWING_MODE p1:0];
+        [cb callMethod:RACER_LINEFOLLOWING_MODE p1:1];
     } else if ( 1 == sender.selectedSegmentIndex) {
-        [cb callMethod:RACER_LINEFOLLOWING_MODE p1:1 p2:0 p3:0];
+        [cb callMethod:RACER_LINEFOLLOWING_MODE p1:0 ];
     }
     
 }

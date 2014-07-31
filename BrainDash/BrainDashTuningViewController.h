@@ -22,6 +22,9 @@
 @property (weak, nonatomic) IBOutlet UITextField *IRBias1TextField;
 @property (weak, nonatomic) IBOutlet UITextField *IRBias2TextField;
 @property (weak, nonatomic) IBOutlet UITextField *IRBias3TextField;
+@property (weak, nonatomic) IBOutlet UITextField *IRReading1;
+@property (weak, nonatomic) IBOutlet UITextField *IRReading2;
+@property (weak, nonatomic) IBOutlet UITextField *IRReading3;
 - (IBAction)ledColourSelected:(id)sender;
 
 -(IBAction)textFieldReturn:(id)sender;
