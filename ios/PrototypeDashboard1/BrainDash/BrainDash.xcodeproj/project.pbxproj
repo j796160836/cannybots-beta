@@ -1,0 +1,939 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B01EEBDF1948F94F00E6D3A4 /* Speed High Rot.png in Resources */ = {isa = PBXBuildFile; fileRef = B01EEBDD1948F94F00E6D3A4 /* Speed High Rot.png */; };
+		B01EEBE01948F94F00E6D3A4 /* Speed Low Rot.png in Resources */ = {isa = PBXBuildFile; fileRef = B01EEBDE1948F94F00E6D3A4 /* Speed Low Rot.png */; };
+		B0B067BD196D542B00ABC209 /* CannybotsController.mm in Sources */ = {isa = PBXBuildFile; fileRef = B0B067BC196D542B00ABC209 /* CannybotsController.mm */; };
+		B0BE4123196093E2003F530B /* Cannybots.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B0BE4121196093E2003F530B /* Cannybots.cpp */; };
+		B0C87347196742D600238594 /* Clock.png in Resources */ = {isa = PBXBuildFile; fileRef = B0C87346196742D600238594 /* Clock.png */; };
+		B0C8734E19674B8800238594 /* HighScores.m in Sources */ = {isa = PBXBuildFile; fileRef = B0C8734B19674B8800238594 /* HighScores.m */; };
+		B0C8734F19674B8800238594 /* HighScoresViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B0C8734D19674B8800238594 /* HighScoresViewController.m */; };
+		B916F522190529B40057388D /* BrainSpeakBLE.m in Sources */ = {isa = PBXBuildFile; fileRef = B916F521190529B40057388D /* BrainSpeakBLE.m */; };
+		B92C59DE18FEC8FE005EC882 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59DD18FEC8FE005EC882 /* Foundation.framework */; };
+		B92C59E018FEC8FE005EC882 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59DF18FEC8FE005EC882 /* CoreGraphics.framework */; };
+		B92C59E218FEC8FE005EC882 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59E118FEC8FE005EC882 /* UIKit.framework */; };
+		B92C59E818FEC8FE005EC882 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = B92C59E618FEC8FE005EC882 /* InfoPlist.strings */; };
+		B92C59EA18FEC8FE005EC882 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B92C59E918FEC8FE005EC882 /* main.m */; };
+		B92C59EE18FEC8FE005EC882 /* BrainDashAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B92C59ED18FEC8FE005EC882 /* BrainDashAppDelegate.m */; };
+		B92C59F118FEC8FE005EC882 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B92C59EF18FEC8FE005EC882 /* Main.storyboard */; };
+		B92C59F418FEC8FE005EC882 /* BrainDashMainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B92C59F318FEC8FE005EC882 /* BrainDashMainViewController.m */; };
+		B92C59F718FEC8FE005EC882 /* BrainDashFlipsideViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B92C59F618FEC8FE005EC882 /* BrainDashFlipsideViewController.m */; };
+		B92C59F918FEC8FE005EC882 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B92C59F818FEC8FE005EC882 /* Images.xcassets */; };
+		B92C5A0018FEC8FF005EC882 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59FF18FEC8FF005EC882 /* XCTest.framework */; };
+		B92C5A0118FEC8FF005EC882 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59DD18FEC8FE005EC882 /* Foundation.framework */; };
+		B92C5A0218FEC8FF005EC882 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59E118FEC8FE005EC882 /* UIKit.framework */; };
+		B92C5A0A18FEC8FF005EC882 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = B92C5A0818FEC8FF005EC882 /* InfoPlist.strings */; };
+		B92C5A0C18FEC8FF005EC882 /* BrainDashTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B92C5A0B18FEC8FF005EC882 /* BrainDashTests.m */; };
+		B92C5A2418FECE96005EC882 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C5A2318FECE96005EC882 /* CoreBluetooth.framework */; };
+		B92C5A6118FEFD1D005EC882 /* UARTPeripheral.m in Sources */ = {isa = PBXBuildFile; fileRef = B92C5A5918FEFD1D005EC882 /* UARTPeripheral.m */; };
+		B92C5A6218FEFD1D005EC882 /* CBUUID+StringExtraction.m in Sources */ = {isa = PBXBuildFile; fileRef = B92C5A5C18FEFD1D005EC882 /* CBUUID+StringExtraction.m */; };
+		B92C5A6318FEFD1D005EC882 /* NSData+hex.m in Sources */ = {isa = PBXBuildFile; fileRef = B92C5A5E18FEFD1D005EC882 /* NSData+hex.m */; };
+		B92C5A6418FEFD1D005EC882 /* NSString+hex.m in Sources */ = {isa = PBXBuildFile; fileRef = B92C5A6018FEFD1D005EC882 /* NSString+hex.m */; };
+		B95632901938B25F00F06E82 /* libcocos2d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B9F68B3A19055C9F00F6654D /* libcocos2d.a */; };
+		B9A66007190561B9004869BF /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B9A66006190561B9004869BF /* libz.dylib */; };
+		B9A6600E1905AA07004869BF /* HelloWorldScene.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A660081905AA07004869BF /* HelloWorldScene.m */; };
+		B9A660151905AA35004869BF /* SneakyJoystickSkinnedBase.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A660111905AA35004869BF /* SneakyJoystickSkinnedBase.m */; };
+		B9A660161905AA35004869BF /* SneakyButtonSkinnedBase.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A660131905AA35004869BF /* SneakyButtonSkinnedBase.m */; };
+		B9A660191905AA82004869BF /* SneakyButton.m in Sources */ = {isa = PBXBuildFile; fileRef = B9A660171905AA82004869BF /* SneakyButton.m */; };
+		B9AD5E3A193E64C800BC9631 /* Button Pause.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E1F193E64C800BC9631 /* Button Pause.png */; };
+		B9AD5E3B193E64C800BC9631 /* Button Play.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E20193E64C800BC9631 /* Button Play.png */; };
+		B9AD5E3C193E64C800BC9631 /* Button Shuffle.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E21193E64C800BC9631 /* Button Shuffle.png */; };
+		B9AD5E3D193E64C800BC9631 /* Button Stop.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E22193E64C800BC9631 /* Button Stop.png */; };
+		B9AD5E3E193E64C800BC9631 /* Arrow Up 3.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E24193E64C800BC9631 /* Arrow Up 3.png */; };
+		B9AD5E3F193E64C800BC9631 /* Control Panel.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E25193E64C800BC9631 /* Control Panel.png */; };
+		B9AD5E40193E64C800BC9631 /* Cursor Move Alt.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E26193E64C800BC9631 /* Cursor Move Alt.png */; };
+		B9AD5E41193E64C800BC9631 /* Dashboard.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E27193E64C800BC9631 /* Dashboard.png */; };
+		B9AD5E42193E64C800BC9631 /* Game Pad.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E28193E64C800BC9631 /* Game Pad.png */; };
+		B9AD5E43193E64C800BC9631 /* Gears.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E29193E64C800BC9631 /* Gears.png */; };
+		B9AD5E44193E64C800BC9631 /* Button Add.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E2B193E64C800BC9631 /* Button Add.png */; };
+		B9AD5E45193E64C800BC9631 /* Button Check.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E2C193E64C800BC9631 /* Button Check.png */; };
+		B9AD5E46193E64C800BC9631 /* Button Delete.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E2D193E64C800BC9631 /* Button Delete.png */; };
+		B9AD5E47193E64C800BC9631 /* Exclamation 2.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E2E193E64C800BC9631 /* Exclamation 2.png */; };
+		B9AD5E48193E64C800BC9631 /* Flag.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E2F193E64C800BC9631 /* Flag.png */; };
+		B9AD5E49193E64C800BC9631 /* Heart.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E30193E64C800BC9631 /* Heart.png */; };
+		B9AD5E4A193E64C800BC9631 /* Information 2.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E31193E64C800BC9631 /* Information 2.png */; };
+		B9AD5E4B193E64C800BC9631 /* Link.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E32193E64C800BC9631 /* Link.png */; };
+		B9AD5E4C193E64C800BC9631 /* Magic Wand.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E33193E64C800BC9631 /* Magic Wand.png */; };
+		B9AD5E4D193E64C800BC9631 /* Medal.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E34193E64C800BC9631 /* Medal.png */; };
+		B9AD5E4E193E64C800BC9631 /* Plug.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E35193E64C800BC9631 /* Plug.png */; };
+		B9AD5E4F193E64C800BC9631 /* Question 2.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E36193E64C800BC9631 /* Question 2.png */; };
+		B9AD5E50193E64C800BC9631 /* Search.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E37193E64C800BC9631 /* Search.png */; };
+		B9AD5E51193E64C800BC9631 /* Traffic Cone.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E38193E64C800BC9631 /* Traffic Cone.png */; };
+		B9AD5E52193E64C800BC9631 /* Traffic Lights.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E39193E64C800BC9631 /* Traffic Lights.png */; };
+		B9AD5E56193EEBEF00BC9631 /* Arrow Right 3.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E54193EEBEF00BC9631 /* Arrow Right 3.png */; };
+		B9AD5E57193EEBEF00BC9631 /* Arrow Left 3.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E55193EEBEF00BC9631 /* Arrow Left 3.png */; };
+		B9AD5E5A193EF35800BC9631 /* Speed Low.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E58193EF35800BC9631 /* Speed Low.png */; };
+		B9AD5E5B193EF35800BC9631 /* Speed High.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E59193EF35800BC9631 /* Speed High.png */; };
+		B9AD5E5F193EF58A00BC9631 /* Cannybots_Logo_2000x446.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E5E193EF58A00BC9631 /* Cannybots_Logo_2000x446.png */; };
+		B9AD5E62193EF9D400BC9631 /* BrainDashLineFollowingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9AD5E61193EF9D400BC9631 /* BrainDashLineFollowingViewController.m */; };
+		B9AD5E6E193F481300BC9631 /* button.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E6B193F481300BC9631 /* button.png */; };
+		B9AD5E6F193F481300BC9631 /* joystick.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E6C193F481300BC9631 /* joystick.png */; };
+		B9AD5E70193F481300BC9631 /* knob.png in Resources */ = {isa = PBXBuildFile; fileRef = B9AD5E6D193F481300BC9631 /* knob.png */; };
+		B9AD5E73193F66E800BC9631 /* BrainDashTuningViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9AD5E72193F66E800BC9631 /* BrainDashTuningViewController.m */; };
+		B9AD5E76194071DA00BC9631 /* BrainDashSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9AD5E75194071DA00BC9631 /* BrainDashSettingsViewController.m */; };
+		B9AD5E791941A0DE00BC9631 /* NSObject+performBlockAfterDelay.m in Sources */ = {isa = PBXBuildFile; fileRef = B9AD5E781941A0DE00BC9631 /* NSObject+performBlockAfterDelay.m */; };
+		B9F68B2919055A0D00F6654D /* SneakyJoystick.m in Sources */ = {isa = PBXBuildFile; fileRef = B9F68B1C19055A0D00F6654D /* SneakyJoystick.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B92C5A0318FEC8FF005EC882 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B92C59D218FEC8FE005EC882 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B92C59D918FEC8FE005EC882;
+			remoteInfo = BrainDash;
+		};
+		B956328E1938B25400F06E82 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B9F68B3419055C9F00F6654D /* cocos2d-ios.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 5018F24C0DFDEAC400C013A5;
+			remoteInfo = cocos2d;
+		};
+		B9F68B3919055C9F00F6654D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B9F68B3419055C9F00F6654D /* cocos2d-ios.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5018F24D0DFDEAC400C013A5;
+			remoteInfo = cocos2d;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		B01EEBDD1948F94F00E6D3A4 /* Speed High Rot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Speed High Rot.png"; sourceTree = "<group>"; };
+		B01EEBDE1948F94F00E6D3A4 /* Speed Low Rot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Speed Low Rot.png"; sourceTree = "<group>"; };
+		B02B512C196C62A2006EEC2B /* CannybotsRacer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CannybotsRacer.h; path = ../../../avr/CannybotsRacer/CannybotsRacer.h; sourceTree = "<group>"; };
+		B069D2C5197145E800F4378A /* CannyLapCounter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CannyLapCounter.h; path = ../../../avr/CannyLapCounter/CannyLapCounter.h; sourceTree = "<group>"; };
+		B0B067BC196D542B00ABC209 /* CannybotsController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CannybotsController.mm; sourceTree = "<group>"; };
+		B0B067BF196D559C00ABC209 /* CannybotsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CannybotsController.h; sourceTree = "<group>"; };
+		B0B067C2196D7EAA00ABC209 /* CannybotsTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CannybotsTypes.h; sourceTree = "<group>"; };
+		B0BE4121196093E2003F530B /* Cannybots.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Cannybots.cpp; sourceTree = "<group>"; };
+		B0BE4122196093E2003F530B /* Cannybots.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cannybots.h; sourceTree = "<group>"; };
+		B0C87346196742D600238594 /* Clock.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Clock.png; sourceTree = "<group>"; };
+		B0C8734A19674B8800238594 /* HighScores.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HighScores.h; sourceTree = "<group>"; };
+		B0C8734B19674B8800238594 /* HighScores.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HighScores.m; sourceTree = "<group>"; };
+		B0C8734C19674B8800238594 /* HighScoresViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HighScoresViewController.h; sourceTree = "<group>"; };
+		B0C8734D19674B8800238594 /* HighScoresViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HighScoresViewController.m; sourceTree = "<group>"; };
+		B916F520190529B40057388D /* BrainSpeakBLE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrainSpeakBLE.h; sourceTree = "<group>"; };
+		B916F521190529B40057388D /* BrainSpeakBLE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrainSpeakBLE.m; sourceTree = "<group>"; };
+		B92AB26B19055D0600A9556D /* libObjectiveChipmunk-iPhone.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libObjectiveChipmunk-iPhone.a"; path = "Libraries/cocos2d-iphone/build/Debug-iphoneos/libObjectiveChipmunk-iPhone.a"; sourceTree = "<group>"; };
+		B92C59DA18FEC8FE005EC882 /* BrainDash.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BrainDash.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B92C59DD18FEC8FE005EC882 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		B92C59DF18FEC8FE005EC882 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		B92C59E118FEC8FE005EC882 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		B92C59E518FEC8FE005EC882 /* BrainDash-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "BrainDash-Info.plist"; sourceTree = "<group>"; };
+		B92C59E718FEC8FE005EC882 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		B92C59E918FEC8FE005EC882 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		B92C59EB18FEC8FE005EC882 /* BrainDash-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "BrainDash-Prefix.pch"; sourceTree = "<group>"; };
+		B92C59EC18FEC8FE005EC882 /* BrainDashAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BrainDashAppDelegate.h; sourceTree = "<group>"; };
+		B92C59ED18FEC8FE005EC882 /* BrainDashAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BrainDashAppDelegate.m; sourceTree = "<group>"; };
+		B92C59F018FEC8FE005EC882 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		B92C59F218FEC8FE005EC882 /* BrainDashMainViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BrainDashMainViewController.h; sourceTree = "<group>"; };
+		B92C59F318FEC8FE005EC882 /* BrainDashMainViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BrainDashMainViewController.m; sourceTree = "<group>"; };
+		B92C59F518FEC8FE005EC882 /* BrainDashFlipsideViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BrainDashFlipsideViewController.h; sourceTree = "<group>"; };
+		B92C59F618FEC8FE005EC882 /* BrainDashFlipsideViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BrainDashFlipsideViewController.m; sourceTree = "<group>"; };
+		B92C59F818FEC8FE005EC882 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		B92C59FE18FEC8FF005EC882 /* BrainDashTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrainDashTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B92C59FF18FEC8FF005EC882 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		B92C5A0718FEC8FF005EC882 /* BrainDashTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "BrainDashTests-Info.plist"; sourceTree = "<group>"; };
+		B92C5A0918FEC8FF005EC882 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		B92C5A0B18FEC8FF005EC882 /* BrainDashTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BrainDashTests.m; sourceTree = "<group>"; };
+		B92C5A2318FECE96005EC882 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
+		B92C5A5818FEFD1D005EC882 /* UARTPeripheral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UARTPeripheral.h; sourceTree = "<group>"; };
+		B92C5A5918FEFD1D005EC882 /* UARTPeripheral.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UARTPeripheral.m; sourceTree = "<group>"; };
+		B92C5A5B18FEFD1D005EC882 /* CBUUID+StringExtraction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CBUUID+StringExtraction.h"; sourceTree = "<group>"; };
+		B92C5A5C18FEFD1D005EC882 /* CBUUID+StringExtraction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CBUUID+StringExtraction.m"; sourceTree = "<group>"; };
+		B92C5A5D18FEFD1D005EC882 /* NSData+hex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+hex.h"; sourceTree = "<group>"; };
+		B92C5A5E18FEFD1D005EC882 /* NSData+hex.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+hex.m"; sourceTree = "<group>"; };
+		B92C5A5F18FEFD1D005EC882 /* NSString+hex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+hex.h"; sourceTree = "<group>"; };
+		B92C5A6018FEFD1D005EC882 /* NSString+hex.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+hex.m"; sourceTree = "<group>"; };
+		B9A66006190561B9004869BF /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
+		B9A660081905AA07004869BF /* HelloWorldScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HelloWorldScene.m; sourceTree = "<group>"; };
+		B9A660091905AA07004869BF /* HelloWorldScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelloWorldScene.h; sourceTree = "<group>"; };
+		B9A660111905AA35004869BF /* SneakyJoystickSkinnedBase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SneakyJoystickSkinnedBase.m; sourceTree = "<group>"; };
+		B9A660121905AA35004869BF /* SneakyJoystickSkinnedBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SneakyJoystickSkinnedBase.h; sourceTree = "<group>"; };
+		B9A660131905AA35004869BF /* SneakyButtonSkinnedBase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SneakyButtonSkinnedBase.m; sourceTree = "<group>"; };
+		B9A660141905AA35004869BF /* SneakyButtonSkinnedBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SneakyButtonSkinnedBase.h; sourceTree = "<group>"; };
+		B9A660171905AA82004869BF /* SneakyButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SneakyButton.m; sourceTree = "<group>"; };
+		B9A660181905AA82004869BF /* SneakyButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SneakyButton.h; sourceTree = "<group>"; };
+		B9AD5E1F193E64C800BC9631 /* Button Pause.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Button Pause.png"; sourceTree = "<group>"; };
+		B9AD5E20193E64C800BC9631 /* Button Play.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Button Play.png"; sourceTree = "<group>"; };
+		B9AD5E21193E64C800BC9631 /* Button Shuffle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Button Shuffle.png"; sourceTree = "<group>"; };
+		B9AD5E22193E64C800BC9631 /* Button Stop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Button Stop.png"; sourceTree = "<group>"; };
+		B9AD5E24193E64C800BC9631 /* Arrow Up 3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Arrow Up 3.png"; sourceTree = "<group>"; };
+		B9AD5E25193E64C800BC9631 /* Control Panel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Control Panel.png"; sourceTree = "<group>"; };
+		B9AD5E26193E64C800BC9631 /* Cursor Move Alt.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Cursor Move Alt.png"; sourceTree = "<group>"; };
+		B9AD5E27193E64C800BC9631 /* Dashboard.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Dashboard.png; sourceTree = "<group>"; };
+		B9AD5E28193E64C800BC9631 /* Game Pad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Game Pad.png"; sourceTree = "<group>"; };
+		B9AD5E29193E64C800BC9631 /* Gears.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Gears.png; sourceTree = "<group>"; };
+		B9AD5E2B193E64C800BC9631 /* Button Add.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Button Add.png"; sourceTree = "<group>"; };
+		B9AD5E2C193E64C800BC9631 /* Button Check.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Button Check.png"; sourceTree = "<group>"; };
+		B9AD5E2D193E64C800BC9631 /* Button Delete.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Button Delete.png"; sourceTree = "<group>"; };
+		B9AD5E2E193E64C800BC9631 /* Exclamation 2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Exclamation 2.png"; sourceTree = "<group>"; };
+		B9AD5E2F193E64C800BC9631 /* Flag.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Flag.png; sourceTree = "<group>"; };
+		B9AD5E30193E64C800BC9631 /* Heart.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Heart.png; sourceTree = "<group>"; };
+		B9AD5E31193E64C800BC9631 /* Information 2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Information 2.png"; sourceTree = "<group>"; };
+		B9AD5E32193E64C800BC9631 /* Link.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Link.png; sourceTree = "<group>"; };
+		B9AD5E33193E64C800BC9631 /* Magic Wand.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Magic Wand.png"; sourceTree = "<group>"; };
+		B9AD5E34193E64C800BC9631 /* Medal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Medal.png; sourceTree = "<group>"; };
+		B9AD5E35193E64C800BC9631 /* Plug.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Plug.png; sourceTree = "<group>"; };
+		B9AD5E36193E64C800BC9631 /* Question 2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Question 2.png"; sourceTree = "<group>"; };
+		B9AD5E37193E64C800BC9631 /* Search.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Search.png; sourceTree = "<group>"; };
+		B9AD5E38193E64C800BC9631 /* Traffic Cone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Traffic Cone.png"; sourceTree = "<group>"; };
+		B9AD5E39193E64C800BC9631 /* Traffic Lights.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Traffic Lights.png"; sourceTree = "<group>"; };
+		B9AD5E54193EEBEF00BC9631 /* Arrow Right 3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Arrow Right 3.png"; sourceTree = "<group>"; };
+		B9AD5E55193EEBEF00BC9631 /* Arrow Left 3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Arrow Left 3.png"; sourceTree = "<group>"; };
+		B9AD5E58193EF35800BC9631 /* Speed Low.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Speed Low.png"; sourceTree = "<group>"; };
+		B9AD5E59193EF35800BC9631 /* Speed High.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Speed High.png"; sourceTree = "<group>"; };
+		B9AD5E5E193EF58A00BC9631 /* Cannybots_Logo_2000x446.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Cannybots_Logo_2000x446.png; sourceTree = "<group>"; };
+		B9AD5E60193EF9D400BC9631 /* BrainDashLineFollowingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrainDashLineFollowingViewController.h; sourceTree = "<group>"; };
+		B9AD5E61193EF9D400BC9631 /* BrainDashLineFollowingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrainDashLineFollowingViewController.m; sourceTree = "<group>"; };
+		B9AD5E6B193F481300BC9631 /* button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = button.png; sourceTree = "<group>"; };
+		B9AD5E6C193F481300BC9631 /* joystick.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = joystick.png; sourceTree = "<group>"; };
+		B9AD5E6D193F481300BC9631 /* knob.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = knob.png; sourceTree = "<group>"; };
+		B9AD5E71193F66E800BC9631 /* BrainDashTuningViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrainDashTuningViewController.h; sourceTree = "<group>"; };
+		B9AD5E72193F66E800BC9631 /* BrainDashTuningViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrainDashTuningViewController.m; sourceTree = "<group>"; };
+		B9AD5E74194071DA00BC9631 /* BrainDashSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrainDashSettingsViewController.h; sourceTree = "<group>"; };
+		B9AD5E75194071DA00BC9631 /* BrainDashSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrainDashSettingsViewController.m; sourceTree = "<group>"; };
+		B9AD5E771941A0DE00BC9631 /* NSObject+performBlockAfterDelay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+performBlockAfterDelay.h"; sourceTree = "<group>"; };
+		B9AD5E781941A0DE00BC9631 /* NSObject+performBlockAfterDelay.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+performBlockAfterDelay.m"; sourceTree = "<group>"; };
+		B9F68B1B19055A0D00F6654D /* SneakyJoystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SneakyJoystick.h; sourceTree = "<group>"; };
+		B9F68B1C19055A0D00F6654D /* SneakyJoystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SneakyJoystick.m; sourceTree = "<group>"; };
+		B9F68B3419055C9F00F6654D /* cocos2d-ios.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "cocos2d-ios.xcodeproj"; path = "Libraries/cocos2d-iphone/cocos2d-ios.xcodeproj"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B92C59D718FEC8FE005EC882 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B95632901938B25F00F06E82 /* libcocos2d.a in Frameworks */,
+				B9A66007190561B9004869BF /* libz.dylib in Frameworks */,
+				B92C5A2418FECE96005EC882 /* CoreBluetooth.framework in Frameworks */,
+				B92C59E018FEC8FE005EC882 /* CoreGraphics.framework in Frameworks */,
+				B92C59E218FEC8FE005EC882 /* UIKit.framework in Frameworks */,
+				B92C59DE18FEC8FE005EC882 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B92C59FB18FEC8FF005EC882 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B92C5A0018FEC8FF005EC882 /* XCTest.framework in Frameworks */,
+				B92C5A0218FEC8FF005EC882 /* UIKit.framework in Frameworks */,
+				B92C5A0118FEC8FF005EC882 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		B0BE4120196093E2003F530B /* Cannybots */ = {
+			isa = PBXGroup;
+			children = (
+				B0BE4121196093E2003F530B /* Cannybots.cpp */,
+				B0BE4122196093E2003F530B /* Cannybots.h */,
+				B0B067BC196D542B00ABC209 /* CannybotsController.mm */,
+				B0B067BF196D559C00ABC209 /* CannybotsController.h */,
+				B0B067C2196D7EAA00ABC209 /* CannybotsTypes.h */,
+			);
+			name = Cannybots;
+			path = ../../../avr/libraries/Cannybots;
+			sourceTree = "<group>";
+		};
+		B0C8734919674B8800238594 /* HighScores */ = {
+			isa = PBXGroup;
+			children = (
+				B0C8734A19674B8800238594 /* HighScores.h */,
+				B0C8734B19674B8800238594 /* HighScores.m */,
+				B0C8734C19674B8800238594 /* HighScoresViewController.h */,
+				B0C8734D19674B8800238594 /* HighScoresViewController.m */,
+			);
+			name = HighScores;
+			path = Libraries/HighScores;
+			sourceTree = "<group>";
+		};
+		B916F51C190506920057388D /* TheBrain */ = {
+			isa = PBXGroup;
+			children = (
+				B916F520190529B40057388D /* BrainSpeakBLE.h */,
+				B916F521190529B40057388D /* BrainSpeakBLE.m */,
+			);
+			name = TheBrain;
+			path = Libraries/TheBrain;
+			sourceTree = "<group>";
+		};
+		B92C59D118FEC8FE005EC882 = {
+			isa = PBXGroup;
+			children = (
+				B069D2C5197145E800F4378A /* CannyLapCounter.h */,
+				B02B512C196C62A2006EEC2B /* CannybotsRacer.h */,
+				B0C8734919674B8800238594 /* HighScores */,
+				B0BE4120196093E2003F530B /* Cannybots */,
+				B9AD5E5C193EF58A00BC9631 /* graphics */,
+				B9AD5E1D193E64C800BC9631 /* icons */,
+				B9F68B3419055C9F00F6654D /* cocos2d-ios.xcodeproj */,
+				B9F68B0E19055A0D00F6654D /* SneakyInput */,
+				B916F51C190506920057388D /* TheBrain */,
+				B92C5A5718FEFD1D005EC882 /* BLE_BlueFruit_UART */,
+				B92C5A5A18FEFD1D005EC882 /* Categories */,
+				B92C59E318FEC8FE005EC882 /* BrainDash */,
+				B92C5A0518FEC8FF005EC882 /* BrainDashTests */,
+				B92C59DC18FEC8FE005EC882 /* Frameworks */,
+				B92C59DB18FEC8FE005EC882 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B92C59DB18FEC8FE005EC882 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B92C59DA18FEC8FE005EC882 /* BrainDash.app */,
+				B92C59FE18FEC8FF005EC882 /* BrainDashTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B92C59DC18FEC8FE005EC882 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B9A66006190561B9004869BF /* libz.dylib */,
+				B92AB26B19055D0600A9556D /* libObjectiveChipmunk-iPhone.a */,
+				B92C5A2318FECE96005EC882 /* CoreBluetooth.framework */,
+				B92C59DD18FEC8FE005EC882 /* Foundation.framework */,
+				B92C59DF18FEC8FE005EC882 /* CoreGraphics.framework */,
+				B92C59E118FEC8FE005EC882 /* UIKit.framework */,
+				B92C59FF18FEC8FF005EC882 /* XCTest.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B92C59E318FEC8FE005EC882 /* BrainDash */ = {
+			isa = PBXGroup;
+			children = (
+				B92C59EF18FEC8FE005EC882 /* Main.storyboard */,
+				B92C59F818FEC8FE005EC882 /* Images.xcassets */,
+				B92C59EC18FEC8FE005EC882 /* BrainDashAppDelegate.h */,
+				B92C59ED18FEC8FE005EC882 /* BrainDashAppDelegate.m */,
+				B92C59F218FEC8FE005EC882 /* BrainDashMainViewController.h */,
+				B92C59F318FEC8FE005EC882 /* BrainDashMainViewController.m */,
+				B92C59F518FEC8FE005EC882 /* BrainDashFlipsideViewController.h */,
+				B92C59F618FEC8FE005EC882 /* BrainDashFlipsideViewController.m */,
+				B9AD5E60193EF9D400BC9631 /* BrainDashLineFollowingViewController.h */,
+				B9AD5E61193EF9D400BC9631 /* BrainDashLineFollowingViewController.m */,
+				B9AD5E71193F66E800BC9631 /* BrainDashTuningViewController.h */,
+				B9AD5E72193F66E800BC9631 /* BrainDashTuningViewController.m */,
+				B9AD5E74194071DA00BC9631 /* BrainDashSettingsViewController.h */,
+				B9AD5E75194071DA00BC9631 /* BrainDashSettingsViewController.m */,
+				B92C59E418FEC8FE005EC882 /* Supporting Files */,
+			);
+			path = BrainDash;
+			sourceTree = "<group>";
+		};
+		B92C59E418FEC8FE005EC882 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				B92C59E518FEC8FE005EC882 /* BrainDash-Info.plist */,
+				B92C59E618FEC8FE005EC882 /* InfoPlist.strings */,
+				B92C59E918FEC8FE005EC882 /* main.m */,
+				B92C59EB18FEC8FE005EC882 /* BrainDash-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		B92C5A0518FEC8FF005EC882 /* BrainDashTests */ = {
+			isa = PBXGroup;
+			children = (
+				B92C5A0B18FEC8FF005EC882 /* BrainDashTests.m */,
+				B92C5A0618FEC8FF005EC882 /* Supporting Files */,
+			);
+			path = BrainDashTests;
+			sourceTree = "<group>";
+		};
+		B92C5A0618FEC8FF005EC882 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				B92C5A0718FEC8FF005EC882 /* BrainDashTests-Info.plist */,
+				B92C5A0818FEC8FF005EC882 /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		B92C5A5718FEFD1D005EC882 /* BLE_BlueFruit_UART */ = {
+			isa = PBXGroup;
+			children = (
+				B92C5A5818FEFD1D005EC882 /* UARTPeripheral.h */,
+				B92C5A5918FEFD1D005EC882 /* UARTPeripheral.m */,
+			);
+			name = BLE_BlueFruit_UART;
+			path = Libraries/BLE_BlueFruit_UART;
+			sourceTree = "<group>";
+		};
+		B92C5A5A18FEFD1D005EC882 /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				B92C5A5B18FEFD1D005EC882 /* CBUUID+StringExtraction.h */,
+				B92C5A5C18FEFD1D005EC882 /* CBUUID+StringExtraction.m */,
+				B92C5A5D18FEFD1D005EC882 /* NSData+hex.h */,
+				B92C5A5E18FEFD1D005EC882 /* NSData+hex.m */,
+				B92C5A5F18FEFD1D005EC882 /* NSString+hex.h */,
+				B92C5A6018FEFD1D005EC882 /* NSString+hex.m */,
+				B9AD5E771941A0DE00BC9631 /* NSObject+performBlockAfterDelay.h */,
+				B9AD5E781941A0DE00BC9631 /* NSObject+performBlockAfterDelay.m */,
+			);
+			name = Categories;
+			path = Libraries/Categories;
+			sourceTree = "<group>";
+		};
+		B9AD5E1D193E64C800BC9631 /* icons */ = {
+			isa = PBXGroup;
+			children = (
+				B9AD5E6A193F481300BC9631 /* joystick */,
+				B9AD5E1E193E64C800BC9631 /* motion */,
+				B9AD5E23193E64C800BC9631 /* tabbar */,
+				B9AD5E2A193E64C800BC9631 /* ui */,
+			);
+			name = icons;
+			path = BrainDash/icons;
+			sourceTree = "<group>";
+		};
+		B9AD5E1E193E64C800BC9631 /* motion */ = {
+			isa = PBXGroup;
+			children = (
+				B9AD5E54193EEBEF00BC9631 /* Arrow Right 3.png */,
+				B9AD5E55193EEBEF00BC9631 /* Arrow Left 3.png */,
+				B9AD5E1F193E64C800BC9631 /* Button Pause.png */,
+				B9AD5E20193E64C800BC9631 /* Button Play.png */,
+				B9AD5E21193E64C800BC9631 /* Button Shuffle.png */,
+				B9AD5E22193E64C800BC9631 /* Button Stop.png */,
+			);
+			path = motion;
+			sourceTree = "<group>";
+		};
+		B9AD5E23193E64C800BC9631 /* tabbar */ = {
+			isa = PBXGroup;
+			children = (
+				B0C87346196742D600238594 /* Clock.png */,
+				B9AD5E24193E64C800BC9631 /* Arrow Up 3.png */,
+				B9AD5E25193E64C800BC9631 /* Control Panel.png */,
+				B9AD5E26193E64C800BC9631 /* Cursor Move Alt.png */,
+				B9AD5E27193E64C800BC9631 /* Dashboard.png */,
+				B9AD5E28193E64C800BC9631 /* Game Pad.png */,
+				B9AD5E29193E64C800BC9631 /* Gears.png */,
+			);
+			path = tabbar;
+			sourceTree = "<group>";
+		};
+		B9AD5E2A193E64C800BC9631 /* ui */ = {
+			isa = PBXGroup;
+			children = (
+				B01EEBDD1948F94F00E6D3A4 /* Speed High Rot.png */,
+				B01EEBDE1948F94F00E6D3A4 /* Speed Low Rot.png */,
+				B9AD5E58193EF35800BC9631 /* Speed Low.png */,
+				B9AD5E59193EF35800BC9631 /* Speed High.png */,
+				B9AD5E2B193E64C800BC9631 /* Button Add.png */,
+				B9AD5E2C193E64C800BC9631 /* Button Check.png */,
+				B9AD5E2D193E64C800BC9631 /* Button Delete.png */,
+				B9AD5E2E193E64C800BC9631 /* Exclamation 2.png */,
+				B9AD5E2F193E64C800BC9631 /* Flag.png */,
+				B9AD5E30193E64C800BC9631 /* Heart.png */,
+				B9AD5E31193E64C800BC9631 /* Information 2.png */,
+				B9AD5E32193E64C800BC9631 /* Link.png */,
+				B9AD5E33193E64C800BC9631 /* Magic Wand.png */,
+				B9AD5E34193E64C800BC9631 /* Medal.png */,
+				B9AD5E35193E64C800BC9631 /* Plug.png */,
+				B9AD5E36193E64C800BC9631 /* Question 2.png */,
+				B9AD5E37193E64C800BC9631 /* Search.png */,
+				B9AD5E38193E64C800BC9631 /* Traffic Cone.png */,
+				B9AD5E39193E64C800BC9631 /* Traffic Lights.png */,
+			);
+			path = ui;
+			sourceTree = "<group>";
+		};
+		B9AD5E5C193EF58A00BC9631 /* graphics */ = {
+			isa = PBXGroup;
+			children = (
+				B9AD5E5D193EF58A00BC9631 /* logos */,
+			);
+			name = graphics;
+			path = BrainDash/graphics;
+			sourceTree = "<group>";
+		};
+		B9AD5E5D193EF58A00BC9631 /* logos */ = {
+			isa = PBXGroup;
+			children = (
+				B9AD5E5E193EF58A00BC9631 /* Cannybots_Logo_2000x446.png */,
+			);
+			path = logos;
+			sourceTree = "<group>";
+		};
+		B9AD5E6A193F481300BC9631 /* joystick */ = {
+			isa = PBXGroup;
+			children = (
+				B9AD5E6B193F481300BC9631 /* button.png */,
+				B9AD5E6C193F481300BC9631 /* joystick.png */,
+				B9AD5E6D193F481300BC9631 /* knob.png */,
+			);
+			path = joystick;
+			sourceTree = "<group>";
+		};
+		B9F68B0E19055A0D00F6654D /* SneakyInput */ = {
+			isa = PBXGroup;
+			children = (
+				B9F68B1B19055A0D00F6654D /* SneakyJoystick.h */,
+				B9F68B1C19055A0D00F6654D /* SneakyJoystick.m */,
+				B9A660171905AA82004869BF /* SneakyButton.m */,
+				B9A660181905AA82004869BF /* SneakyButton.h */,
+				B9A660111905AA35004869BF /* SneakyJoystickSkinnedBase.m */,
+				B9A660121905AA35004869BF /* SneakyJoystickSkinnedBase.h */,
+				B9A660131905AA35004869BF /* SneakyButtonSkinnedBase.m */,
+				B9A660141905AA35004869BF /* SneakyButtonSkinnedBase.h */,
+				B9A660081905AA07004869BF /* HelloWorldScene.m */,
+				B9A660091905AA07004869BF /* HelloWorldScene.h */,
+			);
+			name = SneakyInput;
+			path = Libraries/SneakyInput/Classes;
+			sourceTree = "<group>";
+		};
+		B9F68B3519055C9F00F6654D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B9F68B3A19055C9F00F6654D /* libcocos2d.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B92C59D918FEC8FE005EC882 /* BrainDash */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B92C5A0F18FEC8FF005EC882 /* Build configuration list for PBXNativeTarget "BrainDash" */;
+			buildPhases = (
+				B92C59D618FEC8FE005EC882 /* Sources */,
+				B92C59D718FEC8FE005EC882 /* Frameworks */,
+				B92C59D818FEC8FE005EC882 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B956328F1938B25400F06E82 /* PBXTargetDependency */,
+			);
+			name = BrainDash;
+			productName = BrainDash;
+			productReference = B92C59DA18FEC8FE005EC882 /* BrainDash.app */;
+			productType = "com.apple.product-type.application";
+		};
+		B92C59FD18FEC8FF005EC882 /* BrainDashTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B92C5A1218FEC8FF005EC882 /* Build configuration list for PBXNativeTarget "BrainDashTests" */;
+			buildPhases = (
+				B92C59FA18FEC8FF005EC882 /* Sources */,
+				B92C59FB18FEC8FF005EC882 /* Frameworks */,
+				B92C59FC18FEC8FF005EC882 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B92C5A0418FEC8FF005EC882 /* PBXTargetDependency */,
+			);
+			name = BrainDashTests;
+			productName = BrainDashTests;
+			productReference = B92C59FE18FEC8FF005EC882 /* BrainDashTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B92C59D218FEC8FE005EC882 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				CLASSPREFIX = BrainDash;
+				LastUpgradeCheck = 0510;
+				ORGANIZATIONNAME = CannyBots;
+				TargetAttributes = {
+					B92C59D918FEC8FE005EC882 = {
+						DevelopmentTeam = QP5BLA9EF3;
+					};
+					B92C59FD18FEC8FF005EC882 = {
+						TestTargetID = B92C59D918FEC8FE005EC882;
+					};
+				};
+			};
+			buildConfigurationList = B92C59D518FEC8FE005EC882 /* Build configuration list for PBXProject "BrainDash" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = B92C59D118FEC8FE005EC882;
+			productRefGroup = B92C59DB18FEC8FE005EC882 /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = B9F68B3519055C9F00F6654D /* Products */;
+					ProjectRef = B9F68B3419055C9F00F6654D /* cocos2d-ios.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				B92C59D918FEC8FE005EC882 /* BrainDash */,
+				B92C59FD18FEC8FF005EC882 /* BrainDashTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		B9F68B3A19055C9F00F6654D /* libcocos2d.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libcocos2d.a;
+			remoteRef = B9F68B3919055C9F00F6654D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B92C59D818FEC8FE005EC882 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B01EEBE01948F94F00E6D3A4 /* Speed Low Rot.png in Resources */,
+				B9AD5E40193E64C800BC9631 /* Cursor Move Alt.png in Resources */,
+				B9AD5E3C193E64C800BC9631 /* Button Shuffle.png in Resources */,
+				B9AD5E56193EEBEF00BC9631 /* Arrow Right 3.png in Resources */,
+				B9AD5E3D193E64C800BC9631 /* Button Stop.png in Resources */,
+				B9AD5E4E193E64C800BC9631 /* Plug.png in Resources */,
+				B9AD5E49193E64C800BC9631 /* Heart.png in Resources */,
+				B9AD5E4A193E64C800BC9631 /* Information 2.png in Resources */,
+				B9AD5E6E193F481300BC9631 /* button.png in Resources */,
+				B01EEBDF1948F94F00E6D3A4 /* Speed High Rot.png in Resources */,
+				B9AD5E46193E64C800BC9631 /* Button Delete.png in Resources */,
+				B9AD5E41193E64C800BC9631 /* Dashboard.png in Resources */,
+				B9AD5E4D193E64C800BC9631 /* Medal.png in Resources */,
+				B9AD5E44193E64C800BC9631 /* Button Add.png in Resources */,
+				B92C59F918FEC8FE005EC882 /* Images.xcassets in Resources */,
+				B9AD5E3A193E64C800BC9631 /* Button Pause.png in Resources */,
+				B0C87347196742D600238594 /* Clock.png in Resources */,
+				B9AD5E4C193E64C800BC9631 /* Magic Wand.png in Resources */,
+				B9AD5E45193E64C800BC9631 /* Button Check.png in Resources */,
+				B9AD5E48193E64C800BC9631 /* Flag.png in Resources */,
+				B9AD5E5A193EF35800BC9631 /* Speed Low.png in Resources */,
+				B9AD5E4F193E64C800BC9631 /* Question 2.png in Resources */,
+				B9AD5E5B193EF35800BC9631 /* Speed High.png in Resources */,
+				B9AD5E6F193F481300BC9631 /* joystick.png in Resources */,
+				B9AD5E51193E64C800BC9631 /* Traffic Cone.png in Resources */,
+				B9AD5E3E193E64C800BC9631 /* Arrow Up 3.png in Resources */,
+				B9AD5E5F193EF58A00BC9631 /* Cannybots_Logo_2000x446.png in Resources */,
+				B92C59E818FEC8FE005EC882 /* InfoPlist.strings in Resources */,
+				B9AD5E57193EEBEF00BC9631 /* Arrow Left 3.png in Resources */,
+				B9AD5E52193E64C800BC9631 /* Traffic Lights.png in Resources */,
+				B9AD5E47193E64C800BC9631 /* Exclamation 2.png in Resources */,
+				B9AD5E4B193E64C800BC9631 /* Link.png in Resources */,
+				B9AD5E70193F481300BC9631 /* knob.png in Resources */,
+				B9AD5E3B193E64C800BC9631 /* Button Play.png in Resources */,
+				B9AD5E50193E64C800BC9631 /* Search.png in Resources */,
+				B92C59F118FEC8FE005EC882 /* Main.storyboard in Resources */,
+				B9AD5E42193E64C800BC9631 /* Game Pad.png in Resources */,
+				B9AD5E43193E64C800BC9631 /* Gears.png in Resources */,
+				B9AD5E3F193E64C800BC9631 /* Control Panel.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B92C59FC18FEC8FF005EC882 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B92C5A0A18FEC8FF005EC882 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B92C59D618FEC8FE005EC882 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B92C59EA18FEC8FE005EC882 /* main.m in Sources */,
+				B916F522190529B40057388D /* BrainSpeakBLE.m in Sources */,
+				B0C8734F19674B8800238594 /* HighScoresViewController.m in Sources */,
+				B9AD5E62193EF9D400BC9631 /* BrainDashLineFollowingViewController.m in Sources */,
+				B9A660161905AA35004869BF /* SneakyButtonSkinnedBase.m in Sources */,
+				B9A6600E1905AA07004869BF /* HelloWorldScene.m in Sources */,
+				B0BE4123196093E2003F530B /* Cannybots.cpp in Sources */,
+				B92C5A6418FEFD1D005EC882 /* NSString+hex.m in Sources */,
+				B9AD5E76194071DA00BC9631 /* BrainDashSettingsViewController.m in Sources */,
+				B92C5A6118FEFD1D005EC882 /* UARTPeripheral.m in Sources */,
+				B92C59F718FEC8FE005EC882 /* BrainDashFlipsideViewController.m in Sources */,
+				B9A660151905AA35004869BF /* SneakyJoystickSkinnedBase.m in Sources */,
+				B92C5A6218FEFD1D005EC882 /* CBUUID+StringExtraction.m in Sources */,
+				B92C59EE18FEC8FE005EC882 /* BrainDashAppDelegate.m in Sources */,
+				B9AD5E73193F66E800BC9631 /* BrainDashTuningViewController.m in Sources */,
+				B9F68B2919055A0D00F6654D /* SneakyJoystick.m in Sources */,
+				B0C8734E19674B8800238594 /* HighScores.m in Sources */,
+				B92C59F418FEC8FE005EC882 /* BrainDashMainViewController.m in Sources */,
+				B9AD5E791941A0DE00BC9631 /* NSObject+performBlockAfterDelay.m in Sources */,
+				B0B067BD196D542B00ABC209 /* CannybotsController.mm in Sources */,
+				B9A660191905AA82004869BF /* SneakyButton.m in Sources */,
+				B92C5A6318FEFD1D005EC882 /* NSData+hex.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B92C59FA18FEC8FF005EC882 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B92C5A0C18FEC8FF005EC882 /* BrainDashTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B92C5A0418FEC8FF005EC882 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B92C59D918FEC8FE005EC882 /* BrainDash */;
+			targetProxy = B92C5A0318FEC8FF005EC882 /* PBXContainerItemProxy */;
+		};
+		B956328F1938B25400F06E82 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = cocos2d;
+			targetProxy = B956328E1938B25400F06E82 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		B92C59E618FEC8FE005EC882 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B92C59E718FEC8FE005EC882 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		B92C59EF18FEC8FE005EC882 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B92C59F018FEC8FE005EC882 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		B92C5A0818FEC8FF005EC882 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B92C5A0918FEC8FF005EC882 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		B92C5A0D18FEC8FF005EC882 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		B92C5A0E18FEC8FF005EC882 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		B92C5A1018FEC8FF005EC882 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "BrainDash/BrainDash-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"Libraries/cocos2d-iphone/**",
+				);
+				INFOPLIST_FILE = "BrainDash/BrainDash-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Libraries/",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		B92C5A1118FEC8FF005EC882 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "BrainDash/BrainDash-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"Libraries/cocos2d-iphone/**",
+				);
+				INFOPLIST_FILE = "BrainDash/BrainDash-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Libraries/",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		B92C5A1318FEC8FF005EC882 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/BrainDash.app/BrainDash";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "BrainDash/BrainDash-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "BrainDashTests/BrainDashTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Debug;
+		};
+		B92C5A1418FEC8FF005EC882 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/BrainDash.app/BrainDash";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "BrainDash/BrainDash-Prefix.pch";
+				INFOPLIST_FILE = "BrainDashTests/BrainDashTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B92C59D518FEC8FE005EC882 /* Build configuration list for PBXProject "BrainDash" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B92C5A0D18FEC8FF005EC882 /* Debug */,
+				B92C5A0E18FEC8FF005EC882 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B92C5A0F18FEC8FF005EC882 /* Build configuration list for PBXNativeTarget "BrainDash" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B92C5A1018FEC8FF005EC882 /* Debug */,
+				B92C5A1118FEC8FF005EC882 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B92C5A1218FEC8FF005EC882 /* Build configuration list for PBXNativeTarget "BrainDashTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B92C5A1318FEC8FF005EC882 /* Debug */,
+				B92C5A1418FEC8FF005EC882 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B92C59D218FEC8FE005EC882 /* Project object */;
+}
