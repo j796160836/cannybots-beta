@@ -46,6 +46,7 @@ void calculate_PID() {
   speedA = constrain(cruiseSpeed - correction, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
   speedB = constrain(cruiseSpeed + correction, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
 #endif
+
 }
 
 void update_PID(int _Kp, int _Ki, int _Kd) {

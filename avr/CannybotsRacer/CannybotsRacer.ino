@@ -45,18 +45,22 @@ AnalogScanner scanner;
 #define PID_METHOD_1
 
 #define PID_SETPOINT        0.0
-#define PID_SAMPLE_TIME     10
+#define PID_SAMPLE_TIME     50
 #define PID_DIV             10
 
 #define PRINTVALS_INTERVAL   200
 
-#define OFF_LINE_MAX_TIME 1000
+#define OFF_LINE_MAX_TIME 200
 
-// Motors
+// Motor settings
+#define NUM_MOTORS       2
 #define MOTOR_MAX_SPEED 255
 #define MOTOR_TEST_SPEED MOTOR_MAX_SPEED/2
 //#define MOTOR_A_IS_ON_RIGHT
+
 #define MOTOR_A_POS_IS_FORWARD 1
+#define MOTOR_B_POS_IS_FORWARD 0
+
 // number of divisions between current and target motor speed
 #define MAX_MOTOR_DELTA_DIVISOR     1.0
 // max motor speed change
@@ -71,8 +75,7 @@ AnalogScanner scanner;
 #define NUM_IR_SENSORS   3
 
 
-// Motor settings
-#define NUM_MOTORS       2
+
 
 
 // Battery Voltage sensing
@@ -90,7 +93,7 @@ AnalogScanner scanner;
 #define BOT_TYPE_CUSTOM_PCB 1
 #define IR_MAX 1000
 #define WHITE_THRESHOLD 700
-#define IR_MANUAL_THRESHOLD 100
+#define IR_MANUAL_THRESHOLD 700
 #define IR1 A6
 #define IR2 A8
 #define IR3 A11
@@ -153,6 +156,7 @@ AnalogScanner scanner;
 
 // waypoint detection
 
+// Ignore this for now
 #ifdef USE_IR_WAYPOINT_DETECTION
 #include <IRremoteORG.h>
 IRrecv irrecv(IR_WAYPOINT_DETECTION_PIN);
@@ -173,12 +177,15 @@ int cruiseSpeed = baseCruiseSpeed;
 
 int speedA = 0;
 int speedB = 0;
-int manualA = 0;
+
+// speed only used in in manual mode:
+int manualA = 0;  
 int manualB = 0;
 //int speeds[NUM_MOTORS];
 
-int yAxisValue = 0;
-int xAxisValue = 0;
+// Joystick
+int yAxisValue = 0;  // -255..255
+int xAxisValue = 0;  // -255..255
 
 int IRvals[NUM_IR_SENSORS];
 int IRbias[NUM_IR_SENSORS];
@@ -216,6 +223,8 @@ void setup() {
   digitalWrite(pin_MODE, HIGH); //to set controller to Phase/Enable mode
 #endif
 
+
+// ignore this for now.
 #ifdef USE_ANALOG_LIB
   //int scanOrder[NUM_IR_SENSORS + 1] = {IR1, IR2, IR3, BATTERY_PIN};
   int scanOrder[NUM_IR_SENSORS] = {IR1, IR2, IR3};
@@ -223,6 +232,7 @@ void setup() {
   scanner.beginScanning();  
 #endif
 
+// ignore this for now.
 #ifdef USE_IR_WAYPOINT_DETECTION
   irrecv.enableIRIn();
 #endif
@@ -243,7 +253,7 @@ void loop() {
   read_ir_sensors();
   lf_emitIRValues(IRvals[0], IRvals[1], IRvals[2]);
 
-
+  /*
   // count up the time spent off the line, rahter than switching to manual mode the instance the mid sensor goes of the line
   if ((IRvals[1] <= IR_MANUAL_THRESHOLD )) {
 
@@ -263,10 +273,12 @@ void loop() {
     isLineFollowingMode = 1;
     resetSpeed = true;
   }
+  */
 
   if (forceManualMode) {
     isLineFollowingMode = 0;
   }
+  isLineFollowingMode=1;
 
   lf_report_followingMode(isLineFollowingMode);
 
@@ -276,8 +288,8 @@ void loop() {
   } else {
     // in manual mode
     disable_PID();
-    if ( (millis() - cb.getLastInboundCommandTime()) > 2000) {
-      // no command has been received in the last 2 seconds, err on the side of caution and stop!
+    if ( (millis() - cb.getLastInboundCommandTime()) > 500) {
+      // no command has been received in the last X millis, err on the side of caution and stop!
       speedA = speedB =  0;
     } else {
       // rate limit/ease the speed change
@@ -289,7 +301,7 @@ void loop() {
   printvalues();
 
   cb.update();
-
+//ignore this for now
 #ifdef USE_IR_WAYPOINT_DETECTION
   irwaypoint_loop();
 #endif
@@ -398,7 +410,7 @@ void read_ir_sensors() {
 void motor(int _speedA, int _speedB) {
   // TODO: read config from eeprom
 #ifdef BOT_TYPE_CUSTOM_PCB
-  motor_customPCB(_speedA, _speedB);
+  motor_customPCB(_speedA, _speedB);  // TODO:  move to config!!
 #else
   motor_ORG(_speedA, _speedB);
 #endif
@@ -500,7 +512,7 @@ void setNVDefaults() {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Remotly called funcs
+// Remotely called funcs
 
 
 void lf_updateMotorSpeeds(int _speedA, int _speedB, int _dummy) {

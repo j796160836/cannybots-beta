@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>B083A1A8-9028-450C-9833-A41F5C66E502</string>
+	<key>IDESourceControlProjectName</key>
+	<string>BrainDash</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>C7251D7B-CBFE-4BE4-96A6-3AD9A133D77E</key>
+		<string>https://github.com/Cannybots/cannybots-beta.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>ios/PrototypeDashboard1/BrainDash/BrainDash.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>C7251D7B-CBFE-4BE4-96A6-3AD9A133D77E</key>
+		<string>../../../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/Cannybots/cannybots-beta.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>C7251D7B-CBFE-4BE4-96A6-3AD9A133D77E</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>C7251D7B-CBFE-4BE4-96A6-3AD9A133D77E</string>
+			<key>IDESourceControlWCCName</key>
+			<string>cannybots-beta</string>
+		</dict>
+	</array>
+</dict>
+</plist>
