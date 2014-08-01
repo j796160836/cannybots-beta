@@ -29,7 +29,7 @@ const cb_publish_type Cannybots::PUBLISH_UPDATE_ONCHANGE = 1;
 // msg[1]     = 'B'
 // msg[2]     = 1 byte CRC
 // msg[3]     = seq[7..4] .. type[3...0]
-// msg[4]     = cmd < 192  (>192 is sys command)
+// msg[4]     = cmd
 // msg[5]     = param count (MAYBE TODO: > max len implies mulit packet)
 // msg[6-7]   = int16
 // msg[8-9]   = int16
@@ -103,8 +103,8 @@ void Cannybots::registerVariable(const cb_id& _id, int16_t* var, const bool isNo
     descriptors[offset].data = var;
     descriptors[offset].size = sizeof(int16_t*);
     descriptors[offset].isMethod = false;
-    descriptors[offset].isPublished = false;
-    descriptors[offset].isNV = isNonVolatile;
+    //descriptors[offset].isPublished = false;
+    //descriptors[offset].isNV = isNonVolatile;
     descriptors[offset].type = CB_INT16;
 }
 
@@ -113,9 +113,9 @@ void Cannybots::registerVariable(const cb_id& _id, bool*    var, const bool isNo
     descriptors[offset].cid = _id;
     descriptors[offset].data = var;
     descriptors[offset].size = sizeof(bool*);
-    descriptors[offset].isPublished = false;
+    //descriptors[offset].isPublished = false;
     descriptors[offset].isMethod = false;
-    descriptors[offset].isNV = isNonVolatile;
+    //descriptors[offset].isNV = isNonVolatile;
     descriptors[offset].type = CB_BYTE; // BOOL really
 }
 
@@ -125,16 +125,16 @@ void Cannybots::registerArray(const cb_id _id, int16_t list[], const uint16_t le
     descriptors[offset].cid = _id;
     descriptors[offset].data = list;
     descriptors[offset].size = length * sizeof(uint16_t);
-    descriptors[offset].isPublished = false;
+    //descriptors[offset].isPublished = false;
     descriptors[offset].isMethod = false;
-    descriptors[offset].isNV = false;
+    //descriptors[offset].isNV = false;
     descriptors[offset].type = CB_INT16_ARRAY;
 }
 
 // Published values
 void Cannybots::registerPublisher(const cb_id _id, bool *var, const cb_publish_type pubType) {
     uint16_t offset =_id.cid;
-    descriptors[offset].isPublished = true;
+    //descriptors[offset].isPublished = true;
     // TODO: add to watch list
 }
 
@@ -148,8 +148,8 @@ void Cannybots::registerHandler(const cb_id _id, cb_callback_int16_int16_int16 c
     descriptors[offset].isMethod = true;
     descriptors[offset].type = CB_INT16_3;
     
-    descriptors[offset].isPublished = false;
-    descriptors[offset].isNV = false;
+    //descriptors[offset].isPublished = false;
+    //descriptors[offset].isNV = false;
 }
 
 // Function handlers
@@ -161,8 +161,8 @@ void Cannybots::registerHandler(const cb_id _id, cb_callback_int16_int16 callbac
     descriptors[offset].isMethod = true;
     descriptors[offset].type = CB_INT16_2;
     
-    descriptors[offset].isPublished = false;
-    descriptors[offset].isNV = false;
+    //descriptors[offset].isPublished = false;
+    //descriptors[offset].isNV = false;
 }
 
 void Cannybots::registerHandler(const cb_id& _id, cb_callback_int16 callback) {
@@ -173,11 +173,23 @@ void Cannybots::registerHandler(const cb_id& _id, cb_callback_int16 callback) {
     descriptors[offset].isMethod = true;
     descriptors[offset].type = CB_INT16_1;
     
-    descriptors[offset].isPublished = false;
-    descriptors[offset].isNV = false;
+    //descriptors[offset].isPublished = false;
+    //descriptors[offset].isNV = false;
 }
 
-// abritrary (e..g iOS blcok handlers0
+void Cannybots::registerHandler(const cb_id _id, cb_callback_string callback) {
+    uint16_t offset =_id.cid;
+    descriptors[offset].cid = _id;
+    descriptors[offset].data = (void*)callback;
+    descriptors[offset].size = 0;
+    descriptors[offset].isMethod = true;
+    descriptors[offset].type = CB_STRING;
+    
+    //descriptors[offset].isPublished = false;
+    //descriptors[offset].isNV = false;
+}
+
+// abritrary (e.g. used fore registering the iOS 'block' handlers)
 void Cannybots::registerHandler(const cb_id _id, uint8_t type, void* callback) {
     uint16_t offset =_id.cid;
     descriptors[offset].cid = _id;
@@ -186,8 +198,8 @@ void Cannybots::registerHandler(const cb_id _id, uint8_t type, void* callback) {
     descriptors[offset].isMethod = true;
     descriptors[offset].type = type;
     
-    descriptors[offset].isPublished = false;
-    descriptors[offset].isNV = false;
+    //descriptors[offset].isPublished = false;
+    //descriptors[offset].isNV = false;
 }
 
 // Scripting
@@ -438,6 +450,8 @@ void Cannybots::processMessage(Message* msg ) {
         CB_DBG("PM:%s", msg->payload);
         return;
     }
+    // TODO: check CRC, payload length and if this is a contination
+    
     uint8_t cmd = msg->payload[CB_MSG_OFFSET_CMD];
     //CB_DBG("cmd= %d", cmd);
     cb_descriptor desc = descriptors[cmd];
@@ -445,6 +459,8 @@ void Cannybots::processMessage(Message* msg ) {
     if (desc.isMethod) {
         //CB_DBG("isMethod",0);
         switch (desc.type) {
+            case CB_STRING:
+                break;
             case CB_INT16_3:
                 ((cb_callback_int16_int16_int16)desc.data)(
                                                            mk16bit( msg->payload[CB_MSG_OFFSET_DATA+1],msg->payload[CB_MSG_OFFSET_DATA+0]),

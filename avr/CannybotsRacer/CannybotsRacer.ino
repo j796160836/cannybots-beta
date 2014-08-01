@@ -45,12 +45,14 @@ AnalogScanner scanner;
 #define PID_METHOD_1
 
 #define PID_SETPOINT        0.0
-#define PID_SAMPLE_TIME     50
+#define PID_SAMPLE_TIME     10
 #define PID_DIV             10
 
 #define PRINTVALS_INTERVAL   200
 
 #define OFF_LINE_MAX_TIME 200
+
+#define MANUAL_MODE_RADIOSILENCE_TIMEOUT 500
 
 // Motor settings
 #define NUM_MOTORS       2
@@ -62,7 +64,7 @@ AnalogScanner scanner;
 #define MOTOR_B_POS_IS_FORWARD 0
 
 // number of divisions between current and target motor speed
-#define MAX_MOTOR_DELTA_DIVISOR     1.0
+#define MAX_MOTOR_DELTA_DIVISOR     100.0
 // max motor speed change
 #define MAX_MOTOR_DELTA             255.0
 
@@ -73,6 +75,7 @@ AnalogScanner scanner;
 
 // IR Sensor settings
 #define NUM_IR_SENSORS   3
+
 
 
 
@@ -93,7 +96,6 @@ AnalogScanner scanner;
 #define BOT_TYPE_CUSTOM_PCB 1
 #define IR_MAX 1000
 #define WHITE_THRESHOLD 700
-#define IR_MANUAL_THRESHOLD 700
 #define IR1 A6
 #define IR2 A8
 #define IR3 A11
@@ -253,9 +255,9 @@ void loop() {
   read_ir_sensors();
   lf_emitIRValues(IRvals[0], IRvals[1], IRvals[2]);
 
-  /*
+  
   // count up the time spent off the line, rahter than switching to manual mode the instance the mid sensor goes of the line
-  if ((IRvals[1] <= IR_MANUAL_THRESHOLD )) {
+  if ((IRvals[1] <= WHITE_THRESHOLD )) {
 
     offTheLineTime += loopNowTime - offLineLastTime;
     offLineLastTime = loopNowTime;
@@ -273,12 +275,11 @@ void loop() {
     isLineFollowingMode = 1;
     resetSpeed = true;
   }
-  */
+  
 
   if (forceManualMode) {
     isLineFollowingMode = 0;
   }
-  isLineFollowingMode=1;
 
   lf_report_followingMode(isLineFollowingMode);
 
@@ -288,7 +289,7 @@ void loop() {
   } else {
     // in manual mode
     disable_PID();
-    if ( (millis() - cb.getLastInboundCommandTime()) > 500) {
+    if ( (millis() - cb.getLastInboundCommandTime()) > MANUAL_MODE_RADIOSILENCE_TIMEOUT) {
       // no command has been received in the last X millis, err on the side of caution and stop!
       speedA = speedB =  0;
     } else {

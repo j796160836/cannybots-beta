@@ -12,8 +12,8 @@ CB_ID(6, RACER_PID, "PID");
 CB_ID(7, RACER_CONFIG, "config");
 CB_ID(8, RACER_IRVALS, "IRvals");
 CB_ID(9, RACER_PING, "ping");
-CB_ID(10, RACER_MOVE, "move");
-CB_ID(11, RACER_TEST, "test");
+//CB_ID(10, RACER_MOVE, "move");
+//CB_ID(11, RACER_TEST, "test");
 // max 12 (defined in Cannybots.h)
 
 // constants for 'move'
@@ -30,11 +30,22 @@ CB_ID(11, RACER_TEST, "test");
 
 
 
+/*
+#define CB_NV_CONFIG_BEGIN(x) typedef struct {
+#define CB_NV_CONFIG_END(_structname) } _structname;
+#define CB_NV_PARAM(_type, _name) _type _name;
 
+CB_NV_CONFIG_BEGIN(cb_linefollowing_config);
+CB_NV_ID(1, uint16_t,  version);
+CB_NV_ID(2, uint16_t,  pid_p);
+CB_NV_ID(3, uint16_t,  pid_d);
 
+CB_NV_CONFIG_END(cb_linefollowing_config);
+*/
 
 #define NV_ID                           "CBLF"
 #define NV_BASE                         64
+
 #define NV_VERSION                      0
 #define NV_PID_ALGO_TYPE                4
 #define NV_DEFAULT_CRUISESPEED          5
@@ -66,6 +77,11 @@ CB_ID(11, RACER_TEST, "test");
 #define NV_PID_P                       50 // INT16
 #define NV_PID_I                       52 // INT16
 #define NV_PID_D                       54 // INT16
+#define NV_OFF_LINE_MAX_TIME           56 // UINT16
+#define NV_PRINTVALS_INTERVAL          58 // UINT16
+#define NV_DEBUG_ON                    60 // bool
+#define NV_PD_DIVISOR                  61 // INT16
+
 
 #endif
 

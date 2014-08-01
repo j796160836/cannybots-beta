@@ -20,7 +20,7 @@
 #endif
 // Note: BLE_ADVERTISEMENT_DATA must be < 16 bytes.
 
-#define BLE_TX_POWER_LEVEL  -20
+#define BLE_TX_POWER_LEVEL  4
 
 // Transport buffers
 #define SERIAL_BUF_SIZE 32
@@ -39,12 +39,7 @@
 #define CB_INBOUND_SERIAL_BAUD 9600
 
 
-// Message payload offsets
-#define CB_MSG_OFFSET_CMD  4
-#define CB_MSG_OFFSET_DATA 6
 
-// Exchanged variables info
-#define CB_MAX_DESCRIPTORS 12   
 
 
 // helpers
@@ -63,7 +58,7 @@
 #ifdef DEBUG
 #ifdef ARDUINO
 static char dbg_buffer[128];
-#define CB_DBG(FMT, ...) snprintf(dbg_buffer, 128, FMT, __VA_ARGS__); Serial.println(dbg_buffer); Serial.flush();
+#define CB_DBG(FMT, ...) snprintf(dbg_buffer, 128, FMT, __VA_ARGS__); Serial.println(dbg_buffer); Serial.flush(); dbg_buffer[CB_MAX_MSG_SIZE-CB_MSG_OFFSET_DATA]=0; Cannybots::getInstance().callMethod(_CB_SYS_LOG, dbg_buffer);
 #else
 static char dbg_buffer[256];
 #define CB_DBG(FMT, ...) printf("!!!implement iOS logging hook\n"); //printf(FMT, __VA_ARGS__);
@@ -190,6 +185,7 @@ public:
     
     const static cb_publish_type PUBLISH_UPDATE_ONCHANGE;
     
+    // Callback parameter prototype
     const static cb_type CB_VOID;
     const static cb_type CB_BYTE;
     const static cb_type CB_INT16;
@@ -240,7 +236,7 @@ public:
     void registerHandler(const cb_id _id, cb_callback_int16_int16_int16);
     void registerHandler(const cb_id _id, cb_callback_int16_int16);
     void registerHandler(const cb_id& _id, cb_callback_int16);
-    
+    void registerHandler(const cb_id _id, cb_callback_string);
     
     // 'generic' callback poitners (e.g. iOSblocks)
     void registerHandler(const cb_id _id, uint8_t type, void* callback);
@@ -347,6 +343,23 @@ public:
         msg->size = CB_MAX_MSG_SIZE;
     }
     
+    void createMessage(Message* msg, cb_id cid, const char* p1) {
+        uint8_t tmpMsg[CB_MAX_MSG_SIZE] = {
+            'C', 'B', 0,
+            Cannybots::CB_STRING, cid.cid,
+            14,
+            0,0,
+            0,0,
+            0,0,
+            0,0,  0,0,  0,0, 0,0
+        };
+        strncpy((char*)& tmpMsg[CB_MSG_OFFSET_DATA], p1, strlen(p1));
+        
+        
+        memcpy((char*)msg->payload, (char*)tmpMsg, CB_MAX_MSG_SIZE);
+        msg->size = CB_MAX_MSG_SIZE;
+    }
+    
     
     // REmote invocation
     
@@ -361,7 +374,13 @@ public:
         createMessage(msg, cid, p1, p2, p3);
         addOutboundMessage(msg);
     }
+
     
+    void callMethod(cb_id cid, const char* p1) {
+        Message* msg = new Message();
+        createMessage(msg, cid, p1);
+        addOutboundMessage(msg);
+    }
 
     // Non-Volatile RAM
     
