@@ -1,146 +1,86 @@
-/*********************************************************************
- *********************************************************************/
+//
+//  Cannybots.h
+//
+//  Created by Wayne Keenan
+//  Copyright (c) 2014 CannyBots. All rights reserved.
+//
+
 
 #ifndef _CANNYBOTS_H
 #define _CANNYBOTS_H
 
-#define DEBUG 1
-#define INFO_LED 13
+// Message format
 
-// BLE advertising, (when run on RFduino)
-
-#define BLE_UUID                 "7e400001-b5a3-f393-e0a9-e50e24dcca9e"
-
-#ifndef BLE_LOCALNAME
-#define BLE_LOCALNAME            "Cannybots"
-#endif
-
-#ifndef BLE_ADVERTISEMENT_DATA
-#define BLE_ADVERTISEMENT_DATA   "CB_DEF_001"
-#endif
-// Note: BLE_ADVERTISEMENT_DATA must be < 16 bytes.
-
-#define BLE_TX_POWER_LEVEL  4
-
-// Transport buffers
-#define SERIAL_BUF_SIZE 32
-#define CB_MAX_OUT_Q_DEPTH 4
-#define CB_MAX_IN_Q_DEPTH 4
-
-// Connection settings
-#ifdef __RFduino__
-// this is really jsut for debugging, the message will come from BLE_onReceive
-#define CB_INBOUND_SERIAL_PORT Serial
-#else
-// Assume A*
-#define CB_INBOUND_SERIAL_PORT Serial1
-#endif
-
-#define CB_INBOUND_SERIAL_BAUD 9600
+// 20 bytes
+// msg[0]     = 'C'
+// msg[1]     = 'B'
+// msg[2]     = 1 byte CRC
+// msg[3]     = seq[7..4] .. type[3...0]
+// msg[4]     = cmd
+// msg[5]     = param count (MAYBE TODO: > max len implies mulit packet)
+// msg[6-7]   = int16
+// msg[8-9]   = int16
+// msg[10-11] = int16
+// msg[12-13] = int16
+// msg[14-15] = int16
+// msg[16-17] = int16
+// msg[18-19] = int16
 
 
+/* type:
+ 
+ byte/char  = 1 byte
+ uint/int   = 2 bytes
+ ulong/long = 4 bytes
+ float      = 4 bytes
+ 
+ 0  void
+ 1  scalar: byte
+ 2  scalar: int
+ 3  scalar: uint
+ 4  scalar: long
+ 5  scalar: ulong
+ 6  scalar: float
+ 7  array:  byte[]               - arbitrary data, e.g. custom binary protocol such as EasyTransfer
+ 8 string (0 terminated)
+ 9 int16[7]                 // short
+ 10 uint16[7]                // word
+ 11 long32[3]
+ 12 ulong32[3]
+ 13 float32[3]
+ 14 int16,int16,int16
+ 15 float,float,float
+ 
+ */
+
+// Adding a new function signature for RPC:
+
+// 1. add the function prototype to 'Callback prototypes' below         (e.g. cb_callback_string)
+// 2. ensure there is a CB constatnce in Cannybots.h   'Callback parameter prototype'  (e.g. CB_STRING)
+// 3. add a registerHandler to Cannybots.{h|cpp}  e.g. void Cannybots::registerHandler(const cb_id& _id, cb_callback_string callback) {../}
+
+// 4. in cannybots.[h] add a callMethod(type)   e.g.  void callMethod(cb_id cid, const char* p1)
+
+// 5. in cannybots.h maybe create a helper:     void createMessage(Message* msg, cb_id cid, const char* p1)
+
+// 6. in Cannybots::processMessage(Message* msg ) add an inbound handler.
+
+// 4. (iOS) add brding prototype in CannybotsContrller.h , see  'for ObjC / C++ blocks'   (e.g. typedef void (^cb_bridged_callback_string)(const char*);
+// 5. (iOS) add to CannybotsContrller.mm    e.g   - (void) registerHandler:(cb_id)cid withBlockFor_CB_STRING:(cb_callback_string)block { }
+// 6. (iOS) add the onReceive hfunciton handler to CannyBotsController.mm - (void) didReceiveData:(NSData *)data {
 
 
 
-// helpers
-#define hiByteFromInt(x)  (uint8_t)((x &0xff00) >>8)
-#define loByteFromInt(x)  (uint8_t)(x & 0xff)
-#define mk16bit(lo,hi) ( (lo&0xFF) + ((hi&0xFF)<<8))
+
+
+
+
+#include <CannybotsConfig.h>
 
 
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <CannybotsTypes.h>
-
-
-#ifdef DEBUG
-#ifdef ARDUINO
-static char dbg_buffer[128];
-#define CB_DBG(FMT, ...) snprintf(dbg_buffer, 128, FMT, __VA_ARGS__); Serial.println(dbg_buffer); Serial.flush(); dbg_buffer[CB_MAX_MSG_SIZE-CB_MSG_OFFSET_DATA]=0; Cannybots::getInstance().callMethod(_CB_SYS_LOG, dbg_buffer);
-#else
-static char dbg_buffer[256];
-#define CB_DBG(FMT, ...) printf("!!!implement iOS logging hook\n"); //printf(FMT, __VA_ARGS__);
-#endif //ARDUINO
-#else // DEBUG
-#define LOG(...)
-#endif
-
-
-#ifdef __RFduino__
-#define WATCHDOG_SETUP(seconds) NRF_WDT->CRV = 32768 * seconds; NRF_WDT->TASKS_START = 1;
-#define WATCHDOG_RELOAD() NRF_WDT->RR[0] = WDT_RR_RR_Reload;
-#define BLE_BEGIN_CRITICAL_SECTION() while (!RFduinoBLE.radioActive); while (RFduinoBLE.radioActive);
-#define BLE_END_CRITICAL_SECTION()
-#else
-#define WATCHDOG_SETUP(seconds) 
-#define WATCHDOG_RELOAD() 
-#define BLE_BEGIN_CRITICAL_SECTION() 
-#define BLE_END_CRITICAL_SECTION()
-#endif
-
-
-template<typename T, int rawSize>
-class CBFIFO {
-public:
-	const char size;				//speculative feature, in case it's needed
-    
-	CBFIFO();
-    
-	T dequeue();				//get next element
-	bool enqueue( T element );	//add an element
-	T peek() const;				//get the next element without releasing it from the FIFO
-	void flush();				//[1.1] reset to default state
-    
-	//how many elements are currently in the FIFO?
-	char count() { return numberOfElements; }
-    
-private:
-#ifndef SimpleFIFO_NONVOLATILE
-	volatile char numberOfElements;
-	volatile char nextIn;
-	volatile char nextOut;
-	volatile T raw[rawSize];
-#else
-	char numberOfElements;
-	char nextIn;
-	char nextOut;
-	T raw[rawSize];
-#endif
-};
-
-template<typename T, int rawSize>
-CBFIFO<T,rawSize>::CBFIFO() : size(rawSize) {
-	flush();
-}
-template<typename T, int rawSize>
-bool CBFIFO<T,rawSize>::enqueue( T element ) {
-	if ( count() >= rawSize ) { return false; }
-	numberOfElements++;
-	nextIn %= size;
-	raw[nextIn] = element;
-	nextIn++; //advance to next index
-	return true;
-}
-template<typename T, int rawSize>
-T CBFIFO<T,rawSize>::dequeue() {
-	numberOfElements--;
-	nextOut %= size;
-	return raw[ nextOut++];
-}
-template<typename T, int rawSize>
-T CBFIFO<T,rawSize>::peek() const {
-	return raw[ nextOut % size];
-}
-template<typename T, int rawSize>
-void CBFIFO<T,rawSize>::flush() {
-	nextIn = nextOut = numberOfElements = 0;
-}
-
-
-
-
 
 #ifdef __APPLE__
 #include "TargetConditionals.h"
@@ -148,8 +88,7 @@ void CBFIFO<T,rawSize>::flush() {
 // for free ram
 #import <mach/mach.h>
 #import <mach/mach_host.h>
-
-#endif
+#endif // __APPLE__
 
 
 #ifdef ARDUINO
@@ -161,30 +100,14 @@ void CBFIFO<T,rawSize>::flush() {
 #endif // ARDUINO
 
 
-class Message {
-public:
-    Message(): size(0) {
-    };
-    Message(uint8_t* buffer, uint16_t len) {
-        memcpy(payload, buffer, len<CB_MAX_MSG_SIZE?len:CB_MAX_MSG_SIZE);
-        size=len;
-    };
-    uint8_t payload[CB_MAX_MSG_SIZE];
-    uint8_t size;
-};
-
+#include <CannybotsTypes.h>
+#include <CannybotsUtils.h>
+#include <CannybotsInt.h>
 
 
 class Cannybots
 {
 public:
-    //TODO: private
-    cb_descriptor descriptors[CB_MAX_DESCRIPTORS];
-    
-public:
-    
-    const static cb_publish_type PUBLISH_UPDATE_ONCHANGE;
-    
     // Callback parameter prototype
     const static cb_type CB_VOID;
     const static cb_type CB_BYTE;
@@ -208,9 +131,10 @@ public:
     const static cb_type CB_FLOAT_1;
     const static cb_type CB_FLOAT_2;
     const static cb_type CB_FLOAT_3;
-
     
-    static Cannybots instance; // Guaranteed to be destroyed.
+    const static cb_publish_type PUBLISH_UPDATE_ONCHANGE;
+    
+    
     static Cannybots& getInstance()
     {
         // not instatiated on first use, instead do 'controlled' setup in Cannybots::begin()
@@ -261,10 +185,7 @@ public:
     
     // Comms
     
-    void updateVariable(const cb_id& _id, bool value) {
-        
-    }
-   
+    void updateVariable(const cb_id& _id, bool value);
     
     
     // utils
@@ -292,96 +213,26 @@ public:
 
     // public queue methods
     
-    void addInboundMessage(Message* msg) {
-        inboundMsgFIFO.enqueue(msg);
-    }
-    void addOutboundMessage(Message* msg) {
-        outboundMsgFIFO.enqueue(msg);
-    }
+    void addInboundMessage(Message* msg)  { inboundMsgFIFO.enqueue(msg);  }
+    void addOutboundMessage(Message* msg) { outboundMsgFIFO.enqueue(msg); }
     
     
     
     // Message Creation Helpers
     // TODO generalise, and make use of para count
-    void createMessage(Message* msg, cb_id cid, int16_t p1, int16_t p2, int16_t p3) {
-        uint8_t tmpMsg[CB_MAX_MSG_SIZE] = {
-            'C', 'B', 0,
-            Cannybots::CB_INT16_3, cid.cid,
-            3,
-            hiByteFromInt(p1),loByteFromInt(p1),
-            hiByteFromInt(p2),loByteFromInt(p2),
-            hiByteFromInt(p3),loByteFromInt(p3),
-            0,0,  0,0,  0,0, 0,0
-        };
-        memcpy((char*)msg->payload, (char*)tmpMsg, CB_MAX_MSG_SIZE);
-        msg->size = CB_MAX_MSG_SIZE;
-    }
-    void createMessage(Message* msg, cb_id cid, int16_t p1, int16_t p2) {
-        uint8_t tmpMsg[CB_MAX_MSG_SIZE] = {
-            'C', 'B', 0,
-            Cannybots::CB_INT16_2, cid.cid,
-            2,
-            hiByteFromInt(p1),loByteFromInt(p1),
-            hiByteFromInt(p2),loByteFromInt(p2),
-            0,0,
-            0,0,  0,0,  0,0, 0,0
-        };
-        memcpy((char*)msg->payload, (char*)tmpMsg, CB_MAX_MSG_SIZE);
-        msg->size = CB_MAX_MSG_SIZE;
-    }
-    void createMessage(Message* msg, cb_id cid, int16_t p1) {
-        uint8_t tmpMsg[CB_MAX_MSG_SIZE] = {
-            'C', 'B', 0,
-            Cannybots::CB_INT16_2, cid.cid,
-            1,
-            hiByteFromInt(p1),loByteFromInt(p1),
-            0,0,
-            0,0,
-            0,0,  0,0,  0,0, 0,0
-        };
-        memcpy((char*)msg->payload, (char*)tmpMsg, CB_MAX_MSG_SIZE);
-        msg->size = CB_MAX_MSG_SIZE;
-    }
+    void createMessage(Message* msg, cb_id cid, int16_t p1, int16_t p2, int16_t p3) ;
+    void createMessage(Message* msg, cb_id cid, int16_t p1, int16_t p2);
+    void createMessage(Message* msg, cb_id cid, int16_t p1);
+    void createMessage(Message* msg, cb_id cid, const char* p1)    ;
     
-    void createMessage(Message* msg, cb_id cid, const char* p1) {
-        uint8_t tmpMsg[CB_MAX_MSG_SIZE] = {
-            'C', 'B', 0,
-            Cannybots::CB_STRING, cid.cid,
-            14,
-            0,0,
-            0,0,
-            0,0,
-            0,0,  0,0,  0,0, 0,0
-        };
-        strncpy((char*)& tmpMsg[CB_MSG_OFFSET_DATA], p1, strlen(p1));
-        
-        
-        memcpy((char*)msg->payload, (char*)tmpMsg, CB_MAX_MSG_SIZE);
-        msg->size = CB_MAX_MSG_SIZE;
-    }
+    // Remote invocation entry point
     
-    
-    // REmote invocation
-    
-    void callMethod(cb_id cid, int16_t p1) {
-        Message* msg = new Message();
-        createMessage(msg, cid, p1, 0, 0);
-        addOutboundMessage(msg);
-    }
-    
-    void callMethod(cb_id cid, int16_t p1,int16_t p2,int16_t p3) {
-        Message* msg = new Message();
-        createMessage(msg, cid, p1, p2, p3);
-        addOutboundMessage(msg);
-    }
+    void callMethod(cb_id cid, int16_t p1);
+    void callMethod(cb_id cid, int16_t p1,int16_t p2,int16_t p3);
+    void callMethod(cb_id cid, const char* p1);     // String (null terminated) type
 
     
-    void callMethod(cb_id cid, const char* p1) {
-        Message* msg = new Message();
-        createMessage(msg, cid, p1);
-        addOutboundMessage(msg);
-    }
-
+    
     // Non-Volatile RAM
     
     bool  nvSetByte(uint16_t address, uint8_t b);
@@ -391,9 +242,13 @@ public:
     bool nvSetupConfig();
     bool nvIsValidConfig();
     
+    // TODO: make private
+    cb_descriptor descriptors[CB_MAX_DESCRIPTORS];
+    
 
 private:
-    
+    static Cannybots instance; // Guaranteed to be destroyed.
+
     // Singleton
     Cannybots () {
         lastInboundMessageTime = 0;
@@ -415,7 +270,6 @@ private:
     
 #ifdef ARDUINO
     void readSerial(HardwareSerial &ser);
-    
 #endif
     unsigned long lastInboundMessageTime;
 

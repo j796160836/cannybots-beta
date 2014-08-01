@@ -1,4 +1,3 @@
-
 #include "Cannybots.h"
 
 //#define USE_SPI
@@ -7,63 +6,14 @@
 #include <RFduinoBLE.h>
 #endif
 
-
-
 #ifdef ARDUINO
 #include <Arduino.h>
 #include <EEPROM.h>
-
 #ifdef USE_SPI
 #include <SPI.h>
 #endif USE_SPI
 #endif //ARDUINO
 
-
-
-// class: CAnnybots
-// define statics
-const cb_publish_type Cannybots::PUBLISH_UPDATE_ONCHANGE = 1;
-
-// 20 bytes
-// msg[0]     = 'C'
-// msg[1]     = 'B'
-// msg[2]     = 1 byte CRC
-// msg[3]     = seq[7..4] .. type[3...0]
-// msg[4]     = cmd
-// msg[5]     = param count (MAYBE TODO: > max len implies mulit packet)
-// msg[6-7]   = int16
-// msg[8-9]   = int16
-// msg[10-11] = int16
-// msg[12-13] = int16
-// msg[14-15] = int16
-// msg[16-17] = int16
-// msg[18-19] = int16
-
-// type:
-/*
- byte/char  = 1 byte
- uint/int   = 2 bytes
- ulong/long = 4 bytes
- float      = 4 bytes
- 
- 0  void
- 1  scalar: byte
- 2  scalar: int
- 3  scalar: uint
- 4  scalar: long
- 5  scalar: ulong
- 6  scalar: float
- 7  array:  byte[]               - arbitrary data, e.g. custom binary protocol such as EasyTransfer
- 8 string (0 terminated)
- 9 int16[7]                 // short
- 10 uint16[7]                // word
- 11 long32[3]
- 12 ulong32[3]
- 13 float32[3]
- 14 int16,int16,int16
- 15 float,float,float
- 
- */
 
 const cb_type Cannybots::CB_VOID=0;
 const cb_type Cannybots::CB_BYTE=1;
@@ -87,9 +37,10 @@ const cb_type Cannybots::CB_FLOAT_2=18;
 const cb_type Cannybots::CB_FLOAT_3=19;
 
 
+const cb_publish_type Cannybots::PUBLISH_UPDATE_ONCHANGE = 1;
+
+
 Cannybots Cannybots::instance;
-
-
 
 void Cannybots::setConfigStorage(const char* magic, uint16_t start) {
     
@@ -133,7 +84,7 @@ void Cannybots::registerArray(const cb_id _id, int16_t list[], const uint16_t le
 
 // Published values
 void Cannybots::registerPublisher(const cb_id _id, bool *var, const cb_publish_type pubType) {
-    uint16_t offset =_id.cid;
+    //uint16_t offset =_id.cid;
     //descriptors[offset].isPublished = true;
     // TODO: add to watch list
 }
@@ -213,10 +164,7 @@ void Cannybots::registerScritableVariable(const cb_id _id, const __FlashStringHe
 }
 #endif
 
-// GUI
-
-
-// utils
+// GUI utils
 
 void Cannybots::gui_addButton(const int16_t x, const int16_t y, const char* buttonText,  cb_callback_gui callback) {
     
@@ -460,6 +408,7 @@ void Cannybots::processMessage(Message* msg ) {
         //CB_DBG("isMethod",0);
         switch (desc.type) {
             case CB_STRING:
+                ((cb_callback_string)desc.data)((const char*)& msg->payload[CB_MSG_OFFSET_DATA+0]);
                 break;
             case CB_INT16_3:
                 ((cb_callback_int16_int16_int16)desc.data)(
@@ -474,7 +423,7 @@ void Cannybots::processMessage(Message* msg ) {
                 break;
             case CB_INT16_1:
                 ((cb_callback_int16)desc.data)(
-                                                     mk16bit( msg->payload[CB_MSG_OFFSET_DATA+1],msg->payload[CB_MSG_OFFSET_DATA+0]));
+                                               mk16bit( msg->payload[CB_MSG_OFFSET_DATA+1],msg->payload[CB_MSG_OFFSET_DATA+0]));
                 break;
             default:
                 break;
@@ -515,6 +464,113 @@ int16_t Cannybots::getFreeMemory() {
     return mem_free;
 #endif
 }
+
+
+
+// Message Creation Helpers
+// TODO generalise, and make use of para count
+void Cannybots::createMessage(Message* msg, cb_id cid, int16_t p1, int16_t p2, int16_t p3) {
+    uint8_t tmpMsg[CB_MAX_MSG_SIZE] = {
+        'C', 'B', 0,
+        Cannybots::CB_INT16_3, cid.cid,
+        3,
+        hiByteFromInt(p1),loByteFromInt(p1),
+        hiByteFromInt(p2),loByteFromInt(p2),
+        hiByteFromInt(p3),loByteFromInt(p3),
+        0,0,  0,0,  0,0, 0,0
+    };
+    memcpy((char*)msg->payload, (char*)tmpMsg, CB_MAX_MSG_SIZE);
+    msg->size = CB_MAX_MSG_SIZE;
+}
+void Cannybots::createMessage(Message* msg, cb_id cid, int16_t p1, int16_t p2) {
+    uint8_t tmpMsg[CB_MAX_MSG_SIZE] = {
+        'C', 'B', 0,
+        Cannybots::CB_INT16_2, cid.cid,
+        2,
+        hiByteFromInt(p1),loByteFromInt(p1),
+        hiByteFromInt(p2),loByteFromInt(p2),
+        0,0,
+        0,0,  0,0,  0,0, 0,0
+    };
+    memcpy((char*)msg->payload, (char*)tmpMsg, CB_MAX_MSG_SIZE);
+    msg->size = CB_MAX_MSG_SIZE;
+}
+void Cannybots::createMessage(Message* msg, cb_id cid, int16_t p1) {
+    uint8_t tmpMsg[CB_MAX_MSG_SIZE] = {
+        'C', 'B', 0,
+        Cannybots::CB_INT16_2, cid.cid,
+        1,
+        hiByteFromInt(p1),loByteFromInt(p1),
+        0,0,
+        0,0,
+        0,0,  0,0,  0,0, 0,0
+    };
+    memcpy((char*)msg->payload, (char*)tmpMsg, CB_MAX_MSG_SIZE);
+    msg->size = CB_MAX_MSG_SIZE;
+}
+
+void Cannybots::createMessage(Message* msg, cb_id cid, const char* p1) {
+    uint8_t tmpMsg[CB_MAX_MSG_SIZE] = {
+        'C', 'B', 0,
+        Cannybots::CB_STRING, cid.cid,
+        14,
+        0,0,
+        0,0,
+        0,0,
+        0,0,  0,0,  0,0, 0,0
+    };
+    strncpy((char*)& tmpMsg[CB_MSG_OFFSET_DATA], p1, strlen(p1));
+    
+    
+    memcpy((char*)msg->payload, (char*)tmpMsg, CB_MAX_MSG_SIZE);
+    msg->size = CB_MAX_MSG_SIZE;
+}
+
+
+// REmote invocation
+
+void Cannybots::callMethod(cb_id cid, int16_t p1) {
+    Message* msg = new Message();
+    createMessage(msg, cid, p1, 0, 0);
+    addOutboundMessage(msg);
+}
+
+void Cannybots::callMethod(cb_id cid, int16_t p1,int16_t p2,int16_t p3) {
+    Message* msg = new Message();
+    createMessage(msg, cid, p1, p2, p3);
+    addOutboundMessage(msg);
+}
+
+// String (null terminated) type
+void Cannybots::callMethod(cb_id cid, const char* p1) {
+    Message* msg = new Message();
+    int charsRemaining = strlen(p1);
+    
+    if (charsRemaining < CB_MAX_MSG_DATA_SIZE) {
+        createMessage(msg, cid, p1);
+        addOutboundMessage(msg);
+        
+    } else {
+        return;
+        char tmpBuf[CB_MAX_MSG_DATA_SIZE];
+        while (charsRemaining>0) {
+            uint8_t len = CB_MAX_MSG_DATA_SIZE-1;
+            if (strlen(p1) <CB_MAX_MSG_DATA_SIZE) {
+                len = strlen(p1)-1;
+            }
+            memcpy(tmpBuf,p1, len);
+            tmpBuf[len]=0;
+            
+            charsRemaining-=strlen(tmpBuf);
+            p1+=strlen(tmpBuf);
+            createMessage(msg, cid, tmpBuf);
+            addOutboundMessage(msg);
+            
+        };
+    }
+    
+}
+
 
 ///////////////////////////////////////////////////////////////////////
 // Non-volatile methods

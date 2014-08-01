@@ -5,38 +5,11 @@
 //  Copyright (c) 2014 CannyBots. All rights reserved.
 //
 
-
-// Adding a new type:
-
-// 1. add the function prototype to 'Callback prototypes' below         (e.g. cb_callback_string)
-// 2. ensure there is a CB constatnce in Cannybots.h   'Callback parameter prototype'  (e.g. CB_STRING)
-// 3. add a registerHandler to Cannybots.{h|cpp}  e.g. void Cannybots::registerHandler(const cb_id& _id, cb_callback_string callback) {../}
-
-// 4. in cannybots.[h] add a callMethod(type)   e.g.  void callMethod(cb_id cid, const char* p1)
-
-// 5. in cannybots.h maybe create a helper:     void createMessage(Message* msg, cb_id cid, const char* p1)
-
-// 4. (iOS) add brding prototype in CannybotsContrller.h , see  'for ObjC / C++ blocks'   (e.g. typedef void (^cb_bridged_callback_string)(const char*);
-// 5. (iOS) add to CannybotsContrller.mm    e.g   - (void) registerHandler:(cb_id)cid withBlockFor_CB_STRING:(cb_callback_string)block { }
-// 6. (iOS) add the onReceive hfunciton handler to CannyBotsController.mm - (void) didReceiveData:(NSData *)data {
-  
-
-
-
-
+// This is a C only header, no C++ or Obj-C
 #ifndef _CannybotsTypes_h
 #define _CannybotsTypes_h
 
-#define CB_MAX_MSG_SIZE 20
-
-
-// Message payload offsets
-#define CB_MSG_OFFSET_CMD  4
-#define CB_MSG_OFFSET_DATA 6
-
-// Exchanged variables info
-#define CB_MAX_SYS_DESCRIPTORS 2
-#define CB_MAX_DESCRIPTORS 12+CB_MAX_SYS_DESCRIPTORS
+#include <CannybotsConfig.h>
 
 
 

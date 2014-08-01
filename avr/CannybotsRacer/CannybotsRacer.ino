@@ -555,7 +555,7 @@ void lf_updateBias (int b1, int b2, int b3) {
 }
 
 void lf_updateLineFollowingMode(int _forceManualMode, int _d1, int _d2) {
-  CB_DBG("ForceManual=%d", _forceManualMode)
+  CB_DBG("ForceManual=%d", _forceManualMode);
   forceManualMode = _forceManualMode;
 }
 
