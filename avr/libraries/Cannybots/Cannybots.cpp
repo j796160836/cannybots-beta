@@ -543,29 +543,33 @@ void Cannybots::callMethod(cb_id cid, int16_t p1,int16_t p2,int16_t p3) {
 
 // String (null terminated) type
 void Cannybots::callMethod(cb_id cid, const char* p1) {
-    Message* msg = new Message();
+    
     int charsRemaining = strlen(p1);
     
     if (charsRemaining < CB_MAX_MSG_DATA_SIZE) {
+        Message* msg = new Message();
         createMessage(msg, cid, p1);
         addOutboundMessage(msg);
         
     } else {
-        return;
         char tmpBuf[CB_MAX_MSG_DATA_SIZE];
+        char* ptr = (char*)p1;
+        
         while (charsRemaining>0) {
+        
             uint8_t len = CB_MAX_MSG_DATA_SIZE-1;
-            if (strlen(p1) <CB_MAX_MSG_DATA_SIZE) {
-                len = strlen(p1)-1;
+            
+            if (strlen(ptr) <CB_MAX_MSG_DATA_SIZE) {
+                len = strlen(ptr);
             }
-            memcpy(tmpBuf,p1, len);
+            memcpy(tmpBuf,ptr, len);
             tmpBuf[len]=0;
             
-            charsRemaining-=strlen(tmpBuf);
-            p1+=strlen(tmpBuf);
+            charsRemaining-=len;
+            ptr+=len;
+            Message* msg = new Message();
             createMessage(msg, cid, tmpBuf);
             addOutboundMessage(msg);
-            
         };
     }
     

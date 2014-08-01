@@ -14,6 +14,7 @@
 		B0C87347196742D600238594 /* Clock.png in Resources */ = {isa = PBXBuildFile; fileRef = B0C87346196742D600238594 /* Clock.png */; };
 		B0C8734E19674B8800238594 /* HighScores.m in Sources */ = {isa = PBXBuildFile; fileRef = B0C8734B19674B8800238594 /* HighScores.m */; };
 		B0C8734F19674B8800238594 /* HighScoresViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B0C8734D19674B8800238594 /* HighScoresViewController.m */; };
+		B0DDB053198C3F980062AA13 /* JRTranscriptView.m in Sources */ = {isa = PBXBuildFile; fileRef = B0DDB049198C3F980062AA13 /* JRTranscriptView.m */; };
 		B916F522190529B40057388D /* BrainSpeakBLE.m in Sources */ = {isa = PBXBuildFile; fileRef = B916F521190529B40057388D /* BrainSpeakBLE.m */; };
 		B92C59DE18FEC8FE005EC882 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59DD18FEC8FE005EC882 /* Foundation.framework */; };
 		B92C59E018FEC8FE005EC882 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92C59DF18FEC8FE005EC882 /* CoreGraphics.framework */; };
@@ -123,6 +124,8 @@
 		B0DDB031198C327D0062AA13 /* CannybotsUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CannybotsUtils.h; sourceTree = "<group>"; };
 		B0DDB033198C32EA0062AA13 /* CannybotsInt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CannybotsInt.h; sourceTree = "<group>"; };
 		B0DDB034198C34200062AA13 /* CannybotsConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CannybotsConfig.h; sourceTree = "<group>"; };
+		B0DDB048198C3F980062AA13 /* JRTranscriptView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRTranscriptView.h; sourceTree = "<group>"; };
+		B0DDB049198C3F980062AA13 /* JRTranscriptView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRTranscriptView.m; sourceTree = "<group>"; };
 		B916F520190529B40057388D /* BrainSpeakBLE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrainSpeakBLE.h; sourceTree = "<group>"; };
 		B916F521190529B40057388D /* BrainSpeakBLE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrainSpeakBLE.m; sourceTree = "<group>"; };
 		B92AB26B19055D0600A9556D /* libObjectiveChipmunk-iPhone.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libObjectiveChipmunk-iPhone.a"; path = "Libraries/cocos2d-iphone/build/Debug-iphoneos/libObjectiveChipmunk-iPhone.a"; sourceTree = "<group>"; };
@@ -266,6 +269,16 @@
 			path = Libraries/HighScores;
 			sourceTree = "<group>";
 		};
+		B0DDB035198C3F980062AA13 /* JRTranscriptView */ = {
+			isa = PBXGroup;
+			children = (
+				B0DDB048198C3F980062AA13 /* JRTranscriptView.h */,
+				B0DDB049198C3F980062AA13 /* JRTranscriptView.m */,
+			);
+			name = JRTranscriptView;
+			path = Libraries/JRTranscriptView;
+			sourceTree = "<group>";
+		};
 		B916F51C190506920057388D /* TheBrain */ = {
 			isa = PBXGroup;
 			children = (
@@ -279,6 +292,7 @@
 		B92C59D118FEC8FE005EC882 = {
 			isa = PBXGroup;
 			children = (
+				B0DDB035198C3F980062AA13 /* JRTranscriptView */,
 				B069D2C5197145E800F4378A /* CannyLapCounter.h */,
 				B02B512C196C62A2006EEC2B /* CannybotsRacer.h */,
 				B0C8734919674B8800238594 /* HighScores */,
@@ -685,6 +699,7 @@
 				B92C59EE18FEC8FE005EC882 /* BrainDashAppDelegate.m in Sources */,
 				B9AD5E73193F66E800BC9631 /* BrainDashTuningViewController.m in Sources */,
 				B9F68B2919055A0D00F6654D /* SneakyJoystick.m in Sources */,
+				B0DDB053198C3F980062AA13 /* JRTranscriptView.m in Sources */,
 				B0C8734E19674B8800238594 /* HighScores.m in Sources */,
 				B92C59F418FEC8FE005EC882 /* BrainDashMainViewController.m in Sources */,
 				B9AD5E791941A0DE00BC9631 /* NSObject+performBlockAfterDelay.m in Sources */,

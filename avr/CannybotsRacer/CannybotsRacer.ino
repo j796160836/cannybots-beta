@@ -48,9 +48,9 @@ AnalogScanner scanner;
 #define PID_SAMPLE_TIME     10
 #define PID_DIV             10
 
-#define PRINTVALS_INTERVAL   200
+#define PRINTVALS_INTERVAL   1000
 
-#define OFF_LINE_MAX_TIME 200
+#define OFF_LINE_MAX_TIME 200    
 
 #define MANUAL_MODE_RADIOSILENCE_TIMEOUT 500
 
@@ -76,17 +76,10 @@ AnalogScanner scanner;
 // IR Sensor settings
 #define NUM_IR_SENSORS   3
 
-
-
-
-
-
 // Battery Voltage sensing
 #ifdef BOT_TYPE_CUSTOM_PCB
 #define BATTERY_PIN A1
 #endif
-
-
 
 
 

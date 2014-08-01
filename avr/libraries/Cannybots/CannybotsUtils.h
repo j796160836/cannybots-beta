@@ -18,7 +18,8 @@
 #ifdef DEBUG
 #ifdef ARDUINO
 static char dbg_buffer[128];
-#define CB_DBG(FMT, ...) snprintf(dbg_buffer, 128, FMT, __VA_ARGS__); Serial.println(dbg_buffer); Serial.flush(); dbg_buffer[/*CB_MAX_MSG_SIZE-CB_MSG_OFFSET_DATA*/ 5]=0; Cannybots::getInstance().callMethod(_CB_SYS_LOG, dbg_buffer);
+#define CB_DBG(FMT, ...) snprintf(dbg_buffer, 128, FMT, __VA_ARGS__); Serial.println(dbg_buffer);
+#define CB_DBG2REMOTE(FMT, ...) snprintf(dbg_buffer, 128, FMT, __VA_ARGS__); Serial.println(dbg_buffer); Cannybots::getInstance().callMethod(_CB_SYS_LOG, dbg_buffer);
 #else
 static char dbg_buffer[256];
 #define CB_DBG(FMT, ...) printf("!!!implement iOS logging hook\n"); //printf(FMT, __VA_ARGS__);
@@ -26,6 +27,7 @@ static char dbg_buffer[256];
 #else
 #define LOG(...)
 #define CB_DBG(...)
+#define CB_DBG2REMOTE(...)
 #endif // DEBUG
 
 

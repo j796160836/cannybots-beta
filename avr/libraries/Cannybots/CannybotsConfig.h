@@ -54,7 +54,7 @@
 
 // Transport buffers
 #define SERIAL_BUF_SIZE 32
-#define CB_MAX_OUT_Q_DEPTH 4
+#define CB_MAX_OUT_Q_DEPTH 8
 #define CB_MAX_IN_Q_DEPTH 4
 
 // Connection settings

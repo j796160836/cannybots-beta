@@ -85,7 +85,12 @@
          _IRReading3.text =[NSString stringWithFormat:@"%d", p3];
      }];
 
-     
+    
+    [cb registerHandler:_CB_SYS_LOG withBlockFor_STRING:^(const char* p1)
+     {
+         [self.debugView appendString:[NSString stringWithUTF8String:p1]];
+     }];
+    
     [cb callMethod:RACER_CONFIG p1:0 p2:0 p3:0];
 
 }

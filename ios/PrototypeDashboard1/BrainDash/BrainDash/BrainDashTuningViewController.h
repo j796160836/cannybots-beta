@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "JRTranscriptView.h"
 
 @interface BrainDashTuningViewController : UIViewController <UITextFieldDelegate>
 @property (weak, nonatomic) IBOutlet UITextField *pTextField;
@@ -26,6 +27,7 @@
 @property (weak, nonatomic) IBOutlet UITextField *IRReading2;
 @property (weak, nonatomic) IBOutlet UITextField *IRReading3;
 - (IBAction)ledColourSelected:(id)sender;
+@property (weak, nonatomic) IBOutlet JRTranscriptView *debugView;
 
 -(IBAction)textFieldReturn:(id)sender;
 - (IBAction)pStepperValueChanged:(UIStepper*)sender;
