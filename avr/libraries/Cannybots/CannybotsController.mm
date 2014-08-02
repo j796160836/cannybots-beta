@@ -152,7 +152,7 @@
                 ((__bridge cb_bridged_callback_int16_1)desc.data)( mk16bit( buf[CB_MSG_OFFSET_DATA+1],buf[CB_MSG_OFFSET_DATA+0]));
             }
         } else if (desc.type == Cannybots::CB_STRING) {
-            //NSLog(@"is CB_INT16_2");
+            //NSLog(@"is CB_STRING");
             //NSLog(@"block @ %x", desc.data);
             if (desc.data) {
                 ((__bridge cb_bridged_callback_string)desc.data)( (const char*) &buf[CB_MSG_OFFSET_DATA+0]);

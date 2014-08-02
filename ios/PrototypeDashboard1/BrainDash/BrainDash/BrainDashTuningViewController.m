@@ -88,7 +88,11 @@
     
     [cb registerHandler:_CB_SYS_LOG withBlockFor_STRING:^(const char* p1)
      {
-         [self.debugView appendString:[NSString stringWithUTF8String:p1]];
+         NSLog(@"%x", p1);
+         NSLog(@"%s", p1);
+         if (p1) {
+             [self.debugView appendString:[NSString stringWithUTF8String:p1]];
+         }
      }];
     
     [cb callMethod:RACER_CONFIG p1:0 p2:0 p3:0];
@@ -100,6 +104,7 @@
     [cb deregisterHandler:RACER_PID];
     [cb deregisterHandler:RACER_IRBIAS];
     [cb deregisterHandler:RACER_IRVALS];
+    [cb deregisterHandler:_CB_SYS_LOG]; // TODO: we should have a'restore previous' or implement a 'stack' of pushable/poppable handlers
 }
 
 -(IBAction)textFieldReturn:(id)sender

@@ -85,7 +85,7 @@ int getPID_D() {
 }
 
 void printvals_PID() {
-  CB_DBG2REMOTE(    "%lu(%lu@%lu): IR(%u,%u,%u),Kpd(%d,%d)/100,Sab(%d,%d),Mab(%d,%d),XY(%d,%d),MEM(%d)\n", //VCC(%d)", // e(%d) PeDe(%d,%d)
+  CB_DBG2REMOTE(    "%lu(%lu@%lu): IR(%u,%u,%u),Kpd(%d,%d)/100,Sab(%d,%d),Mab(%d,%d),XY(%d,%d),MEM(%d)\n\n", //VCC(%d)", // e(%d) PeDe(%d,%d)
              loopNowTime,
              loopDeltaTime,
              loopcount,
