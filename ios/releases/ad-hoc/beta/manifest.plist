@@ -11,7 +11,7 @@
 					<key>kind</key>
 					<string>software-package</string>
 					<key>url</key>
-					<string>https://github.com/Cannybots/cannybots-beta/tree/master/ios/releases/ad-hoc/beta/BrainDash.ipa</string>
+					<string>https://raw.githubusercontent.com/Cannybots/cannybots-beta/master/ios/releases/ad-hoc/beta/BrainDash.ipa</string>
 				</dict>
 			</array>
 			<key>metadata</key>
