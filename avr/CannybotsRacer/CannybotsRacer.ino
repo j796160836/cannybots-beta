@@ -153,8 +153,8 @@ AnalogScanner scanner;
 
 // Ignore this for now
 #ifdef USE_IR_WAYPOINT_DETECTION
-#include <IRremoteORG.h>
-IRrecv irrecv(IR_WAYPOINT_DETECTION_PIN);
+//#include <IRremoteORG.h>
+//IRrecv irrecv(IR_WAYPOINT_DETECTION_PIN);
 #endif
 
 
