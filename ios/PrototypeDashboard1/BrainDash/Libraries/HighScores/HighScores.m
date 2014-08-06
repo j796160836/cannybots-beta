@@ -24,7 +24,7 @@ const int MAX_HIGHSCORES = 10;
 	NSMutableArray *localHighScores = [[NSMutableArray alloc] init];
 	int totalScore = [score intValue];
 	[HighScores updateLocalScoresWithArray:localHighScores completion:^{
-		int tempTotalScore, count = [localHighScores count];
+		unsigned long tempTotalScore, count = [localHighScores count];
 		BOOL didInsert = NO;
 		
 		for ( int i= 0 ; i < count; i++ ){

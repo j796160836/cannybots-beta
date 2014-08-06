@@ -71,16 +71,13 @@
 
 
 
-
-
-
-
 #include <CannybotsConfig.h>
 
 
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>     /* offsetof */
 
 #ifdef __APPLE__
 #include "TargetConditionals.h"
@@ -146,32 +143,34 @@ public:
     void setConfigStorage(const char* magic, const uint16_t start);
     
     // Scalar
-    void registerVariable(const cb_id& _id, int16_t* var, const bool isNonVolatile=false, const int16_t defaultValue=0);
-    void registerVariable(const cb_id& _id, bool*    var, const bool isNonVolatile=false, const bool    defaultValue=false);
+    void registerVariable(cb_id* _id, int16_t* var, const bool isNonVolatile=false, const int16_t defaultValue=0);
+    void registerVariable(cb_id* _id, bool*    var, const bool isNonVolatile=false, const bool    defaultValue=false);
     
     // Arrays
-    void registerArray(const cb_id _id, int16_t list[], const uint16_t length);
+    void registerArray(cb_id* _id, int16_t list[], const uint16_t length);
     
     // Published values
-    void registerPublisher(const cb_id _id, bool *var, const cb_publish_type pubType);
+    void registerPublisher(cb_id* _id, bool *var, const cb_publish_type pubType);
 
     
     // Function handlers
-    void registerHandler(const cb_id _id, cb_callback_int16_int16_int16);
-    void registerHandler(const cb_id _id, cb_callback_int16_int16);
-    void registerHandler(const cb_id& _id, cb_callback_int16);
-    void registerHandler(const cb_id _id, cb_callback_string);
+    void registerHandler(cb_id* _id, cb_callback_int16_int16_int16);
+    void registerHandler(cb_id* _id, cb_callback_int16_int16);
+    void registerHandler(cb_id* _id, cb_callback_int16);
+    void registerHandler(cb_id* _id, cb_callback_string);
     
     // 'generic' callback poitners (e.g. iOSblocks)
-    void registerHandler(const cb_id _id, uint8_t type, void* callback);
+    void registerHandler(cb_id* _id, uint8_t type, void* callback);
 
+    // NV
     
+    void registerConfigParameter(cb_nv_id* _id);
     
     // Scripting
     
-    void registerScritableVariable(const cb_id _id, const char* name);
+    void registerScritableVariable(cb_id* _id, const char* name);
 #ifdef ARDUINO
-    void registerScritableVariable(const cb_id _id, const __FlashStringHelper*);
+    void registerScritableVariable(cb_id* _id, const __FlashStringHelper*);
     
     unsigned long getLastInboundCommandTime() {
         return lastInboundMessageTime;
@@ -185,7 +184,7 @@ public:
     
     // Comms
     
-    void updateVariable(const cb_id& _id, bool value);
+    void updateVariable(cb_id* _id, bool value);
     
     
     // utils
@@ -220,25 +219,33 @@ public:
     
     // Message Creation Helpers
     // TODO generalise, and make use of para count
-    void createMessage(Message* msg, cb_id cid, int16_t p1, int16_t p2, int16_t p3) ;
-    void createMessage(Message* msg, cb_id cid, int16_t p1, int16_t p2);
-    void createMessage(Message* msg, cb_id cid, int16_t p1);
-    void createMessage(Message* msg, cb_id cid, const char* p1)    ;
+    void createMessage(Message* msg, cb_id* cid, int16_t p1, int16_t p2, int16_t p3) ;
+    void createMessage(Message* msg, cb_id* cid, int16_t p1, int16_t p2);
+    void createMessage(Message* msg, cb_id* cid, int16_t p1);
+    void createMessage(Message* msg, cb_id* cid, const char* p1)    ;
     
     // Remote invocation entry point
     
-    void callMethod(cb_id cid, int16_t p1);
-    void callMethod(cb_id cid, int16_t p1,int16_t p2,int16_t p3);
-    void callMethod(cb_id cid, const char* p1);     // String (null terminated) type
+    void callMethod(cb_id* cid, int16_t p1);
+    void callMethod(cb_id* cid, int16_t p1,int16_t p2,int16_t p3);
+    void callMethod(cb_id* cid, const char* p1);     // String (null terminated) type
 
     
     
     // Non-Volatile RAM
     
-    bool  nvSetByte(uint16_t address, uint8_t b);
+    bool     nvSetByte(uint16_t address, uint8_t b);
     uint8_t  nvGetByte(uint16_t address);
-    bool nvSetInt(uint16_t address, uint16_t b);
+    bool     nvSetInt(uint16_t address, uint16_t b);
     uint16_t nvGetInt(uint16_t address);
+
+    bool     nvSetByte(cb_nv_id* address, uint8_t b);
+    uint8_t  nvGetByte(cb_nv_id* address);
+    bool     nvSetInt(cb_nv_id* address, uint16_t b);
+    uint16_t nvGetInt(cb_nv_id* address);
+
+    
+    
     bool nvSetupConfig();
     bool nvIsValidConfig();
     
@@ -247,7 +254,7 @@ public:
     
 
 private:
-    static Cannybots instance; // Guaranteed to be destroyed.
+    static Cannybots instance; // Guaranteed to be destroyed. (yeah, when the power goes lol)
 
     // Singleton
     Cannybots () {

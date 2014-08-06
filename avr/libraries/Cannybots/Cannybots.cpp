@@ -47,21 +47,21 @@ void Cannybots::setConfigStorage(const char* magic, uint16_t start) {
 }
 
 // Scalar
-void Cannybots::registerVariable(const cb_id& _id, int16_t* var, const bool isNonVolatile, const int16_t defaultValue) {
+void Cannybots::registerVariable(cb_id* _id, int16_t* var, const bool isNonVolatile, const int16_t defaultValue) {
     
-    uint16_t offset =_id.cid;
-    descriptors[offset].cid = _id;
+    uint16_t offset =_id->cid;
+    descriptors[offset].cid_t.cidMT = _id;
     descriptors[offset].data = var;
     descriptors[offset].size = sizeof(int16_t*);
     descriptors[offset].isMethod = false;
     //descriptors[offset].isPublished = false;
-    //descriptors[offset].isNV = isNonVolatile;
+    descriptors[offset].isNV = isNonVolatile;
     descriptors[offset].type = CB_INT16;
 }
 
-void Cannybots::registerVariable(const cb_id& _id, bool*    var, const bool isNonVolatile, const bool    defaultValue) {
-    uint16_t offset =_id.cid;
-    descriptors[offset].cid = _id;
+void Cannybots::registerVariable(cb_id* _id, bool*    var, const bool isNonVolatile, const bool    defaultValue) {
+    uint16_t offset =_id->cid;
+    descriptors[offset].cid_t.cidMT = _id;
     descriptors[offset].data = var;
     descriptors[offset].size = sizeof(bool*);
     //descriptors[offset].isPublished = false;
@@ -71,9 +71,9 @@ void Cannybots::registerVariable(const cb_id& _id, bool*    var, const bool isNo
 }
 
 // Arrays
-void Cannybots::registerArray(const cb_id _id, int16_t list[], const uint16_t length) {
-    uint16_t offset =_id.cid;
-    descriptors[offset].cid = _id;
+void Cannybots::registerArray(cb_id* _id, int16_t list[], const uint16_t length) {
+    uint16_t offset =_id->cid;
+    descriptors[offset].cid_t.cidMT = _id;
     descriptors[offset].data = list;
     descriptors[offset].size = length * sizeof(uint16_t);
     //descriptors[offset].isPublished = false;
@@ -83,7 +83,7 @@ void Cannybots::registerArray(const cb_id _id, int16_t list[], const uint16_t le
 }
 
 // Published values
-void Cannybots::registerPublisher(const cb_id _id, bool *var, const cb_publish_type pubType) {
+void Cannybots::registerPublisher(cb_id* _id, bool *var, const cb_publish_type pubType) {
     //uint16_t offset =_id.cid;
     //descriptors[offset].isPublished = true;
     // TODO: add to watch list
@@ -91,9 +91,9 @@ void Cannybots::registerPublisher(const cb_id _id, bool *var, const cb_publish_t
 
 
 // Function handlers
-void Cannybots::registerHandler(const cb_id _id, cb_callback_int16_int16_int16 callback) {
-    uint16_t offset =_id.cid;
-    descriptors[offset].cid = _id;
+void Cannybots::registerHandler(cb_id* _id, cb_callback_int16_int16_int16 callback) {
+    uint16_t offset =_id->cid;
+    descriptors[offset].cid_t.cidMT = _id;
     descriptors[offset].data = (void*)callback;
     descriptors[offset].size = 0;
     descriptors[offset].isMethod = true;
@@ -104,9 +104,9 @@ void Cannybots::registerHandler(const cb_id _id, cb_callback_int16_int16_int16 c
 }
 
 // Function handlers
-void Cannybots::registerHandler(const cb_id _id, cb_callback_int16_int16 callback) {
-    uint16_t offset =_id.cid;
-    descriptors[offset].cid = _id;
+void Cannybots::registerHandler(cb_id* _id, cb_callback_int16_int16 callback) {
+    uint16_t offset =_id->cid;
+    descriptors[offset].cid_t.cidMT = _id;
     descriptors[offset].data = (void*)callback;
     descriptors[offset].size = 0;
     descriptors[offset].isMethod = true;
@@ -116,9 +116,9 @@ void Cannybots::registerHandler(const cb_id _id, cb_callback_int16_int16 callbac
     //descriptors[offset].isNV = false;
 }
 
-void Cannybots::registerHandler(const cb_id& _id, cb_callback_int16 callback) {
-    uint16_t offset =_id.cid;
-    descriptors[offset].cid = _id;
+void Cannybots::registerHandler(cb_id* _id, cb_callback_int16 callback) {
+    uint16_t offset =_id->cid;
+    descriptors[offset].cid_t.cidMT = _id;
     descriptors[offset].data = (void*)callback;
     descriptors[offset].size = 0;
     descriptors[offset].isMethod = true;
@@ -128,9 +128,9 @@ void Cannybots::registerHandler(const cb_id& _id, cb_callback_int16 callback) {
     //descriptors[offset].isNV = false;
 }
 
-void Cannybots::registerHandler(const cb_id _id, cb_callback_string callback) {
-    uint16_t offset =_id.cid;
-    descriptors[offset].cid = _id;
+void Cannybots::registerHandler(cb_id* _id, cb_callback_string callback) {
+    uint16_t offset =_id->cid;
+    descriptors[offset].cid_t.cidMT = _id;
     descriptors[offset].data = (void*)callback;
     descriptors[offset].size = 0;
     descriptors[offset].isMethod = true;
@@ -141,9 +141,9 @@ void Cannybots::registerHandler(const cb_id _id, cb_callback_string callback) {
 }
 
 // abritrary (e.g. used fore registering the iOS 'block' handlers)
-void Cannybots::registerHandler(const cb_id _id, uint8_t type, void* callback) {
-    uint16_t offset =_id.cid;
-    descriptors[offset].cid = _id;
+void Cannybots::registerHandler( cb_id* _id, uint8_t type, void* callback) {
+    uint16_t offset =_id->cid;
+    descriptors[offset].cid_t.cidMT = _id;
     descriptors[offset].data = (void*)callback;
     descriptors[offset].size = 0;
     descriptors[offset].isMethod = true;
@@ -153,13 +153,47 @@ void Cannybots::registerHandler(const cb_id _id, uint8_t type, void* callback) {
     //descriptors[offset].isNV = false;
 }
 
+// Config
+
+void Cannybots::registerConfigParameter(cb_nv_id* _id) {
+    
+    uint16_t offset =_id->cid;
+    descriptors[offset].cid_t.cidNV = _id;
+//    descriptors[offset].data = (void*)callback;
+    descriptors[offset].size = 0;
+    descriptors[offset].isMethod = false;
+//    descriptors[offset].type = type;
+    
+    //descriptors[offset].isPublished = false;
+    descriptors[offset].isNV = true;
+}
+
+
+//metadata:
+
+void getConfigParameterList() {
+    
+
+}
+
+/*
+//getter/setters
+setConfigParameterValue {
+// if not on ARDUION build messag eand send
+// if on arduon use EEPROMex library
+    
+}
+getConfigParameterValue
+*/
+
+
 // Scripting
 
-void Cannybots::registerScritableVariable(const cb_id _id, const char* name) {
+void Cannybots::registerScritableVariable(cb_id* _id, const char* name) {
     
 }
 #ifdef ARDUINO
-void Cannybots::registerScritableVariable(const cb_id _id, const __FlashStringHelper* name) {
+void Cannybots::registerScritableVariable( cb_id* _id, const __FlashStringHelper* name) {
     Cannybots::registerScritableVariable(_id, (const char *) name);
 }
 #endif
@@ -459,8 +493,8 @@ int16_t Cannybots::getFreeMemory() {
     //natural_t mem_used = (vm_stat.active_count +
     //                      vm_stat.inactive_count +
     //                      vm_stat.wire_count) * pagesize;
-    natural_t mem_free = vm_stat.free_count * pagesize;
-    //natural_t mem_total = mem_used + mem_free;
+    unsigned long mem_free = vm_stat.free_count * pagesize;
+    //unsigned long mem_total = mem_used + mem_free;
     return mem_free;
 #endif
 }
@@ -469,10 +503,10 @@ int16_t Cannybots::getFreeMemory() {
 
 // Message Creation Helpers
 // TODO generalise, and make use of para count
-void Cannybots::createMessage(Message* msg, cb_id cid, int16_t p1, int16_t p2, int16_t p3) {
+void Cannybots::createMessage(Message* msg, cb_id* cid, int16_t p1, int16_t p2, int16_t p3) {
     uint8_t tmpMsg[CB_MAX_MSG_SIZE] = {
         'C', 'B', 0,
-        Cannybots::CB_INT16_3, cid.cid,
+        Cannybots::CB_INT16_3, cid->cid,
         3,
         hiByteFromInt(p1),loByteFromInt(p1),
         hiByteFromInt(p2),loByteFromInt(p2),
@@ -482,10 +516,10 @@ void Cannybots::createMessage(Message* msg, cb_id cid, int16_t p1, int16_t p2, i
     memcpy((char*)msg->payload, (char*)tmpMsg, CB_MAX_MSG_SIZE);
     msg->size = CB_MAX_MSG_SIZE;
 }
-void Cannybots::createMessage(Message* msg, cb_id cid, int16_t p1, int16_t p2) {
+void Cannybots::createMessage(Message* msg, cb_id* cid, int16_t p1, int16_t p2) {
     uint8_t tmpMsg[CB_MAX_MSG_SIZE] = {
         'C', 'B', 0,
-        Cannybots::CB_INT16_2, cid.cid,
+        Cannybots::CB_INT16_2, cid->cid,
         2,
         hiByteFromInt(p1),loByteFromInt(p1),
         hiByteFromInt(p2),loByteFromInt(p2),
@@ -495,10 +529,10 @@ void Cannybots::createMessage(Message* msg, cb_id cid, int16_t p1, int16_t p2) {
     memcpy((char*)msg->payload, (char*)tmpMsg, CB_MAX_MSG_SIZE);
     msg->size = CB_MAX_MSG_SIZE;
 }
-void Cannybots::createMessage(Message* msg, cb_id cid, int16_t p1) {
+void Cannybots::createMessage(Message* msg, cb_id* cid, int16_t p1) {
     uint8_t tmpMsg[CB_MAX_MSG_SIZE] = {
         'C', 'B', 0,
-        Cannybots::CB_INT16_2, cid.cid,
+        Cannybots::CB_INT16_2, cid->cid,
         1,
         hiByteFromInt(p1),loByteFromInt(p1),
         0,0,
@@ -509,10 +543,10 @@ void Cannybots::createMessage(Message* msg, cb_id cid, int16_t p1) {
     msg->size = CB_MAX_MSG_SIZE;
 }
 
-void Cannybots::createMessage(Message* msg, cb_id cid, const char* p1) {
+void Cannybots::createMessage(Message* msg, cb_id* cid, const char* p1) {
     uint8_t tmpMsg[CB_MAX_MSG_SIZE] = {
         'C', 'B', 0,
-        Cannybots::CB_STRING, cid.cid,
+        Cannybots::CB_STRING, cid->cid,
         14,
         0,0,
         0,0,
@@ -529,22 +563,22 @@ void Cannybots::createMessage(Message* msg, cb_id cid, const char* p1) {
 
 // REmote invocation
 
-void Cannybots::callMethod(cb_id cid, int16_t p1) {
+void Cannybots::callMethod(cb_id* cid, int16_t p1) {
     Message* msg = new Message();
     createMessage(msg, cid, p1, 0, 0);
     addOutboundMessage(msg);
 }
 
-void Cannybots::callMethod(cb_id cid, int16_t p1,int16_t p2,int16_t p3) {
+void Cannybots::callMethod(cb_id* cid, int16_t p1,int16_t p2,int16_t p3) {
     Message* msg = new Message();
     createMessage(msg, cid, p1, p2, p3);
     addOutboundMessage(msg);
 }
 
 // String (null terminated) type
-void Cannybots::callMethod(cb_id cid, const char* p1) {
+void Cannybots::callMethod(cb_id* cid, const char* p1) {
     
-    int charsRemaining = strlen(p1);
+    uint16_t charsRemaining = strlen(p1);
     
     if (charsRemaining < CB_MAX_MSG_DATA_SIZE) {
         Message* msg = new Message();
@@ -635,8 +669,28 @@ uint16_t Cannybots::nvGetInt(uint16_t address) {
 }
 
 
+bool Cannybots::nvSetByte(cb_nv_id* address, uint8_t b) {
+    return nvSetByte((uint16_t)address->offset, b);
+}
+
+uint8_t Cannybots::nvGetByte(cb_nv_id* address) {
+    return nvGetByte((uint16_t)0);
+    
+}
+
+bool Cannybots::nvSetInt(cb_nv_id* address, uint16_t b) {
+    return nvSetInt((uint16_t)address->offset, b);
+
+}
+
+uint16_t Cannybots::nvGetInt(cb_nv_id* address) {
+    return nvGetInt((uint16_t)address->offset);
+}
+
+
+
 bool Cannybots::nvSetupConfig() {
-    nvSetByte(0, 'C');
+    nvSetByte((uint16_t)0, 'C');
     nvSetByte(1, 'N');
     nvSetByte(2, 'Y');
     nvSetByte(3, 'B');
@@ -644,7 +698,7 @@ bool Cannybots::nvSetupConfig() {
 }
 
 bool Cannybots::nvIsValidConfig() {
-    uint8_t b1 = nvGetByte(0);
+    uint8_t b1 = nvGetByte((uint16_t)0);
     uint8_t b2 = nvGetByte(1);
     uint8_t b3 = nvGetByte(2);
     uint8_t b4 = nvGetByte(3);

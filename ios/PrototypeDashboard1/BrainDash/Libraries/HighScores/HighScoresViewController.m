@@ -94,7 +94,7 @@
 		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:HighScoreCellIdentifier];
 	}
 	
-	int row = indexPath.row;
+	long row = indexPath.row;
 	NSDictionary *highScoreDict = nil;
 	if( row < [highScoresArray count] )
 		highScoreDict = [highScoresArray objectAtIndex:row];
@@ -111,7 +111,7 @@
 		
 		cell.detailTextLabel.text = [NSString stringWithFormat:@"%0.2f", [[highScoreDict objectForKey:@"score"] intValue]/1000.0];
 		
-		NSString *temp = [[NSString alloc] initWithFormat:@"%d. %@", row + 1, [highScoreDict objectForKey:@"name"]];
+		NSString *temp = [[NSString alloc] initWithFormat:@"%ld. %@", row + 1, [highScoreDict objectForKey:@"name"]];
 		cell.textLabel.text = temp;
 	}
 	return cell;
@@ -136,7 +136,7 @@
 - (void) viewDidAppear:(BOOL)animated {
     CannybotsController* cb = [CannybotsController sharedInstance];
     
-    [cb registerHandler:LAPCOUNTER_LAPTIME withBlockFor_INT16_1: ^(int16_t p1)
+    [cb registerHandler:&LAPCOUNTER_LAPTIME withBlockFor_INT16_1: ^(int16_t p1)
      {
          [self recordLapTime: p1 ];
      }];
@@ -146,7 +146,7 @@
 
 - (void) viewWillDisappear:(BOOL)animated {
     CannybotsController* cb = [CannybotsController sharedInstance];
-    [cb deregisterHandler:LAPCOUNTER_LAPTIME];
+    [cb deregisterHandler:&LAPCOUNTER_LAPTIME];
 }
 
 
@@ -164,7 +164,7 @@
 
 - (void) resetLapCounter {
     CannybotsController* cb = [CannybotsController sharedInstance];
-    [cb callMethod:LAPCOUNTER_GETREADY p1:0];
+    [cb callMethod:&LAPCOUNTER_GETREADY p1:0];
     NSLog(@"Reset laptime");
 
 }

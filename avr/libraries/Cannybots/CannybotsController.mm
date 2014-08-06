@@ -41,7 +41,7 @@
         bsle     = [BrainSpeakBLE sharedInstance];
         bsle.cbdelegate = self;
 
-        [self registerHandler:_CB_SYS_LOG withBlockFor_STRING:^(const char* p1){
+        [self registerHandler:&_CB_SYS_LOG withBlockFor_STRING:^(const char* p1){
             NSLog(@"CB_REMOTE_DBG:%s", p1);
             }
          ];
@@ -66,52 +66,52 @@
 // TODO: add to an outbound queue (?)
 // TODO: create an C++ BLE API adapter plugin api for iOS, Android, Pi/Linux etc.
 
-- (void) callMethod:(cb_id)cid p1:(int16_t)p1 p2:(int16_t)p2 p3:(int16_t)p3 {
+- (void) callMethod:(cb_id*)cid p1:(int16_t)p1 p2:(int16_t)p2 p3:(int16_t)p3 {
     Message msg;
     cb->createMessage(&msg, cid, p1, p2,p3);
     [self sendMessage:&msg];
 }
 
-- (void) callMethod:(cb_id)cid p1:(int16_t)p1 p2:(int16_t)p2{
+- (void) callMethod:(cb_id*)cid p1:(int16_t)p1 p2:(int16_t)p2{
     Message msg;
     cb->createMessage(&msg, cid, p1, p2);
     [self sendMessage:&msg];
 }
-- (void) callMethod:(cb_id)cid p1:(int16_t)p1 {
+- (void) callMethod:(cb_id*)cid p1:(int16_t)p1 {
     Message msg;
     cb->createMessage(&msg, cid, p1);
     [self sendMessage:&msg];
 }
 
-- (void) registerHandler:(cb_id)cid withBlockFor_INT16_3:(cb_bridged_callback_int16_3)block {
-    NSLog(@"registerHandler: %d", cid.cid);
+- (void) registerHandler:(cb_id*)cid withBlockFor_INT16_3:(cb_bridged_callback_int16_3)block {
+    NSLog(@"registerHandler: %d", cid->cid);
     cb->registerHandler(cid, Cannybots::CB_INT16_3, (void*)CFBridgingRetain(block));
     
 }
 
-- (void) registerHandler:(cb_id)cid withBlockFor_INT16_2:(cb_bridged_callback_int16_2)block {
-    NSLog(@"registerHandler: %d", cid.cid);
+- (void) registerHandler:(cb_id*)cid withBlockFor_INT16_2:(cb_bridged_callback_int16_2)block {
+    NSLog(@"registerHandler: %d", cid->cid);
     cb->registerHandler(cid, Cannybots::CB_INT16_2, (void*)CFBridgingRetain(block));
     
 }
 
-- (void) registerHandler:(cb_id)cid withBlockFor_INT16_1:(cb_bridged_callback_int16_1)block {
-    NSLog(@"registerHandler: %d", cid.cid);
+- (void) registerHandler:(cb_id*)cid withBlockFor_INT16_1:(cb_bridged_callback_int16_1)block {
+    NSLog(@"registerHandler: %d", cid->cid);
     cb->registerHandler(cid, Cannybots::CB_INT16_1, (void*)CFBridgingRetain(block));
     
 }
 
-- (void) registerHandler:(cb_id)cid withBlockFor_STRING:(cb_bridged_callback_string)block {
-    NSLog(@"registerHandler: %d", cid.cid);
+- (void) registerHandler:(cb_id*)cid withBlockFor_STRING:(cb_bridged_callback_string)block {
+    NSLog(@"registerHandler: %d", cid->cid);
     cb->registerHandler(cid, Cannybots::CB_STRING, (void*)CFBridgingRetain(block));
     
 }
 
-- (void) deregisterHandler:(cb_id)cid  {
-    NSLog(@"degisterHandler: %d", cid.cid);
+- (void) deregisterHandler:(cb_id*)cid  {
+    NSLog(@"degisterHandler: %d", cid->cid);
 
-    CFBridgingRelease(cb->descriptors[cid.cid].data);
-    cb->descriptors[cid.cid].data=0;
+    CFBridgingRelease(cb->descriptors[cid->cid].data);
+    cb->descriptors[cid->cid].data=0;
     
 }
 
@@ -120,7 +120,7 @@
     //long      len = [data length];
     uint8_t * buf = (uint8_t*)[data bytes];
     
-    NSString* hexString = [data hexRepresentationWithSpaces:YES];
+    //NSString* hexString = [data hexRepresentationWithSpaces:YES];
     //NSLog(@"Received: %@", hexString);
     
     uint8_t cid = buf[CB_MSG_OFFSET_CMD];

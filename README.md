@@ -4,8 +4,11 @@ cannybots-beta
 This repository contains the beta source code for Cannybots, including:
 
 1  Cannybots robot line following
+
 2. Cannybots Arduino and iOS libraries
+
 3. Programming an Arduino Over the Air 
+
 4. Historical and experimental code
 
 by
@@ -67,3 +70,12 @@ rfduinoisp.program.tool=avrdude
 rfduinoisp.program.extra_params=-P{serial.port} -b{program.speed}
 
 2. Restart the IDE
+
+
+
+iOS App
+-------
+
+http://cannybots.github.io/cannybots-beta/
+
+

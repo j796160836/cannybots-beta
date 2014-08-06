@@ -30,57 +30,69 @@ CB_ID(9, RACER_PING, "ping");
 
 
 
-/*
-#define CB_NV_CONFIG_BEGIN(x) typedef struct {
-#define CB_NV_CONFIG_END(_structname) } _structname;
-#define CB_NV_PARAM(_type, _name) _type _name;
-
-CB_NV_CONFIG_BEGIN(cb_linefollowing_config);
-CB_NV_ID(1, uint16_t,  version);
-CB_NV_ID(2, uint16_t,  pid_p);
-CB_NV_ID(3, uint16_t,  pid_d);
-
-CB_NV_CONFIG_END(cb_linefollowing_config);
-*/
 
 #define NV_ID                           "CBLF"
 #define NV_BASE                         64
 
-#define NV_VERSION                      0
-#define NV_PID_ALGO_TYPE                4
-#define NV_DEFAULT_CRUISESPEED          5
-#define NV_MAX_MANUAL_CRUISESPEED       6
-#define NV_MAX_MOTOR_SPEED              7
-#define NV_MOTOR_ALGO_TYPE              8
-#define NV_M1_A_PIN                     9
-#define NV_M1_B_PIN                    10
-#define NV_M1_SENSE_PIN                11
-#define NV_M2_A_PIN                    12
-#define NV_M2_B_PIN                    13
-#define NV_M2_SENSE_PIN                14
-#define NV_MDRIVER_MODE_PIN            15
-#define NV_BAT_PIN                     16
-//   bits [0..7] =  [ HAS_MDRRIVEMODE, HAT_MOTOR_SENSE, HAS_BAT_SENSE, M1_POSITIVESPEED_IS_FWD, M2_POSITIVESPEED_IS_FWD, n/a, n/a, n/a],
-#define NV_FEATURES_MASK1              17
-#define NV_IR_MAX                      18 // UINT
-#define NV_IR_WHITE_THRESHOLD          20 // UINT
-#define NV_XAXIS_DEADZONE              22 // BYTE
-#define NV_BOT_ID                      23 // UINT
-#define NV_MAX_MOTOR_DELTA             24
-#define NV_MAX_MOTOR_DELTA_DIV         25
-#define NV_IRPIN_1                     30
-#define NV_IRPIN_2                     31
-#define NV_IRPIN_3                     32
-#define NV_IRBIAS_1                    40 // INT8
-#define NV_IRBIAS_2                    41 // INT8
-#define NV_IRBIAS_3                    42 // INT8
-#define NV_PID_P                       50 // INT16
-#define NV_PID_I                       52 // INT16
-#define NV_PID_D                       54 // INT16
-#define NV_OFF_LINE_MAX_TIME           56 // UINT16
-#define NV_PRINTVALS_INTERVAL          58 // UINT16
-#define NV_DEBUG_ON                    60 // bool
-#define NV_PD_DIVISOR                  61 // INT16
+typedef struct {
+  uint16_t  version;
+  uint16_t  bot_id;
+
+  bool      battery_hasSense;
+  uint8_t   battery_pin_sense;
+
+  uint16_t  ir_max;
+  uint16_t  ir_whiteThreshold;
+  uint8_t   ir_pin_1;
+  uint8_t   ir_pin_2;
+  uint8_t   ir_pin_3;
+  int16_t   ir_bias_1;  
+  int16_t   ir_bias_2;  
+  int16_t   ir_bias_3;  
+
+  uint8_t   motorDriver_type;
+  uint8_t   motorDriver_mode;
+  uint8_t   motorDriver_maxSpeed;
+  bool      motorDriver_hasDriveMode;
+  bool      motorDriver_hasMotorSense;
+  uint8_t   motor1_pin_A;
+  uint8_t   motor1_pin_B;
+  uint8_t   motor1_pin_sense;
+  bool      motor1_postiveSpeedisFwd;
+  uint8_t   motor1_id;                        // e.g. 0 = left, 1 = right
+  uint8_t   motor2_pin_A;
+  uint8_t   motor2_pin_B;
+  uint8_t   motor2_pin_sense;
+  bool      motor2_postiveSpeedisFwd;
+  uint8_t   motor2_id;                        // e.g. 0 = left, 1 = right
+  uint16_t  motor_speedSmoothingDivisions;
+  uint8_t   motor_speedSmoothingMaxDelta;
+
+  uint16_t  pid_p;
+  uint16_t  pid_i;
+  uint16_t  pid_d;
+  uint16_t  pid_divisor;
+
+  uint8_t   joystick_xAxisDeadzone;
+
+  uint8_t   cruiseSpeed_defaultSpeed;
+  uint8_t   cruiseSpeed_manualMaxSpeed;
+
+  uint16_t  offLineMaxTime;  
+
+  uint16_t  info_printValsInterval;  
+  bool      debugFlag;
+  
+} cb_linefollowing_config;
+
+
+
+CB_NV_ID(1, NV_PID_P, "PID_P", cb_linefollowing_config, pid_p);
+CB_NV_ID(2, NV_PID_I, "PID_I", cb_linefollowing_config, pid_i);
+CB_NV_ID(3, NV_PID_D, "PID_D", cb_linefollowing_config, pid_d);
+CB_NV_ID(4, NV_IRBIAS_1, "IR_BIAS_1", cb_linefollowing_config, ir_bias_1);
+CB_NV_ID(5, NV_IRBIAS_2, "IR_BIAS_2", cb_linefollowing_config, ir_bias_2);
+CB_NV_ID(6, NV_IRBIAS_3, "IR_BIAS_3", cb_linefollowing_config, ir_bias_3);
 
 
 #endif

@@ -60,7 +60,7 @@
 - (void) viewDidAppear:(BOOL)animated {
 
     CannybotsController* cb = [CannybotsController sharedInstance];
-    [cb registerHandler:RACER_PID withBlockFor_INT16_3: ^(int16_t p1, int16_t p2, int16_t p3)
+    [cb registerHandler:&RACER_PID withBlockFor_INT16_3: ^(int16_t p1, int16_t p2, int16_t p3)
      {
          _pTextField.text = [NSString stringWithFormat:@"%d", p1];
          _iTextField.text = [NSString stringWithFormat:@"%d", p2];
@@ -70,7 +70,7 @@
          _dStepper.value = p3;
      }];
     
-    [cb registerHandler:RACER_IRBIAS withBlockFor_INT16_3: ^(int16_t p1, int16_t p2, int16_t p3)
+    [cb registerHandler:&RACER_IRBIAS withBlockFor_INT16_3: ^(int16_t p1, int16_t p2, int16_t p3)
      {
          _IRBias1TextField.text =[NSString stringWithFormat:@"%d", p1];
          _IRBias2TextField.text =[NSString stringWithFormat:@"%d", p2];
@@ -78,7 +78,7 @@
      }];
     
 
-    [cb registerHandler:RACER_IRVALS withBlockFor_INT16_3: ^(int16_t p1, int16_t p2, int16_t p3)
+    [cb registerHandler:&RACER_IRVALS withBlockFor_INT16_3: ^(int16_t p1, int16_t p2, int16_t p3)
      {
          _IRReading1.text =[NSString stringWithFormat:@"%d", p1];
          _IRReading2.text =[NSString stringWithFormat:@"%d", p2];
@@ -86,25 +86,25 @@
      }];
 
     
-    [cb registerHandler:_CB_SYS_LOG withBlockFor_STRING:^(const char* p1)
+    [cb registerHandler:&_CB_SYS_LOG withBlockFor_STRING:^(const char* p1)
      {
-         NSLog(@"%x", p1);
-         NSLog(@"%s", p1);
+         //NSLog(@"%s", p1);
+         //NSLog(@"%s", p1);
          if (p1) {
              [self.debugView appendString:[NSString stringWithUTF8String:p1]];
          }
      }];
     
-    [cb callMethod:RACER_CONFIG p1:0 p2:0 p3:0];
+    [cb callMethod:&RACER_CONFIG p1:0 p2:0 p3:0];
 
 }
 
 - (void) viewWillDisappear:(BOOL)animated {
     CannybotsController* cb = [CannybotsController sharedInstance];
-    [cb deregisterHandler:RACER_PID];
-    [cb deregisterHandler:RACER_IRBIAS];
-    [cb deregisterHandler:RACER_IRVALS];
-    [cb deregisterHandler:_CB_SYS_LOG]; // TODO: we should have a'restore previous' or implement a 'stack' of pushable/poppable handlers
+    [cb deregisterHandler:&RACER_PID];
+    [cb deregisterHandler:&RACER_IRBIAS];
+    [cb deregisterHandler:&RACER_IRVALS];
+    [cb deregisterHandler:&_CB_SYS_LOG]; // TODO: we should have a'restore previous' or implement a 'stack' of pushable/poppable handlers
 }
 
 -(IBAction)textFieldReturn:(id)sender
@@ -180,12 +180,12 @@
 - (IBAction)savePressed:(id)sender {
     CannybotsController* cb = [CannybotsController sharedInstance];
 
-    [cb callMethod:RACER_PID
+    [cb callMethod:&RACER_PID
                 p1:[[_pTextField text] intValue]
                 p2:[[_iTextField text] intValue]
                 p3:[[_dTExtField text] intValue]];
     
-    [cb callMethod:RACER_IRBIAS
+    [cb callMethod:&RACER_IRBIAS
                 p1:[[_IRBias1TextField text] intValue]
                 p2:[[_IRBias2TextField text] intValue]
                 p3:[[_IRBias3TextField text] intValue]];
@@ -193,7 +193,7 @@
 }
 - (IBAction)revertPressed:(id)sender {
     CannybotsController* cb = [CannybotsController sharedInstance];
-    [cb callMethod:RACER_CONFIG p1:0 p2:0 p3:0];
+    [cb callMethod:&RACER_CONFIG p1:0 p2:0 p3:0];
 }
 
 

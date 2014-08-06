@@ -22,33 +22,57 @@ typedef uint8_t cb_type ;
 // RACER_SET_SPEED(1,2,3); // use eitehr a contructor on cb_id or a new Invoke class creted in the macro to make it look like a function call!
 
 
-typedef struct {
+typedef struct cb_id_t{
     uint8_t  cid;
 #ifndef ARDUINO
-    char*    name;
+    const char*    name;
 #endif
 } cb_id;
 
 
+typedef struct cb_nv_id_t {
+    uint8_t  cid;
+    uint16_t  offset;
+#ifndef ARDUINO
+    const char*    name;
+#endif
+} cb_nv_id;
+
+
+
+// these 'compound literals' to save space (prmarily for  ARDUINO)
 #ifdef ARDUINO
 #define CB_ID(_cid, _idVarName, _name) \
-const static cb_id _idVarName = {CB_MAX_SYS_DESCRIPTORS+_cid};
+static cb_id  _idVarName = {.cid= CB_MAX_SYS_DESCRIPTORS+_cid};
 // ignore the string to save SRAM and PRG space.
 #else
- #define CB_ID(_cid, _idVarName,  _name) \
- const static cb_id _idVarName = { .cid = CB_MAX_SYS_DESCRIPTORS+_cid, .name = _name };
+#define CB_ID(_cid, _idVarName,  _name) \
+static cb_id _idVarName = { .cid = CB_MAX_SYS_DESCRIPTORS+_cid, .name = _name };
 #endif
 
 
 
+#ifdef ARDUINO
+#define CB_NV_ID(_cid, _idVarName, _name, _structName, _structMember) \
+static cb_nv_id _idVarName = {.cid = CB_MAX_SYS_DESCRIPTORS+_cid, .offset = offsetof(_structName, _structMember)};
+// ignore the string to save SRAM and PRG space.
+#else
+#define CB_NV_ID(_cid, _idVarName,  _name, _structName, _structMember) \
+static cb_nv_id _idVarName = { .cid = CB_MAX_SYS_DESCRIPTORS+_cid, .name = _name, .offset = offsetof(_structName, _structMember) };
+#endif
+
+
 
 typedef struct {
-    cb_id    cid;
+    union cid_u {
+        cb_id*     cidMT;
+        cb_nv_id*  cidNV;
+    } cid_t;
     cb_type  type;
     void*    data;
     uint16_t size;
     
-    //bool     isNV;
+    bool     isNV;
     bool     isMethod;
     
     //bool     isPublished;
@@ -81,10 +105,11 @@ extern "C" {
 CB_ID(0, _CB_SYS_CALL, "syscall");       // multi-purpose system call, first uint8_t param is function select, following bytes will depend on func.
 CB_ID(1, _CB_SYS_LOG, "log");            // log a message (may be truncated to 20 bytes)
 
-#define _CANNYBOTS_SYSCALL_NOP              0
-#define _CANNYBOTS_SYSCALL_GET_DEVICE_ID    1
-#define _CANNYBOTS_SYSCALL_SET_DEVICE_ID    2
-#define _CANNYBOTS_SYSCALL_GET_TIMESTAMP    3
+#define _CANNYBOTS_SYSCALL_NOP                0
+#define _CANNYBOTS_SYSCALL_GET_DEVICE_ID      1
+#define _CANNYBOTS_SYSCALL_GET_VERSION        2
+#define _CANNYBOTS_SYSCALL_GET_APP_CONFIG_ID  3
+#define _CANNYBOTS_SYSCALL_GET_APP_CONFIG_VER 4
 
 
 

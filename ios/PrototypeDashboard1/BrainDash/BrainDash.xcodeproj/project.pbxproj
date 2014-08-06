@@ -244,14 +244,14 @@
 		B0BE4120196093E2003F530B /* Cannybots */ = {
 			isa = PBXGroup;
 			children = (
-				B0BE4121196093E2003F530B /* Cannybots.cpp */,
-				B0BE4122196093E2003F530B /* Cannybots.h */,
-				B0B067BC196D542B00ABC209 /* CannybotsController.mm */,
-				B0B067BF196D559C00ABC209 /* CannybotsController.h */,
+				B0DDB034198C34200062AA13 /* CannybotsConfig.h */,
 				B0B067C2196D7EAA00ABC209 /* CannybotsTypes.h */,
 				B0DDB031198C327D0062AA13 /* CannybotsUtils.h */,
 				B0DDB033198C32EA0062AA13 /* CannybotsInt.h */,
-				B0DDB034198C34200062AA13 /* CannybotsConfig.h */,
+				B0BE4122196093E2003F530B /* Cannybots.h */,
+				B0BE4121196093E2003F530B /* Cannybots.cpp */,
+				B0B067BF196D559C00ABC209 /* CannybotsController.h */,
+				B0B067BC196D542B00ABC209 /* CannybotsController.mm */,
 			);
 			name = Cannybots;
 			path = ../../../avr/libraries/Cannybots;
@@ -836,8 +836,9 @@
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Wayne Keenan (XECW4HBRGW)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Wayne Keenan (XECW4HBRGW)";
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "BrainDash/BrainDash-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
@@ -852,7 +853,8 @@
 					"$(PROJECT_DIR)/Libraries/",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "F97B3687-D646-4C51-B968-134B2D40B610";
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -863,8 +865,9 @@
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Wayne Keenan (QP5BLA9EF3)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Wayne Keenan (QP5BLA9EF3)";
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "BrainDash/BrainDash-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
@@ -879,7 +882,8 @@
 					"$(PROJECT_DIR)/Libraries/",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "45B20BDB-2304-4392-AAB8-8CA867DB382C";
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

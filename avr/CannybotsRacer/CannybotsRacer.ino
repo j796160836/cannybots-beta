@@ -470,7 +470,7 @@ void lf_report_followingMode(bool isLineMode) {
   static unsigned long lastCall = millis();
   // throttle sending to 1000/x times a second
   if (millis() - lastCall > 500) {
-    cb.callMethod(RACER_LINEFOLLOWING_MODE, isLineMode);
+    cb.callMethod(&RACER_LINEFOLLOWING_MODE, isLineMode);
     lastCall = millis();
   }
 }
@@ -482,21 +482,21 @@ void lf_report_followingMode(bool isLineMode) {
 // Stored Settings  (EEPROM/Flash)
 
 void getPIDSettings() {
-  setPID_P(cb.nvGetInt(NV_PID_P));
-  setPID_I(cb.nvGetInt(NV_PID_I));
-  setPID_D(cb.nvGetInt(NV_PID_D));
-  IRbias[0] = cb.nvGetByte(NV_IRBIAS_1);
-  IRbias[1] = cb.nvGetByte(NV_IRBIAS_2);
-  IRbias[2] = cb.nvGetByte(NV_IRBIAS_3);
+  setPID_P(cb.nvGetInt(&NV_PID_P));
+  setPID_I(cb.nvGetInt(&NV_PID_I));
+  setPID_D(cb.nvGetInt(&NV_PID_D));
+  IRbias[0] = cb.nvGetByte(&NV_IRBIAS_1);
+  IRbias[1] = cb.nvGetByte(&NV_IRBIAS_2);
+  IRbias[2] = cb.nvGetByte(&NV_IRBIAS_3);
 }
 
 void setNVDefaults() {
-  cb.nvSetInt(NV_PID_P, 0);
-  cb.nvSetInt(NV_PID_I, 0);
-  cb.nvSetInt(NV_PID_D, 0);
-  cb.nvSetByte(NV_IRBIAS_1, 0 );
-  cb.nvSetByte(NV_IRBIAS_2, 0 );
-  cb.nvSetByte(NV_IRBIAS_3, 0 );
+  cb.nvSetInt(&NV_PID_P, 0);
+  cb.nvSetInt(&NV_PID_I, 0);
+  cb.nvSetInt(&NV_PID_D, 0);
+  cb.nvSetByte(&NV_IRBIAS_1, 0 );
+  cb.nvSetByte(&NV_IRBIAS_2, 0 );
+  cb.nvSetByte(&NV_IRBIAS_3, 0 );
 }
 
 
@@ -541,9 +541,9 @@ void lf_updateBias (int b1, int b2, int b3) {
   IRbias[0] = b1;
   IRbias[1] = b2;
   IRbias[2] = b3;
-  cb.nvSetByte(NV_IRBIAS_1, IRbias[0]);
-  cb.nvSetByte(NV_IRBIAS_2, IRbias[1]);
-  cb.nvSetByte(NV_IRBIAS_3, IRbias[2]);
+  cb.nvSetByte(&NV_IRBIAS_1, IRbias[0]);
+  cb.nvSetByte(&NV_IRBIAS_2, IRbias[1]);
+  cb.nvSetByte(&NV_IRBIAS_3, IRbias[2]);
 
 }
 
@@ -553,14 +553,14 @@ void lf_updateLineFollowingMode(int _forceManualMode, int _d1, int _d2) {
 }
 
 void lf_emitConfig(int _d1, int _d2, int _d3) {
-  cb.callMethod(RACER_PID, getPID_P(), getPID_I(), getPID_D());
-  cb.callMethod(RACER_IRBIAS, IRbias[0], IRbias[1], IRbias[2]);
+  cb.callMethod(&RACER_PID, getPID_P(), getPID_I(), getPID_D());
+  cb.callMethod(&RACER_IRBIAS, IRbias[0], IRbias[1], IRbias[2]);
 }
 
 void lf_emitIRValues(int v1, int v2, int v3) {
   static unsigned long lastCall = millis();
   if (millis() - lastCall > 200) {
-    cb.callMethod(RACER_IRVALS, v1, v2, v3);
+    cb.callMethod(&RACER_IRVALS, v1, v2, v3);
     lastCall = millis();
   }
 }
@@ -628,14 +628,16 @@ void irwaypoint_loop() {
 
 void mycannybots_setup() {
   cb.setConfigStorage(NV_ID, NV_BASE);
-  cb.registerHandler(RACER_CRUISESPEED, lf_updateMotorSpeeds);
-  cb.registerHandler(RACER_LINEFOLLOWING_MODE, lf_updateLineFollowingMode);
-  cb.registerHandler(RACER_PID, lf_updatePID);
-  cb.registerHandler(RACER_IRBIAS, lf_updateBias);
-  cb.registerHandler(RACER_JOYAXIS, lf_updateAxis);
-  cb.registerHandler(RACER_CONFIG, lf_emitConfig);
-  cb.registerHandler(RACER_IRVALS, lf_emitIRValues);
-  cb.registerHandler(RACER_PING, lf_ping);
+  cb.registerHandler(&RACER_CRUISESPEED, lf_updateMotorSpeeds);
+  cb.registerHandler(&RACER_LINEFOLLOWING_MODE, lf_updateLineFollowingMode);
+  cb.registerHandler(&RACER_PID, lf_updatePID);
+  cb.registerHandler(&RACER_IRBIAS, lf_updateBias);
+  cb.registerHandler(&RACER_JOYAXIS, lf_updateAxis);
+  cb.registerHandler(&RACER_CONFIG, lf_emitConfig);
+  cb.registerHandler(&RACER_IRVALS, lf_emitIRValues);
+  cb.registerHandler(&RACER_PING, lf_ping);
+  cb.registerConfigParameter(&NV_PID_P);
+  
   cb.begin();
 }
 

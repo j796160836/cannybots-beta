@@ -53,9 +53,9 @@ void update_PID(int _Kp, int _Ki, int _Kd) {
   setPID_P(_Kp);
   setPID_I(_Ki);
   setPID_D(_Kd);
-  cb.nvSetInt(NV_PID_P, _Kp);
-  cb.nvSetInt(NV_PID_I, _Ki);
-  cb.nvSetInt(NV_PID_D, _Kd);
+  cb.nvSetInt(&NV_PID_P, _Kp);
+  cb.nvSetInt(&NV_PID_I, _Ki);
+  cb.nvSetInt(&NV_PID_D, _Kd);
 }
 
 void disable_PID() {
@@ -85,7 +85,7 @@ int getPID_D() {
 }
 
 void printvals_PID() {
-  CB_DBG2REMOTE(    "%lu(%lu@%lu): IR(%u,%u,%u),Kpd(%d,%d)/100,Sab(%d,%d),Mab(%d,%d),XY(%d,%d),MEM(%d)\n\n", //VCC(%d)", // e(%d) PeDe(%d,%d)
+  CB_DBG(    "%lu(%lu@%lu): IR(%u,%u,%u),Kpd(%d,%d)/100,Sab(%d,%d),Mab(%d,%d),XY(%d,%d),MEM(%d)\n\n", //VCC(%d)", // e(%d) PeDe(%d,%d)
              loopNowTime,
              loopDeltaTime,
              loopcount,

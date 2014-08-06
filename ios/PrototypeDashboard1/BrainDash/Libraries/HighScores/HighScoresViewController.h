@@ -20,6 +20,5 @@
 
 -(void)loadLocalScores;
 
-- (IBAction)postScore;
 
 @end
