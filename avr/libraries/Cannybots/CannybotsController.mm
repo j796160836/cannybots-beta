@@ -41,10 +41,12 @@
         bsle     = [BrainSpeakBLE sharedInstance];
         bsle.cbdelegate = self;
         
-        [self registerHandler:&_CB_SYS_LOG withBlockFor_STRING:^(const char* p1){
+        // TODO: re-instate this when we can push/pop handlers using the API
+        /*[self registerHandler:&_CB_SYS_LOG withBlockFor_STRING:^(const char* p1){
             NSLog(@"CB_REMOTE_DBG:%s", p1);
         }
-         ];
+        
+         ];*/
     }
     return self;
 }
@@ -115,6 +117,8 @@
 }
 
 - (void) deregisterHandler:(cb_id*)cid  {
+    return;
+    // TODO: fix the data sync issue when this trys to modifiy the underlying link list whilst data may be received.
     @synchronized(self) {
         NSLog(@"degisterHandler: %d", cid->cid);
         
@@ -134,6 +138,7 @@
 
 
 - (void) didReceiveData:(NSData *)data {
+        @synchronized(self) {
     //long      len = [data length];
     uint8_t * buf = (uint8_t*)[data bytes];
     
@@ -179,7 +184,7 @@
         }
         
     }
-    
+        }
 }
 
 

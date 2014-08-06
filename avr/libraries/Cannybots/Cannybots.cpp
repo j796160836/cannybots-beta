@@ -141,7 +141,7 @@ void Cannybots::deregisterHandler( cb_id* _id) {
     if (desc) {
         int16_t i = getIndexForDescriptor(methods, desc);
         if (i!=-1) {
-            methods.remove(i);
+            //methods.remove(i);
             //free(desc);
         }
     }
@@ -154,7 +154,9 @@ cb_descriptor* Cannybots::getDescriptorForCommand(uint8_t commandId) {
     // TODO: optimise by searching the 'bands' defined in config.h:  CB_[MIN|MAX]_CMD_[METHOD|CONFIG|VARIABLE]_TYPE
     for(int i = 0; i < methods.size(); i++){
         desc = methods.get(i);
+#ifndef ARDUINO
         printf("%d, %x, %x, %x, %d, %s\n", i, desc, desc->cid_t, desc->cid_t.cidMT, desc->cid_t.cidMT->cid, desc->cid_t.cidMT->name);
+#endif
         if(commandId == desc->cid_t.cidMT->cid){
             return desc;
         }

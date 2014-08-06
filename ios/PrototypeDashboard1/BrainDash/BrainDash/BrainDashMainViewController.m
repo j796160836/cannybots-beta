@@ -244,7 +244,7 @@
 
 
 - (void) viewWillDisappear:(BOOL)animated {
-    //[cb deregisterHandler:&RACER_LINEFOLLOWING_MODE];
+    [cb deregisterHandler:&RACER_LINEFOLLOWING_MODE];
 }
 
 

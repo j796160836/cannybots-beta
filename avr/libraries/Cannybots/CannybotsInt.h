@@ -380,7 +380,7 @@ T LinkedList<T>::remove(int index){
 	ListNode<T> *tmp = getNode(index - 1);
 	ListNode<T> *toDelete = tmp->next;
 	tmp->next = tmp->next->next;
-	//delete(toDelete);
+	delete(toDelete);
 	_size--;
 	isCached = false;
     
