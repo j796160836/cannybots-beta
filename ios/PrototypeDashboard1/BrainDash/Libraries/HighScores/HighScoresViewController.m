@@ -146,7 +146,7 @@
 
 - (void) viewWillDisappear:(BOOL)animated {
     CannybotsController* cb = [CannybotsController sharedInstance];
-    [cb deregisterHandler:&LAPCOUNTER_LAPTIME];
+    //[cb deregisterHandler:&LAPCOUNTER_LAPTIME];
 }
 
 

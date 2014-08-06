@@ -162,6 +162,10 @@ public:
     // 'generic' callback poitners (e.g. iOSblocks)
     void registerHandler(cb_id* _id, uint8_t type, void* callback);
 
+    
+    void deregisterHandler( cb_id* _id);
+
+    
     // NV
     
     void registerConfigParameter(cb_nv_id* _id);
@@ -248,10 +252,9 @@ public:
     
     bool nvSetupConfig();
     bool nvIsValidConfig();
-    
-    // TODO: make private
-    cb_descriptor descriptors[CB_MAX_DESCRIPTORS];
-    
+
+
+    cb_descriptor* getDescriptorForCommand(uint8_t commandId);
 
 private:
     static Cannybots instance; // Guaranteed to be destroyed. (yeah, when the power goes lol)
@@ -271,7 +274,12 @@ private:
     CBFIFO<Message*, CB_MAX_IN_Q_DEPTH>  inboundMsgFIFO;
     CBFIFO<Message*, CB_MAX_OUT_Q_DEPTH> outboundMsgFIFO;
     
+    LinkedList<cb_descriptor*>  methods    = LinkedList<cb_descriptor*>();
+    LinkedList<cb_descriptor*>  configVars = LinkedList<cb_descriptor*>();
 
+    int16_t getIndexForDescriptor(LinkedList<cb_descriptor*> list, cb_descriptor* desc);
+
+    
     // utils
     bool         debug;
     

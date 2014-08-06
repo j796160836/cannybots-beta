@@ -70,10 +70,6 @@ typedef struct {
     } cid_t;
     cb_type  type;
     void*    data;
-    uint16_t size;
-    
-    bool     isNV;
-    bool     isMethod;
     
     //bool     isPublished;
     //cb_publish_type pubType;

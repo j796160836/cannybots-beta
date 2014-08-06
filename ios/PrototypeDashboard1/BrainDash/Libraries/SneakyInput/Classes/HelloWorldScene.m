@@ -65,7 +65,7 @@
 		
         [self schedule:@selector(tick:) interval:1.0f/15.0f];
         
-        [self schedule:@selector(keepAlive:) interval:1.0f];
+        //[self schedule:@selector(keepAlive:) interval:1.0f];
         
 	}
 	return self;

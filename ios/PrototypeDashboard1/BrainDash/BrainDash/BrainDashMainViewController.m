@@ -232,7 +232,7 @@
 
 
 - (void) viewDidAppear:(BOOL)animated {
-    
+    NSLog(@"viewDidAppear");
     [cb registerHandler:&RACER_LINEFOLLOWING_MODE withBlockFor_INT16_3: ^(int16_t p1, int16_t p2, int16_t p3)
     {
         [self.modeSegment setSelectedSegmentIndex:p1>0?1:0];
@@ -244,7 +244,7 @@
 
 
 - (void) viewWillDisappear:(BOOL)animated {
-    [cb deregisterHandler:&RACER_LINEFOLLOWING_MODE];
+    //[cb deregisterHandler:&RACER_LINEFOLLOWING_MODE];
 }
 
 

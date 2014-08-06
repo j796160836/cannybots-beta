@@ -46,40 +46,36 @@ void Cannybots::setConfigStorage(const char* magic, uint16_t start) {
     
 }
 
+#define CB_ALLOC_DESC()  (cb_descriptor*) calloc(1, sizeof(cb_descriptor));
+//new cb_descriptor;
+//
+
+
 // Scalar
 void Cannybots::registerVariable(cb_id* _id, int16_t* var, const bool isNonVolatile, const int16_t defaultValue) {
     
-    uint16_t offset =_id->cid;
-    descriptors[offset].cid_t.cidMT = _id;
-    descriptors[offset].data = var;
-    descriptors[offset].size = sizeof(int16_t*);
-    descriptors[offset].isMethod = false;
-    //descriptors[offset].isPublished = false;
-    descriptors[offset].isNV = isNonVolatile;
-    descriptors[offset].type = CB_INT16;
+    cb_descriptor* desc =  CB_ALLOC_DESC();
+    desc->cid_t.cidMT = _id;
+    desc->data = var;
+    desc->type = CB_INT16;
+    methods.add(desc);
 }
 
 void Cannybots::registerVariable(cb_id* _id, bool*    var, const bool isNonVolatile, const bool    defaultValue) {
-    uint16_t offset =_id->cid;
-    descriptors[offset].cid_t.cidMT = _id;
-    descriptors[offset].data = var;
-    descriptors[offset].size = sizeof(bool*);
-    //descriptors[offset].isPublished = false;
-    descriptors[offset].isMethod = false;
-    //descriptors[offset].isNV = isNonVolatile;
-    descriptors[offset].type = CB_BYTE; // BOOL really
+    cb_descriptor* desc =  CB_ALLOC_DESC();
+    desc->cid_t.cidMT = _id;
+    desc->data = var;
+    desc->type = CB_BYTE;
+    methods.add(desc);
 }
 
 // Arrays
 void Cannybots::registerArray(cb_id* _id, int16_t list[], const uint16_t length) {
-    uint16_t offset =_id->cid;
-    descriptors[offset].cid_t.cidMT = _id;
-    descriptors[offset].data = list;
-    descriptors[offset].size = length * sizeof(uint16_t);
-    //descriptors[offset].isPublished = false;
-    descriptors[offset].isMethod = false;
-    //descriptors[offset].isNV = false;
-    descriptors[offset].type = CB_INT16_ARRAY;
+    cb_descriptor* desc =  CB_ALLOC_DESC();
+    desc->cid_t.cidMT = _id;
+    desc->data = list;
+    desc->type = CB_INT16_ARRAY;
+    methods.add(desc);
 }
 
 // Published values
@@ -92,80 +88,98 @@ void Cannybots::registerPublisher(cb_id* _id, bool *var, const cb_publish_type p
 
 // Function handlers
 void Cannybots::registerHandler(cb_id* _id, cb_callback_int16_int16_int16 callback) {
-    uint16_t offset =_id->cid;
-    descriptors[offset].cid_t.cidMT = _id;
-    descriptors[offset].data = (void*)callback;
-    descriptors[offset].size = 0;
-    descriptors[offset].isMethod = true;
-    descriptors[offset].type = CB_INT16_3;
-    
-    //descriptors[offset].isPublished = false;
-    //descriptors[offset].isNV = false;
+    cb_descriptor* desc =  CB_ALLOC_DESC();
+    desc->cid_t.cidMT = _id;
+    desc->data = (void*)callback;
+    desc->type = CB_INT16_3;
+    methods.add(desc);
+
 }
 
 // Function handlers
 void Cannybots::registerHandler(cb_id* _id, cb_callback_int16_int16 callback) {
-    uint16_t offset =_id->cid;
-    descriptors[offset].cid_t.cidMT = _id;
-    descriptors[offset].data = (void*)callback;
-    descriptors[offset].size = 0;
-    descriptors[offset].isMethod = true;
-    descriptors[offset].type = CB_INT16_2;
-    
-    //descriptors[offset].isPublished = false;
-    //descriptors[offset].isNV = false;
+    cb_descriptor* desc =  CB_ALLOC_DESC();
+    desc->cid_t.cidMT = _id;
+    desc->data = (void*)callback;
+    desc->type = CB_INT16_2;
+    methods.add(desc);
+
 }
 
 void Cannybots::registerHandler(cb_id* _id, cb_callback_int16 callback) {
-    uint16_t offset =_id->cid;
-    descriptors[offset].cid_t.cidMT = _id;
-    descriptors[offset].data = (void*)callback;
-    descriptors[offset].size = 0;
-    descriptors[offset].isMethod = true;
-    descriptors[offset].type = CB_INT16_1;
-    
-    //descriptors[offset].isPublished = false;
-    //descriptors[offset].isNV = false;
+    cb_descriptor* desc =  CB_ALLOC_DESC();
+    desc->cid_t.cidMT = _id;
+    desc->data = (void*)callback;
+    desc->type = CB_INT16_1;
+    methods.add(desc);
+
 }
 
 void Cannybots::registerHandler(cb_id* _id, cb_callback_string callback) {
-    uint16_t offset =_id->cid;
-    descriptors[offset].cid_t.cidMT = _id;
-    descriptors[offset].data = (void*)callback;
-    descriptors[offset].size = 0;
-    descriptors[offset].isMethod = true;
-    descriptors[offset].type = CB_STRING;
-    
-    //descriptors[offset].isPublished = false;
-    //descriptors[offset].isNV = false;
+    cb_descriptor* desc =  CB_ALLOC_DESC();
+    desc->cid_t.cidMT = _id;
+    desc->data = (void*)callback;
+    desc->type = CB_STRING;
+    methods.add(desc);
+
 }
 
-// abritrary (e.g. used fore registering the iOS 'block' handlers)
+// abritrary client registration (e.g. used fore registering the iOS 'block' handlers)
 void Cannybots::registerHandler( cb_id* _id, uint8_t type, void* callback) {
-    uint16_t offset =_id->cid;
-    descriptors[offset].cid_t.cidMT = _id;
-    descriptors[offset].data = (void*)callback;
-    descriptors[offset].size = 0;
-    descriptors[offset].isMethod = true;
-    descriptors[offset].type = type;
-    
-    //descriptors[offset].isPublished = false;
-    //descriptors[offset].isNV = false;
+    cb_descriptor* desc =  CB_ALLOC_DESC();
+    desc->cid_t.cidMT = _id;
+    desc->data = (void*)callback;
+    desc->type = type;
+    methods.add(desc);
+
 }
+
+
+void Cannybots::deregisterHandler( cb_id* _id) {
+
+    cb_descriptor* desc = getDescriptorForCommand(_id->cid);
+    if (desc) {
+        int16_t i = getIndexForDescriptor(methods, desc);
+        if (i!=-1) {
+            methods.remove(i);
+            //free(desc);
+        }
+    }
+}
+
+
+cb_descriptor* Cannybots::getDescriptorForCommand(uint8_t commandId) {
+    cb_descriptor *desc=NULL;
+    // find mathicg methods
+    // TODO: optimise by searching the 'bands' defined in config.h:  CB_[MIN|MAX]_CMD_[METHOD|CONFIG|VARIABLE]_TYPE
+    for(int i = 0; i < methods.size(); i++){
+        desc = methods.get(i);
+        printf("%d, %x, %x, %x, %d, %s\n", i, desc, desc->cid_t, desc->cid_t.cidMT, desc->cid_t.cidMT->cid, desc->cid_t.cidMT->name);
+        if(commandId == desc->cid_t.cidMT->cid){
+            return desc;
+        }
+    }
+    return NULL;
+}
+
+int16_t Cannybots::getIndexForDescriptor(LinkedList<cb_descriptor*> list, cb_descriptor* desc) {
+    for(int16_t i = 0; i < list.size(); i++){
+        if (desc == methods.get(i)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+
+
 
 // Config
 
 void Cannybots::registerConfigParameter(cb_nv_id* _id) {
-    
-    uint16_t offset =_id->cid;
-    descriptors[offset].cid_t.cidNV = _id;
-//    descriptors[offset].data = (void*)callback;
-    descriptors[offset].size = 0;
-    descriptors[offset].isMethod = false;
-//    descriptors[offset].type = type;
-    
-    //descriptors[offset].isPublished = false;
-    descriptors[offset].isNV = true;
+    cb_descriptor* desc =  CB_ALLOC_DESC();
+    desc->cid_t.cidNV = _id;
+    configVars.add(desc);
 }
 
 
@@ -436,27 +450,27 @@ void Cannybots::processMessage(Message* msg ) {
     
     uint8_t cmd = msg->payload[CB_MSG_OFFSET_CMD];
     //CB_DBG("cmd= %d", cmd);
-    cb_descriptor desc = descriptors[cmd];
+    cb_descriptor* desc = getDescriptorForCommand(cmd);
     
-    if (desc.isMethod) {
+    if (desc && CB_CMD_IS_METHOD(cmd)) {
         //CB_DBG("isMethod",0);
-        switch (desc.type) {
+        switch (desc->type) {
             case CB_STRING:
-                ((cb_callback_string)desc.data)((const char*)& msg->payload[CB_MSG_OFFSET_DATA+0]);
+                ((cb_callback_string)desc->data)((const char*)& msg->payload[CB_MSG_OFFSET_DATA+0]);
                 break;
             case CB_INT16_3:
-                ((cb_callback_int16_int16_int16)desc.data)(
+                ((cb_callback_int16_int16_int16)desc->data)(
                                                            mk16bit( msg->payload[CB_MSG_OFFSET_DATA+1],msg->payload[CB_MSG_OFFSET_DATA+0]),
                                                            mk16bit( msg->payload[CB_MSG_OFFSET_DATA+3],msg->payload[CB_MSG_OFFSET_DATA+2]),
                                                            mk16bit( msg->payload[CB_MSG_OFFSET_DATA+5],msg->payload[CB_MSG_OFFSET_DATA+4]));
                 break;
             case CB_INT16_2:
-                ((cb_callback_int16_int16)desc.data)(
+                ((cb_callback_int16_int16)desc->data)(
                                                      mk16bit( msg->payload[CB_MSG_OFFSET_DATA+1],msg->payload[CB_MSG_OFFSET_DATA+0]),
                                                      mk16bit( msg->payload[CB_MSG_OFFSET_DATA+3],msg->payload[CB_MSG_OFFSET_DATA+2]));
                 break;
             case CB_INT16_1:
-                ((cb_callback_int16)desc.data)(
+                ((cb_callback_int16)desc->data)(
                                                mk16bit( msg->payload[CB_MSG_OFFSET_DATA+1],msg->payload[CB_MSG_OFFSET_DATA+0]));
                 break;
             default:

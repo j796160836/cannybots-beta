@@ -46,8 +46,16 @@
 #define CB_MAX_SYS_DESCRIPTORS  2
 #define CB_MAX_DESCRIPTORS (CB_MAX_SYS_DESCRIPTORS+CB_MAX_USER_DESCRIPTORS)
 
+/// used to determin the tye of the command
+#define CB_MIN_CMD_METHOD_TYPE 0
+#define CB_MAX_CMD_METHOD_TYPE 63
+#define CB_MIN_CMD_CONFIG_TYPE 64
+#define CB_MAX_CMD_CONFIG_TYPE 127
+#define CB_MIN_CMD_VARIABLE_TYPE 128
+#define CB_MAX_CMD_VARIABLE_TYPE 247
+// 8 unused
 
-
+#define CB_CMD_IS_METHOD(c) (c<CB_MAX_CMD_METHOD_TYPE)
 
 
 ////////////////////////////////////////////////////////////////////////

@@ -171,7 +171,7 @@ public:
      Return Element if accessible,
      else, return false;
      */
-	virtual T get(int index, bool useCached);
+	virtual T get(int index, bool useCached=false);  //WK: modified to be compatible with Apple Clang C++ compiler
     
 	/*
      Clear the entire array
@@ -184,8 +184,8 @@ public:
 template<typename T>
 LinkedList<T>::LinkedList()
 {
-	root=false;
-	last=false;
+	root=NULL;
+	last=NULL;
 	_size=0;
     
 	lastNodeGot = root;
@@ -198,13 +198,13 @@ template<typename T>
 LinkedList<T>::~LinkedList()
 {
 	ListNode<T>* tmp;
-	while(root!=false)
+	while(root!=NULL)
 	{
 		tmp=root;
 		root=root->next;
 		delete tmp;
 	}
-	last = false;
+	last = NULL;
 	_size=0;
 	isCached = false;
 }
@@ -241,7 +241,7 @@ ListNode<T>* LinkedList<T>::getNode(int index){
 		return current;
 	}
     
-	return false;
+	return NULL;
 }
 
 template<typename T>
@@ -275,7 +275,7 @@ bool LinkedList<T>::add(T _t){
     
 	ListNode<T> *tmp = new ListNode<T>();
 	tmp->data = _t;
-	tmp->next = false;
+	tmp->next = NULL;
 	
 	if(root){
 		// Already have elements inserted
@@ -330,7 +330,7 @@ T LinkedList<T>::pop(){
 		ListNode<T> *tmp = getNode(_size - 2);
 		T ret = tmp->next->data;
 		delete(tmp->next);
-		tmp->next = false;
+		tmp->next = NULL;
 		last = tmp;
 		_size--;
 		return ret;
@@ -338,8 +338,8 @@ T LinkedList<T>::pop(){
 		// Only one element left on the list
 		T ret = root->data;
 		delete(root);
-		root = false;
-		last = false;
+		root = NULL;
+		last = NULL;
 		_size = 0;
 		return ret;
 	}
@@ -380,7 +380,7 @@ T LinkedList<T>::remove(int index){
 	ListNode<T> *tmp = getNode(index - 1);
 	ListNode<T> *toDelete = tmp->next;
 	tmp->next = tmp->next->next;
-	delete(toDelete);
+	//delete(toDelete);
 	_size--;
 	isCached = false;
     
@@ -388,7 +388,7 @@ T LinkedList<T>::remove(int index){
 }
 
 template<typename T>
-T LinkedList<T>::get(int index, bool useCached = false){
+T LinkedList<T>::get(int index, bool useCached){  //WK: modified to be compatible with Apple Clang C++ compiler )moved the default to the definition)
 	ListNode<T> *tmp = getNode(index);
     
 	return (tmp ? tmp->data : T());
