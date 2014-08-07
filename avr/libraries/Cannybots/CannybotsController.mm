@@ -133,7 +133,17 @@
     }
 }
 
-
+- (NSArray*) getConfigParameterList {
+    
+    int len = cb->getConfigParameterListSize();
+    NSMutableArray* desc = [[NSMutableArray alloc] initWithCapacity:len];
+    
+    for (int index = 0; index < len; index ++ ){
+        cb_descriptor* desc = cb->getConfigParameterListItem(index);
+    }
+    
+    return desc;
+}
 
 
 
@@ -147,14 +157,14 @@
     
     uint8_t commandId = buf[CB_MSG_OFFSET_CMD];
     cb_descriptor* desc = cb->getDescriptorForCommand(commandId);
-    NSLog(@"cmd= %d", commandId);
+    //NSLog(@"cmd= %d", commandId);
     
     if (desc && CB_CMD_IS_METHOD(commandId)) {
-        NSLog(@"Method=%s", desc->cid_t.cidMT->name);
+        //NSLog(@"Method=%s", desc->cid_t.cidMT->name);
         
         if (desc->type == Cannybots::CB_INT16_3) {
             //NSLog(@"is CB_INT16_3");
-            NSLog(@"block @ %x", desc->data);
+            //NSLog(@"block @ %x", desc->data);
             if (desc->data) {
                 ((__bridge cb_bridged_callback_int16_3)desc->data)( mk16bit( buf[CB_MSG_OFFSET_DATA+1],buf[CB_MSG_OFFSET_DATA+0]),
                                                                    mk16bit( buf[CB_MSG_OFFSET_DATA+3],buf[CB_MSG_OFFSET_DATA+2]),

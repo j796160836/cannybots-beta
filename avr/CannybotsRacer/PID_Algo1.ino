@@ -5,21 +5,9 @@
 //
 
 #ifdef PID_METHOD_1
-#define pid_t int
-#define pid_m 1
 
-pid_t Kp = 0;
-pid_t Ki = 0;
-pid_t Kd = 0;
-
-pid_t P_error = 0;
-pid_t D_error = 0;
-pid_t error = 0;
-pid_t error_last = 0; // to calculate D_error = error - error_last
-pid_t correction = 0; //error after PID filter
 
 void setup_PID() {
-  getPIDSettings();
 }
 
 unsigned long pidLastTime = millis();
@@ -51,11 +39,9 @@ void calculate_PID() {
 
 void update_PID(int _Kp, int _Ki, int _Kd) {
   setPID_P(_Kp);
-  setPID_I(_Ki);
   setPID_D(_Kd);
-  cb.nvSetInt(&NV_PID_P, _Kp);
-  cb.nvSetInt(&NV_PID_I, _Ki);
-  cb.nvSetInt(&NV_PID_D, _Kd);
+  cb.setConfigParameterValue(&cfg_pid_p, &_Kp);
+  cb.setConfigParameterValue(&cfg_pid_d, &_Kd);
 }
 
 void disable_PID() {

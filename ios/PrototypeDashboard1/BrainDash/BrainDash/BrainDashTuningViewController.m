@@ -91,7 +91,8 @@
          //NSLog(@"%s", p1);
          //NSLog(@"%s", p1);
          if (p1) {
-             [self.debugView appendString:[NSString stringWithUTF8String:p1]];
+            NSString* str = [NSString stringWithUTF8String:p1];
+             [self.debugView appendString:str?str:@"nil"];
          }
      }];
     

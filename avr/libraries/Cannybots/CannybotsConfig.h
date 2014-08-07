@@ -15,7 +15,7 @@
 
 
 ////////////////////////////////////////////////////////////////////////
-// BLE advertising, (when run on RFduino)
+// BLE advertising, (when compiled for and run on RFduino)
 
 #define BLE_UUID                 "7e400001-b5a3-f393-e0a9-e50e24dcca9e"
 
@@ -42,9 +42,8 @@
 #define CB_MAX_MSG_DATA_SIZE (CB_MAX_MSG_SIZE-CB_MSG_OFFSET_DATA)
 
 // Exchanged variables info
-#define CB_MAX_USER_DESCRIPTORS 64
 #define CB_MAX_SYS_DESCRIPTORS  2
-#define CB_MAX_DESCRIPTORS (CB_MAX_SYS_DESCRIPTORS+CB_MAX_USER_DESCRIPTORS)
+#define CB_MAX_DESCRIPTORS 255
 
 /// used to determin the tye of the command
 #define CB_MIN_CMD_METHOD_TYPE 0

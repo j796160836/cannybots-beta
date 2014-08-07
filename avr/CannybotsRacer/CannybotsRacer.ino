@@ -2,105 +2,75 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Libraries
-//#include <AnalogScanner.h>
-#include <EEPROM.h>
+#include <EEPROMex.h>
 
 
-#include <SPI.h>
 #include <Cannybots.h>
 #include "CannybotsRacer.h"
 Cannybots& cb = Cannybots::getInstance();
 
 
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//#define USE_ANALOG_LIB
-//#define USE_IR_WAYPOINT_DETECTION
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef USE_ANALOG_LIB
-// see: https://github.com/merose/AnalogScanner
-#include <AnalogScanner.h>
-AnalogScanner scanner;
-#define ANALOG_READ scanner.getValue
-#else
-#define ANALOG_READ analogRead
-#define ANALOG_READING_DELAY 10
-#endif
-
-
-
-
-
+uint16_t  cb_version = LF_MAJOR_VERSION*255 + LF_MINOR_VERSION;
+uint32_t  cb_bot_id  = 0xCB1FB075;
+bool debugEnabled = false;
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Config
+// Bot Config
+#define PID_METHOD_1
+#define NUM_MOTORS       2
+#define NUM_IR_SENSORS 3
 
 // PID
-#define PID_METHOD_1
 
-#define PID_SETPOINT        0.0
-#define PID_SAMPLE_TIME     10
-#define PID_DIV             10
+uint8_t  PID_SAMPLE_TIME      = 10;
+uint8_t  PID_DIV              = 10;
 
-#define PRINTVALS_INTERVAL   1000
 
-#define OFF_LINE_MAX_TIME 200    
-
-#define MANUAL_MODE_RADIOSILENCE_TIMEOUT 500
+uint16_t PRINTVALS_INTERVAL   = 1000;
+uint16_t OFF_LINE_MAX_TIME    = 200;
+uint16_t MANUAL_MODE_RADIOSILENCE_TIMEOUT = 500;
 
 // Motor settings
-#define NUM_MOTORS       2
-#define MOTOR_MAX_SPEED 255
-#define MOTOR_TEST_SPEED MOTOR_MAX_SPEED/2
-//#define MOTOR_A_IS_ON_RIGHT
+bool MOTOR_A_POS_IS_FORWARD = 1;
+bool MOTOR_B_POS_IS_FORWARD = 0;
 
-#define MOTOR_A_POS_IS_FORWARD 1
-#define MOTOR_B_POS_IS_FORWARD 0
+uint8_t motorA_id = 0;
+uint8_t motorB_id = 1;
 
-// number of divisions between current and target motor speed
-#define MAX_MOTOR_DELTA_DIVISOR     100.0
-// max motor speed change
-#define MAX_MOTOR_DELTA             255.0
+uint8_t motorDriverType = 0;
 
+bool motorDriverHasMode = false;
+uint8_t motorDriverMode = false;
 
-// Joystick
-#define XAXIS_DEADZONE 50
+bool motorDriverHasSense = false;
 
+uint8_t MOTOR_MAX_SPEED          = 255;
+uint8_t MAX_MOTOR_DELTA_DIVISOR  =  100.0;                // number of divisions between current and target motor speed
+uint8_t MAX_MOTOR_DELTA          =   255.0;              // max motor speed change
 
-// IR Sensor settings
-#define NUM_IR_SENSORS   3
-
-// Battery Voltage sensing
-#ifdef BOT_TYPE_CUSTOM_PCB
-#define BATTERY_PIN A1
-#endif
-
-
+uint8_t XAXIS_DEADZONE           = 50;                             // Joystick
 
 // Pinout wiring
-
 // Aiva
 #define BOT_TYPE_CUSTOM_PCB 1
-#define IR_MAX 1000
-#define WHITE_THRESHOLD 700
-#define IR1 A6
-#define IR2 A8
-#define IR3 A11
-#define IR_WAYPOINT_DETECTION_PIN IR3
+uint16_t IR_MAX = 1000;
+uint16_t WHITE_THRESHOLD = 700;
+uint8_t IR1 = A6;
+uint8_t IR2 = A8;
+uint8_t IR3 = A11;
+uint8_t pinA1 = 3;
+uint8_t pinA2 = 5;
 
-#define pinA1 3
-#define pinA2 5
-#define pinB1 6
-#define pinB2 9
+uint8_t pinB1 = 6;
+uint8_t pinB2 = 9;
+uint8_t pin_MODE = 2;
+uint8_t pinAsense = 0;
+uint8_t pinBsense = 0;
 
-#define pin_MODE 2
-
+bool    hasBattSense =false;
+uint8_t BATTERY_PIN=A1;                                  // Battery Voltage sensing
 
 
 // REdbot
@@ -149,32 +119,41 @@ AnalogScanner scanner;
 // Indicator LED
 #define STATUS_LED 13
 
-// waypoint detection
-
-// Ignore this for now
-#ifdef USE_IR_WAYPOINT_DETECTION
-//#include <IRremoteORG.h>
-//IRrecv irrecv(IR_WAYPOINT_DETECTION_PIN);
-#endif
-
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // App State
+// PID
+
+#define pid_t int
+#define pid_m 1
+
+pid_t Kp = 0;
+pid_t Ki = 0;
+pid_t Kd = 0;
+
+pid_t P_error = 0;
+pid_t D_error = 0;
+pid_t error = 0;
+pid_t error_last = 0; // to calculate D_error = error - error_last
+pid_t correction = 0; //error after PID filter
+
+/////
 
 bool isLineFollowingMode = true;
 bool forceManualMode = false;
 int baseCruiseSpeed = 150;
 int cruiseSpeed = baseCruiseSpeed;
+int maxCruiseSpeed = MOTOR_MAX_SPEED;
+
 
 int speedA = 0;
 int speedB = 0;
 
 // speed only used in in manual mode:
-int manualA = 0;  
+int manualA = 0;
 int manualB = 0;
 //int speeds[NUM_MOTORS];
 
@@ -212,43 +191,27 @@ void setup() {
   pinMode(pinB2, OUTPUT);
   pinMode(STATUS_LED, OUTPUT);
   digitalWrite(STATUS_LED, HIGH);
-  
+
 #ifdef BOT_TYPE_CUSTOM_PCB
   pinMode(pin_MODE, OUTPUT);
   digitalWrite(pin_MODE, HIGH); //to set controller to Phase/Enable mode
 #endif
 
-
-// ignore this for now.
-#ifdef USE_ANALOG_LIB
-  //int scanOrder[NUM_IR_SENSORS + 1] = {IR1, IR2, IR3, BATTERY_PIN};
-  int scanOrder[NUM_IR_SENSORS] = {IR1, IR2, IR3};
-  scanner.setScanOrder(NUM_IR_SENSORS, scanOrder);
-  scanner.beginScanning();  
-#endif
-
-// ignore this for now.
-#ifdef USE_IR_WAYPOINT_DETECTION
-  irrecv.enableIRIn();
-#endif
-
-  setup_PID();
   mycannybots_setup();
 }
 
-
 void loop() {
-  // do some stats...  
+  // do some stats...
   loopcount++;
   loopNowTime = millis();
   loopDeltaTime = loopNowTime - loopLastTime;
   loopLastTime = loopNowTime;
-  
+
   // read and publish R sensor values
   read_ir_sensors();
-  lf_emitIRValues(IRvals[0], IRvals[1], IRvals[2]);
+  //lf_emitIRValues(IRvals[0], IRvals[1], IRvals[2]);
 
-  
+
   // count up the time spent off the line, rahter than switching to manual mode the instance the mid sensor goes of the line
   if ((IRvals[1] <= WHITE_THRESHOLD )) {
 
@@ -268,7 +231,7 @@ void loop() {
     isLineFollowingMode = 1;
     resetSpeed = true;
   }
-  
+
 
   if (forceManualMode) {
     isLineFollowingMode = 0;
@@ -295,7 +258,7 @@ void loop() {
   printvalues();
 
   cb.update();
-//ignore this for now
+  //ignore this for now
 #ifdef USE_IR_WAYPOINT_DETECTION
   irwaypoint_loop();
 #endif
@@ -383,18 +346,18 @@ void read_ir_sensors() {
 
 #ifndef USE_ANALOG_LIB
   //ANALOG_READ(IR1); delay(ANALOG_READING_DELAY);
-#endif  
-  IRvals[0] = constrain(ANALOG_READ(IR1) - IRbias[0], 0, IR_MAX); //left looking from behind
+#endif
+  IRvals[0] = constrain(analogRead(IR1) - IRbias[0], 0, IR_MAX); //left looking from behind
 
 #ifndef USE_ANALOG_LIB
   //ANALOG_READ(IR2); delay(ANALOG_READING_DELAY);
-#endif  
-  IRvals[1] = constrain(ANALOG_READ(IR2) - IRbias[1], 0, IR_MAX); //centre
-  
+#endif
+  IRvals[1] = constrain(analogRead(IR2) - IRbias[1], 0, IR_MAX); //centre
+
 #ifndef USE_ANALOG_LIB
   //ANALOG_READ(IR3); delay(ANALOG_READING_DELAY);
-#endif  
-  IRvals[2] = constrain(ANALOG_READ(IR3) - IRbias[2], 0, IR_MAX); //right
+#endif
+  IRvals[2] = constrain(analogRead(IR3) - IRbias[2], 0, IR_MAX); //right
 
   IRonBlack[0] = IRvals[0] > WHITE_THRESHOLD;
   IRonBlack[1] = IRvals[1] > WHITE_THRESHOLD;
@@ -481,27 +444,6 @@ void lf_report_followingMode(bool isLineMode) {
 //
 // Stored Settings  (EEPROM/Flash)
 
-void getPIDSettings() {
-  setPID_P(cb.nvGetInt(&NV_PID_P));
-  setPID_I(cb.nvGetInt(&NV_PID_I));
-  setPID_D(cb.nvGetInt(&NV_PID_D));
-  IRbias[0] = cb.nvGetByte(&NV_IRBIAS_1);
-  IRbias[1] = cb.nvGetByte(&NV_IRBIAS_2);
-  IRbias[2] = cb.nvGetByte(&NV_IRBIAS_3);
-}
-
-void setNVDefaults() {
-  cb.nvSetInt(&NV_PID_P, 0);
-  cb.nvSetInt(&NV_PID_I, 0);
-  cb.nvSetInt(&NV_PID_D, 0);
-  cb.nvSetByte(&NV_IRBIAS_1, 0 );
-  cb.nvSetByte(&NV_IRBIAS_2, 0 );
-  cb.nvSetByte(&NV_IRBIAS_3, 0 );
-}
-
-
-
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -541,10 +483,10 @@ void lf_updateBias (int b1, int b2, int b3) {
   IRbias[0] = b1;
   IRbias[1] = b2;
   IRbias[2] = b3;
-  cb.nvSetByte(&NV_IRBIAS_1, IRbias[0]);
-  cb.nvSetByte(&NV_IRBIAS_2, IRbias[1]);
-  cb.nvSetByte(&NV_IRBIAS_3, IRbias[2]);
-
+  // TODO: change to the generic:  cb.setConfigParameterValue(&NV_IRBIAS_1), no need to specify variable address again
+  cb.setConfigParameterValue(&cfg_ir_bias_1, &IRbias[0]);
+  cb.setConfigParameterValue(&cfg_ir_bias_2, &IRbias[1]);
+  cb.setConfigParameterValue(&cfg_ir_bias_3, &IRbias[2]);
 }
 
 void lf_updateLineFollowingMode(int _forceManualMode, int _d1, int _d2) {
@@ -553,8 +495,8 @@ void lf_updateLineFollowingMode(int _forceManualMode, int _d1, int _d2) {
 }
 
 void lf_emitConfig(int _d1, int _d2, int _d3) {
-  cb.callMethod(&RACER_PID, getPID_P(), getPID_I(), getPID_D());
-  cb.callMethod(&RACER_IRBIAS, IRbias[0], IRbias[1], IRbias[2]);
+  //cb.callMethod(&RACER_PID, getPID_P(), getPID_I(), getPID_D());
+  //cb.callMethod(&RACER_IRBIAS, IRbias[0], IRbias[1], IRbias[2]);
 }
 
 void lf_emitIRValues(int v1, int v2, int v3) {
@@ -571,54 +513,6 @@ void lf_ping(int v1) {
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//
-// IR Waypoint detection
-
-#ifdef USE_IR_WAYPOINT_DETECTION
-
-// see:
-decode_results results;
-
-// Dumps out the decode_results structure.
-// Call this after IRrecv::decode()
-// void * to work around compiler issue
-void irwaypoint_dump(void *v) {
-  decode_results *results = (decode_results *)v;
-  //void irwaypoint_dump(decode_results *results) {
-  int count = results->rawlen;
-  Serial.print(results->value, HEX);
-  Serial.print(" (");
-  Serial.print(results->bits, DEC);
-  Serial.println(" bits)");
-  Serial.print("Raw (");
-  Serial.print(count, DEC);
-  Serial.print("): ");
-
-  for (int i = 0; i < count; i++) {
-    if ((i % 2) == 1) {
-      Serial.print(results->rawbuf[i]*USECPERTICK, DEC);
-    }
-    else {
-      Serial.print(-(int)results->rawbuf[i]*USECPERTICK, DEC);
-    }
-    Serial.print(" ");
-  }
-  Serial.println("");
-}
-
-
-void irwaypoint_loop() {
-  if (irrecv.decode(&results)) {
-    Serial.println(results.value, HEX);
-    irwaypoint_dump(&results);
-    irrecv.resume(); // Receive the next value
-  }
-}
-#endif // USE_IR_WAYPOINT_DETECTION
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -627,7 +521,7 @@ void irwaypoint_loop() {
 // Cannybots glulogic
 
 void mycannybots_setup() {
-  cb.setConfigStorage(NV_ID, NV_BASE);
+  delay(5000);
   cb.registerHandler(&RACER_CRUISESPEED, lf_updateMotorSpeeds);
   cb.registerHandler(&RACER_LINEFOLLOWING_MODE, lf_updateLineFollowingMode);
   cb.registerHandler(&RACER_PID, lf_updatePID);
@@ -636,8 +530,48 @@ void mycannybots_setup() {
   cb.registerHandler(&RACER_CONFIG, lf_emitConfig);
   cb.registerHandler(&RACER_IRVALS, lf_emitIRValues);
   cb.registerHandler(&RACER_PING, lf_ping);
-  cb.registerConfigParameter(&NV_PID_P);
-  
+
+  cb.setConfigStorage(CFG_ID, CFG_BASE, sizeof(cb_app_config), LF_MAJOR_VERSION, LF_MINOR_VERSION);
+  cb.registerConfigParameter(&cfg_version, &cb_version);
+  cb.registerConfigParameter(&cfg_bot_id, &cb_bot_id);
+  cb.registerConfigParameter(&cfg_battery_hasSense, &hasBattSense);
+  cb.registerConfigParameter(&cfg_battery_pin_sense, &BATTERY_PIN);
+  cb.registerConfigParameter(&cfg_ir_max, &IR_MAX);
+  cb.registerConfigParameter(&cfg_ir_whiteThreshold, &WHITE_THRESHOLD);
+  cb.registerConfigParameter(&cfg_ir_pin_1, &IR1);
+  cb.registerConfigParameter(&cfg_ir_pin_2, &IR2);
+  cb.registerConfigParameter(&cfg_ir_pin_3, &IR3);
+  cb.registerConfigParameter(&cfg_ir_bias_1, &IRbias[0]);
+  cb.registerConfigParameter(&cfg_ir_bias_2, &IRbias[1]);
+  cb.registerConfigParameter(&cfg_ir_bias_3, &IRbias[2]);
+  cb.registerConfigParameter(&cfg_motorDriver_type, &motorDriverType);
+  cb.registerConfigParameter(&cfg_motorDriver_mode, &motorDriverMode);
+  cb.registerConfigParameter(&cfg_motorDriver_maxSpeed, &MOTOR_MAX_SPEED);
+  cb.registerConfigParameter(&cfg_motorDriver_hasDriveMode, &motorDriverHasMode);
+  cb.registerConfigParameter(&cfg_motorDriver_hasMotorSense, &motorDriverHasSense);
+  cb.registerConfigParameter(&cfg_motorA_pin_1, &pinA1);
+  cb.registerConfigParameter(&cfg_motorA_pin_2, &pinA2);
+  cb.registerConfigParameter(&cfg_motorA_pin_sense, &pinAsense);
+  cb.registerConfigParameter(&cfg_motorA_postiveSpeedisFwd, &MOTOR_A_POS_IS_FORWARD);
+  cb.registerConfigParameter(&cfg_motorA_id, &motorA_id);
+  cb.registerConfigParameter(&cfg_motorB_pin_1, &pinB1);
+  cb.registerConfigParameter(&cfg_motorB_pin_2, &pinB2);
+  cb.registerConfigParameter(&cfg_motorB_pin_sense, &pinBsense);
+  cb.registerConfigParameter(&cfg_motorB_postiveSpeedisFwd, &MOTOR_B_POS_IS_FORWARD);
+  cb.registerConfigParameter(&cfg_motorB_id, &motorB_id);
+  cb.registerConfigParameter(&cfg_motor_speedSmoothingDivisions, &MAX_MOTOR_DELTA_DIVISOR);
+  cb.registerConfigParameter(&cfg_motor_speedSmoothingMaxDelta, &MAX_MOTOR_DELTA);
+  cb.registerConfigParameter(&cfg_pid_p, &Kp);
+  cb.registerConfigParameter(&cfg_pid_i, &Ki);
+  cb.registerConfigParameter(&cfg_pid_d, &Kd);
+  cb.registerConfigParameter(&cfg_pid_divisor, &PID_DIV);
+  cb.registerConfigParameter(&cfg_joystick_xAxisDeadzone, &XAXIS_DEADZONE);
+  cb.registerConfigParameter(&cfg_cruiseSpeed_defaultSpeed, &baseCruiseSpeed);
+  cb.registerConfigParameter(&cfg_cruiseSpeed_manualMaxSpeed, &maxCruiseSpeed);
+  cb.registerConfigParameter(&cfg_offLineMaxTime, &OFF_LINE_MAX_TIME);
+  cb.registerConfigParameter(&cfg_info_printValsInterval, &PRINTVALS_INTERVAL);
+  cb.registerConfigParameter(&cfg_debugFlag, &debugEnabled);
+  cb.populateVariablesFromConfig();
   cb.begin();
 }
 
@@ -651,13 +585,13 @@ void test(int16_t p1, int16_t p2, int16_t p3) {
 
   switch (p1) {
     case CANNYBOTSRACER_TEST_MOTORS:
-      motor(MOTOR_TEST_SPEED, 0);
+      motor(MOTOR_MAX_SPEED, 0);
       delay(500);
-      motor(-MOTOR_TEST_SPEED, 0);
+      motor(-MOTOR_MAX_SPEED, 0);
       delay(500);
-      motor(0, MOTOR_TEST_SPEED);
+      motor(0, MOTOR_MAX_SPEED);
       delay(500);
-      motor(0, -MOTOR_TEST_SPEED);
+      motor(0, -MOTOR_MAX_SPEED);
       delay(500);
       motor(0, 0);
       break;
@@ -666,4 +600,14 @@ void test(int16_t p1, int16_t p2, int16_t p3) {
   }
 }
 
+
+// bets
+
+// idetify areas of code with high changle volatility
+
+// document:
+//          CB API example
+//          ARchitecture
+//          calss diagram
+//        Areas of work
 

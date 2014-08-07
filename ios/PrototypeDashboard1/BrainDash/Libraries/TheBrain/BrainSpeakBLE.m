@@ -114,7 +114,7 @@
 
 
 - (void) centralManagerDidUpdateState:(CBCentralManager*)central{
-    NSLog(@"centralManagerDidUpdateState: %x", central.state);
+    NSLog(@"centralManagerDidUpdateState: %ld", central.state);
 
     if (central.state == CBCentralManagerStatePoweredOn){
         

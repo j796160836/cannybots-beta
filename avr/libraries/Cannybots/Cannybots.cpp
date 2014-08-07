@@ -7,8 +7,8 @@
 #endif
 
 #ifdef ARDUINO
+#include <EEPROMEx.h>
 #include <Arduino.h>
-#include <EEPROM.h>
 #ifdef USE_SPI
 #include <SPI.h>
 #endif USE_SPI
@@ -17,24 +17,26 @@
 
 const cb_type Cannybots::CB_VOID=0;
 const cb_type Cannybots::CB_BYTE=1;
-const cb_type Cannybots::CB_INT16=2;
-const cb_type Cannybots::CB_UINT16=3;
-const cb_type Cannybots::CB_INT32=4;
-const cb_type Cannybots::CB_UINT32=5;
-const cb_type Cannybots::CB_FLOAT=6;
-const cb_type Cannybots::CB_BYTE_ARRAY=7;
-const cb_type Cannybots::CB_STRING=8;
-const cb_type Cannybots::CB_INT16_ARRAY=9;
-const cb_type Cannybots::CB_UINT16_ARRAY=10;
-const cb_type Cannybots::CB_INT32_ARRAY=11;
-const cb_type Cannybots::CB_UINT32_ARRAY=12;
-const cb_type Cannybots::CB_FLOAT_ARRAY=13;
-const cb_type Cannybots::CB_INT16_1=14;
-const cb_type Cannybots::CB_INT16_2=15;
-const cb_type Cannybots::CB_INT16_3=16;
-const cb_type Cannybots::CB_FLOAT_1=17;
-const cb_type Cannybots::CB_FLOAT_2=18;
-const cb_type Cannybots::CB_FLOAT_3=19;
+const cb_type Cannybots::CB_INT8=2;
+const cb_type Cannybots::CB_UINT8=3;
+const cb_type Cannybots::CB_INT16=4;
+const cb_type Cannybots::CB_UINT16=5;
+const cb_type Cannybots::CB_INT32=6;
+const cb_type Cannybots::CB_UINT32=7;
+const cb_type Cannybots::CB_FLOAT=8;
+const cb_type Cannybots::CB_BYTE_ARRAY=9;
+const cb_type Cannybots::CB_STRING=10;
+const cb_type Cannybots::CB_INT16_ARRAY=11;
+const cb_type Cannybots::CB_UINT16_ARRAY=12;
+const cb_type Cannybots::CB_INT32_ARRAY=13;
+const cb_type Cannybots::CB_UINT32_ARRAY=14;
+const cb_type Cannybots::CB_FLOAT_ARRAY=15;
+const cb_type Cannybots::CB_INT16_1=16;
+const cb_type Cannybots::CB_INT16_2=17;
+const cb_type Cannybots::CB_INT16_3=18;
+const cb_type Cannybots::CB_FLOAT_1=19;
+const cb_type Cannybots::CB_FLOAT_2=20;
+const cb_type Cannybots::CB_FLOAT_3=21;
 
 
 const cb_publish_type Cannybots::PUBLISH_UPDATE_ONCHANGE = 1;
@@ -42,9 +44,6 @@ const cb_publish_type Cannybots::PUBLISH_UPDATE_ONCHANGE = 1;
 
 Cannybots Cannybots::instance;
 
-void Cannybots::setConfigStorage(const char* magic, uint16_t start) {
-    
-}
 
 #define CB_ALLOC_DESC()  (cb_descriptor*) calloc(1, sizeof(cb_descriptor));
 //new cb_descriptor;
@@ -155,12 +154,14 @@ cb_descriptor* Cannybots::getDescriptorForCommand(uint8_t commandId) {
     for(int i = 0; i < methods.size(); i++){
         desc = methods.get(i);
 #ifndef ARDUINO
-        printf("%d, %x, %x, %x, %d, %s\n", i, desc, desc->cid_t, desc->cid_t.cidMT, desc->cid_t.cidMT->cid, desc->cid_t.cidMT->name);
+//        printf("%d, %x, %x, %x, %d, %s\n", i, desc, desc->cid_t, desc->cid_t.cidMT, desc->cid_t.cidMT->cid, desc->cid_t.cidMT->name);
 #endif
         if(commandId == desc->cid_t.cidMT->cid){
             return desc;
         }
     }
+    
+    //TODO: config
     return NULL;
 }
 
@@ -176,33 +177,9 @@ int16_t Cannybots::getIndexForDescriptor(LinkedList<cb_descriptor*> list, cb_des
 
 
 
-// Config
-
-void Cannybots::registerConfigParameter(cb_nv_id* _id) {
-    cb_descriptor* desc =  CB_ALLOC_DESC();
-    desc->cid_t.cidNV = _id;
-    configVars.add(desc);
-}
-
-
-//metadata:
-
-void getConfigParameterList() {
-    
-
-}
-
-/*
-//getter/setters
-setConfigParameterValue {
-// if not on ARDUION build messag eand send
-// if on arduon use EEPROMex library
-    
-}
-getConfigParameterValue
-*/
-
-
+////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
+//
 // Scripting
 
 void Cannybots::registerScritableVariable(cb_id* _id, const char* name) {
@@ -383,7 +360,7 @@ void RFduinoBLE_onReceive(char *data, int len) {
 void Cannybots::processInboundMessageQueue() {
     
     for (int i = 0; i < inboundMsgFIFO.count(); i++) {
-        //§       CB_DBG("processInboundMessageQueue(%d)", i+1);
+        //       CB_DBG("processInboundMessageQueue(%d)", i+1);
         
         Message* msg = inboundMsgFIFO.dequeue();
 #ifdef ARDUINO
@@ -629,96 +606,157 @@ void Cannybots::callMethod(cb_id* cid, const char* p1) {
 ///////////////////////////////////////////////////////////////////////
 // Non-volatile methods
 
-// limit the number of writes, just in case we get stuck in a loop during dev!
-int nvWritesSinceBoot=0;
-bool  Cannybots::nvSetByte(uint16_t address, uint8_t b) {
-    nvWritesSinceBoot++;
-    if (nvWritesSinceBoot < 1000) {
-        
+
+
+
+void Cannybots::setConfigStorage(const char* magic, const uint16_t start, const uint16_t size, uint8_t majorVersion, uint8_t minorVersion) {
 #ifdef ARDUINO
-        
-#ifdef __RFduino__
-        
-        // see:  https://github.com/RFduino/RFduino/tree/master/libraries/RFduinoNonBLE/examples/Flash/FlashInteger
-#else
-        EEPROM.write(address, b);
-#endif
-#endif
-    } else {
-        //WARN("exceeded max EEPROM writes for this session");
+    EEPROM.setMemPool(start, start+size);
+    // Set maximum allowed writes to maxAllowedWrites.
+    // More writes will only give errors when _EEPROMEX_DEBUG is set
+    EEPROM.setMaxAllowedWrites(100);
+    delay(2000);
+    
+    nvBaseAddress = start;
+    
+    // TODO: check mage bytes at 'start'
+    uint16_t len = strlen(magic);
+    bool match=true;
+    for (int i=0; i < len; i++) {
+        if (EEPROM.readByte(start+i) != magic[i]) {
+            match=false;
+        }
     }
-    return 0;
+    if (match == false) {
+        CB_DBG("NV not set",-0);
+        for (int i=0; i < len; i++) {
+            //nvSetByte(start+i, magic[i];
+        }
+        for (int i=len; i < size; i++) {
+            EEPROM.writeByte(start+i, 0);
+        }
+    }
+#endif
+    
 }
 
 
-uint8_t  Cannybots::nvGetByte(uint16_t address) {
-    uint8_t b = 0;
+
+
+
 #ifdef ARDUINO
     
 #ifdef __RFduino__
     // see:  https://github.com/RFduino/RFduino/tree/master/libraries/RFduinoNonBLE/examples/Flash/FlashInteger
 #else
-    b = EEPROM.read(address);
-#endif
-#endif
-    return b;
+
+
+
+/*
+ //getter/setters
+ // if not on ARDUION build messag eand send
+ // if on arduon use EEPROMex library
+ 
+ }
+ */
+#define _CB_CFG_OFFSET(_id) nvBaseAddress+_id->cid
+void Cannybots::getConfigParameterValue(cb_nv_id* _id, uint8_t* v) {
+    *v= EEPROM.readByte(_CB_CFG_OFFSET(_id));
+}
+
+void Cannybots::setConfigParameterValue(cb_nv_id* _id, uint8_t* v) {
+    EEPROM.writeByte(_CB_CFG_OFFSET(_id),*v);
+}
+
+void Cannybots::getConfigParameterValue(cb_nv_id* _id, int8_t* v) {
+    *v= EEPROM.readByte(_CB_CFG_OFFSET(_id));
+}
+
+void Cannybots::setConfigParameterValue(cb_nv_id* _id, int8_t* v) {
+    EEPROM.writeByte(_CB_CFG_OFFSET(_id),*v);
+}
+
+void Cannybots::getConfigParameterValue(cb_nv_id* _id, int16_t* v) {
+    *v= EEPROM.readInt(_CB_CFG_OFFSET(_id));
+}
+
+void Cannybots::setConfigParameterValue(cb_nv_id* _id, int16_t* v) {
+    EEPROM.writeInt(_CB_CFG_OFFSET(_id),*v);
+}
+
+void Cannybots::getConfigParameterValue(cb_nv_id* _id, uint16_t* v) {
+    *v= EEPROM.readInt(_CB_CFG_OFFSET(_id));
+}
+
+void Cannybots::setConfigParameterValue(cb_nv_id* _id, uint16_t* v) {
+    EEPROM.writeInt(_CB_CFG_OFFSET(_id),*v);
+}
+
+void Cannybots::getConfigParameterValue(cb_nv_id* _id, int32_t* v) {
+    *v= EEPROM.readLong(_CB_CFG_OFFSET(_id));
+}
+
+void Cannybots::setConfigParameterValue(cb_nv_id* _id, int32_t* v) {
+    EEPROM.writeLong(_CB_CFG_OFFSET(_id),*v);
+}
+
+void Cannybots::getConfigParameterValue(cb_nv_id* _id, uint32_t* v) {
+    *v= EEPROM.readLong(_CB_CFG_OFFSET(_id));
+}
+
+void Cannybots::setConfigParameterValue(cb_nv_id* _id, uint32_t* v) {
+    EEPROM.writeLong(_CB_CFG_OFFSET(_id),*v);
 }
 
 
+void Cannybots::getConfigParameterValue(cb_nv_id* _id, bool* v) {
+    *v= EEPROM.readByte(_CB_CFG_OFFSET(_id));
+}
 
-bool Cannybots::nvSetInt(uint16_t address, uint16_t b) {
-    uint8_t b1 = hiByteFromInt(b);
-    uint8_t b2 = loByteFromInt(b);
-    
-    nvSetByte(address,b1);
-    nvSetByte(address+1,b2);
-    return 0;
+void Cannybots::setConfigParameterValue(cb_nv_id* _id, bool* v) {
+    EEPROM.writeByte(_CB_CFG_OFFSET(_id),*v);
+}
+
+#endif // __RFduino__
+#endif // ARDUINO
+
+#define _CB_TEMPLATE_registerConfigParameter(_ctype, _cb_type) \
+void Cannybots::registerConfigParameter(cb_nv_id* _id, _ctype *v) { \
+cb_descriptor* desc =  CB_ALLOC_DESC(); \
+desc->cid_t.cidNV = _id; \
+desc->type = _cb_type; \
+desc->data = v; \
+configVars.add(desc); }
+
+_CB_TEMPLATE_registerConfigParameter(bool,    CB_BYTE);
+_CB_TEMPLATE_registerConfigParameter(int8_t,  CB_INT8);
+_CB_TEMPLATE_registerConfigParameter(uint8_t, CB_UINT8);
+_CB_TEMPLATE_registerConfigParameter(int16_t, CB_INT16);
+_CB_TEMPLATE_registerConfigParameter(uint16_t,CB_UINT16);
+_CB_TEMPLATE_registerConfigParameter(int32_t, CB_INT32);
+_CB_TEMPLATE_registerConfigParameter(uint32_t,CB_UINT32);
+
+
+void Cannybots::populateVariablesFromConfig() {
+    cb_descriptor *desc=NULL;
+    // find mathicg methods
+    // TODO: optimise by searching the 'bands' defined in config.h:  CB_[MIN|MAX]_CMD_[METHOD|CONFIG|VARIABLE]_TYPE
+    for(int i = 0; i < configVars.size(); i++){
+        desc = configVars.get(i);
+        CB_DBG("NV: %d = %d\n", i, desc->cid_t.cidNV->cid);
+    }
+
 }
 
 
-
-uint16_t Cannybots::nvGetInt(uint16_t address) {
-    uint8_t b1 = nvGetByte(address);
-    uint8_t b2 = nvGetByte(address+1);
-    int16_t b = mk16bit(b2,b1);
-    return b;
+        
+uint16_t Cannybots::getConfigParameterListSize() {
+    return configVars.size();
 }
 
-
-bool Cannybots::nvSetByte(cb_nv_id* address, uint8_t b) {
-    return nvSetByte((uint16_t)address->offset, b);
-}
-
-uint8_t Cannybots::nvGetByte(cb_nv_id* address) {
-    return nvGetByte((uint16_t)0);
-    
-}
-
-bool Cannybots::nvSetInt(cb_nv_id* address, uint16_t b) {
-    return nvSetInt((uint16_t)address->offset, b);
+cb_descriptor* Cannybots::getConfigParameterListItem(int16_t index) {
+    return configVars.get(index);
 
 }
 
-uint16_t Cannybots::nvGetInt(cb_nv_id* address) {
-    return nvGetInt((uint16_t)address->offset);
-}
-
-
-
-bool Cannybots::nvSetupConfig() {
-    nvSetByte((uint16_t)0, 'C');
-    nvSetByte(1, 'N');
-    nvSetByte(2, 'Y');
-    nvSetByte(3, 'B');
-    return 0;
-}
-
-bool Cannybots::nvIsValidConfig() {
-    uint8_t b1 = nvGetByte((uint16_t)0);
-    uint8_t b2 = nvGetByte(1);
-    uint8_t b3 = nvGetByte(2);
-    uint8_t b4 = nvGetByte(3);
-    
-    return (  (b1 == 'C') && (b2 == 'N') && (b3 == 'Y') && (b4 == 'B') );
-}
 

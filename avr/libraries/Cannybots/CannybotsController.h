@@ -41,4 +41,7 @@ typedef void (^cb_bridged_callback_string)(const char*);
 - (void) registerHandler:(cb_id*)cid withBlockFor_STRING:(cb_bridged_callback_string)block;
 - (void) deregisterHandler:(cb_id*)cid;
 
+- (NSArray*) getConfigParameterList;
+
+
 @end

@@ -108,6 +108,8 @@ public:
     // Callback parameter prototype
     const static cb_type CB_VOID;
     const static cb_type CB_BYTE;
+    const static cb_type CB_INT8;
+    const static cb_type CB_UINT8;
     const static cb_type CB_INT16;
     const static cb_type CB_UINT16;
     const static cb_type CB_INT32;
@@ -140,7 +142,6 @@ public:
         return instance;
     }
 
-    void setConfigStorage(const char* magic, const uint16_t start);
     
     // Scalar
     void registerVariable(cb_id* _id, int16_t* var, const bool isNonVolatile=false, const int16_t defaultValue=0);
@@ -165,10 +166,6 @@ public:
     
     void deregisterHandler( cb_id* _id);
 
-    
-    // NV
-    
-    void registerConfigParameter(cb_nv_id* _id);
     
     // Scripting
     
@@ -234,27 +231,46 @@ public:
     void callMethod(cb_id* cid, int16_t p1,int16_t p2,int16_t p3);
     void callMethod(cb_id* cid, const char* p1);     // String (null terminated) type
 
-    
-    
-    // Non-Volatile RAM
-    
-    bool     nvSetByte(uint16_t address, uint8_t b);
-    uint8_t  nvGetByte(uint16_t address);
-    bool     nvSetInt(uint16_t address, uint16_t b);
-    uint16_t nvGetInt(uint16_t address);
-
-    bool     nvSetByte(cb_nv_id* address, uint8_t b);
-    uint8_t  nvGetByte(cb_nv_id* address);
-    bool     nvSetInt(cb_nv_id* address, uint16_t b);
-    uint16_t nvGetInt(cb_nv_id* address);
-
-    
-    
-    bool nvSetupConfig();
-    bool nvIsValidConfig();
-
 
     cb_descriptor* getDescriptorForCommand(uint8_t commandId);
+
+
+    
+    
+    // Non-Volatile Configuration Setting (e.g. EEPROM on Arduono, FLASH on RFduino)
+
+    
+    void setConfigStorage(const char* magic, const uint16_t start, const uint16_t size, uint8_t majorVersion, uint8_t minorVersion);
+
+    void registerConfigParameter(cb_nv_id* _id, bool* v);
+    void registerConfigParameter(cb_nv_id* _id, int8_t* v);
+    void registerConfigParameter(cb_nv_id* _id, uint8_t* v);
+    void registerConfigParameter(cb_nv_id* _id, int16_t* v);
+    void registerConfigParameter(cb_nv_id* _id, uint16_t* v);
+    void registerConfigParameter(cb_nv_id* _id, int32_t* v);
+    void registerConfigParameter(cb_nv_id* _id, uint32_t* v);
+    
+    void getConfigParameterValue(cb_nv_id* _id, int8_t* v);
+    void setConfigParameterValue(cb_nv_id* _id, int8_t* v);
+    void getConfigParameterValue(cb_nv_id* _id, uint8_t* v);
+    void setConfigParameterValue(cb_nv_id* _id, uint8_t* v);
+    void getConfigParameterValue(cb_nv_id* _id, int16_t* v);
+    void setConfigParameterValue(cb_nv_id* _id, int16_t* v);
+    void getConfigParameterValue(cb_nv_id* _id, uint16_t* v);
+    void setConfigParameterValue(cb_nv_id* _id, uint16_t* v);
+    void getConfigParameterValue(cb_nv_id* _id, int32_t* v);
+    void setConfigParameterValue(cb_nv_id* _id, int32_t* v);
+    void getConfigParameterValue(cb_nv_id* _id, uint32_t* v);
+    void setConfigParameterValue(cb_nv_id* _id, uint32_t* v);
+    void getConfigParameterValue(cb_nv_id* _id, bool* v);
+    void setConfigParameterValue(cb_nv_id* _id, bool* v);
+
+
+    void populateVariablesFromConfig();
+
+    uint16_t        getConfigParameterListSize();
+    cb_descriptor*  getConfigParameterListItem(int16_t index);
+    
 
 private:
     static Cannybots instance; // Guaranteed to be destroyed. (yeah, when the power goes lol)
@@ -279,6 +295,7 @@ private:
 
     int16_t getIndexForDescriptor(LinkedList<cb_descriptor*> list, cb_descriptor* desc);
 
+    uint16_t nvBaseAddress;
     
     // utils
     bool         debug;

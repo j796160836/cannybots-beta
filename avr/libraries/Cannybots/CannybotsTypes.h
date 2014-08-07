@@ -11,16 +11,8 @@
 
 #include <CannybotsConfig.h>
 
-
-
 typedef uint8_t cb_publish_type ;
 typedef uint8_t cb_type ;
-
-
-
-// TODO: create an class that has contructos
-// RACER_SET_SPEED(1,2,3); // use eitehr a contructor on cb_id or a new Invoke class creted in the macro to make it look like a function call!
-
 
 typedef struct cb_id_t{
     uint8_t  cid;
@@ -30,9 +22,10 @@ typedef struct cb_id_t{
 } cb_id;
 
 
+
+// TODO: need to warn if offset is > 255
 typedef struct cb_nv_id_t {
     uint8_t  cid;
-    uint16_t  offset;
 #ifndef ARDUINO
     const char*    name;
 #endif
@@ -40,7 +33,25 @@ typedef struct cb_nv_id_t {
 
 
 
-// these 'compound literals' to save space (prmarily for  ARDUINO)
+typedef struct {
+    union cid_u {
+        cb_id*     cidMT;
+        cb_nv_id*  cidNV;
+    } cid_t;
+    cb_type  type;
+    void*    data;
+} cb_descriptor;
+
+
+// TODO:  published vars, see below
+//bool     isPublished;
+//cb_publish_type pubType;
+//void*    lastData;
+//unsigned long lastChangeTime;
+
+
+
+
 #ifdef ARDUINO
 #define CB_ID(_cid, _idVarName, _name) \
 static cb_id  _idVarName = {.cid= CB_MAX_SYS_DESCRIPTORS+_cid};
@@ -53,32 +64,14 @@ static cb_id _idVarName = { .cid = CB_MAX_SYS_DESCRIPTORS+_cid, .name = _name };
 
 
 #ifdef ARDUINO
-#define CB_NV_ID(_cid, _idVarName, _name, _structName, _structMember) \
-static cb_nv_id _idVarName = {.cid = CB_MAX_SYS_DESCRIPTORS+_cid, .offset = offsetof(_structName, _structMember)};
+#define CB_CFG_ID(_structMember) \
+static cb_nv_id _structMember = {.cid= offsetof(cb_app_config, _structMember)};
 // ignore the string to save SRAM and PRG space.
 #else
-#define CB_NV_ID(_cid, _idVarName,  _name, _structName, _structMember) \
-static cb_nv_id _idVarName = { .cid = CB_MAX_SYS_DESCRIPTORS+_cid, .name = _name, .offset = offsetof(_structName, _structMember) };
+#define CB_CFG_ID(_structMember) \
+static cb_nv_id _structMember = { .cid = offsetof(cb_app_config, _structMember), .name = #_structMember};
 #endif
 
-
-
-typedef struct {
-    union cid_u {
-        cb_id*     cidMT;
-        cb_nv_id*  cidNV;
-    } cid_t;
-    cb_type  type;
-    void*    data;
-    
-    //bool     isPublished;
-    //cb_publish_type pubType;
-    
-    // should go elsewhere, attached to a dedicated list of published variables (along with a copy of pubtype)
-    //void*    lastData;
-    //unsigned long lastChangeTime;
-    
-} cb_descriptor;
 
 
 #ifdef __cplusplus
@@ -98,8 +91,8 @@ extern "C" {
 
 // system functions
 // total cant be > CB_MAX_SYS_DESCRIPTORS
-CB_ID(0, _CB_SYS_CALL, "syscall");       // multi-purpose system call, first uint8_t param is function select, following bytes will depend on func.
-CB_ID(1, _CB_SYS_LOG, "log");            // log a message (may be truncated to 20 bytes)
+CB_ID(0-CB_MAX_SYS_DESCRIPTORS, _CB_SYS_CALL, "syscall");       // multi-purpose system call, first uint8_t param is function select, following bytes will depend on func.
+CB_ID(1-CB_MAX_SYS_DESCRIPTORS, _CB_SYS_LOG, "log");            // log a message (may be truncated to 20 bytes)
 
 #define _CANNYBOTS_SYSCALL_NOP                0
 #define _CANNYBOTS_SYSCALL_GET_DEVICE_ID      1
