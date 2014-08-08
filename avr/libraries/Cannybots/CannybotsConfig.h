@@ -61,8 +61,8 @@
 // Message Queuing
 
 // Transport buffers
-#define SERIAL_BUF_SIZE 32
-#define CB_MAX_OUT_Q_DEPTH 8
+#define SERIAL_BUF_SIZE CB_MAX_MSG_SIZE+10
+#define CB_MAX_OUT_Q_DEPTH 4
 #define CB_MAX_IN_Q_DEPTH 4
 
 // Connection settings
@@ -81,3 +81,7 @@
 
 
 #endif
+
+// enchated object, david rose
+// makers, charles stross
+

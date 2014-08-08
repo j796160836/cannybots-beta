@@ -225,6 +225,9 @@ public:
     void createMessage(Message* msg, cb_id* cid, int16_t p1);
     void createMessage(Message* msg, cb_id* cid, const char* p1)    ;
     
+    void createMessage(Message* msg, cb_id* cid, int16_t p1, int16_t p2, int16_t p3, uint32_t ui32);
+
+    
     // Remote invocation entry point
     
     void callMethod(cb_id* cid, int16_t p1);
@@ -268,9 +271,12 @@ public:
 
     void populateVariablesFromConfig();
 
+    void            getConfigParameterListFromRemote();
     uint16_t        getConfigParameterListSize();
     cb_descriptor*  getConfigParameterListItem(int16_t index);
-    
+
+    void sendConfigParameterList();
+
 
 private:
     static Cannybots instance; // Guaranteed to be destroyed. (yeah, when the power goes lol)
@@ -282,6 +288,9 @@ private:
     Cannybots(Cannybots const&);        // Don't Implement
     void operator=(Cannybots const&);   // Don't implement
     
+    
+    void registerSysCalls();
+
     // Message processing
     void processInboundMessageQueue();
     void processOutboundMessageQueue();

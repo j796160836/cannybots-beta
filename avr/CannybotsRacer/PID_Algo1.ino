@@ -13,43 +13,24 @@ void setup_PID() {
 unsigned long pidLastTime = millis();
 void calculate_PID() {
  
-  if ( (loopNowTime - pidLastTime) < PID_SAMPLE_TIME) {
+  if ((loopNowTime - pidLastTime) < PID_SAMPLE_TIME){
     return;
   }
   pidLastTime= loopNowTime;
-  
+
   // process IR readings via PID
   error_last = error;                                   // store previous error before new one is caluclated
-  //error = constrain(IRvals[0] - IRvals[2], -30, 30);        // set bounds for error
   error = IRvals[0] - IRvals[2];
 
   P_error = error * Kp / PID_DIV;                               // calculate proportional term
   D_error = (error - error_last) * Kd / PID_DIV;                // calculate differential term
   correction = P_error + D_error;
-  cruiseSpeed = baseCruiseSpeed + manualA;
-#ifdef MOTOR_A_POS_IS_FORWARD
-  speedA = constrain(cruiseSpeed + correction, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
-  speedB = constrain(cruiseSpeed - correction, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
-#else
-  speedA = constrain(cruiseSpeed - correction, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
-  speedB = constrain(cruiseSpeed + correction, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
-#endif
+
+  speedA = constrain(cruiseSpeed + ( MOTOR_A_POS_IS_FORWARD?correction:-correction), -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
+  speedB = constrain(cruiseSpeed + ( MOTOR_B_POS_IS_FORWARD?correction:-correction), -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
 
 }
 
-void update_PID(int _Kp, int _Ki, int _Kd) {
-  setPID_P(_Kp);
-  setPID_D(_Kd);
-  cb.setConfigParameterValue(&cfg_pid_p, &_Kp);
-  cb.setConfigParameterValue(&cfg_pid_d, &_Kd);
-}
-
-void disable_PID() {
-}
-
-
-void enable_PID() {
-}
 
 void setPID_P(int v) {
   Kp = v/pid_m;
@@ -71,14 +52,14 @@ int getPID_D() {
 }
 
 void printvals_PID() {
-  CB_DBG2REMOTE(    "%lu(%lu@%lu): IR(%u,%u,%u),Kpd(%d,%d)/100,Sab(%d,%d),Mab(%d,%d),XY(%d,%d),MEM(%d)\n\n", //VCC(%d)", // e(%d) PeDe(%d,%d)
+  CB_DBG(    "%lu(%lu@%lu): IR(%u,%u,%u),Kpd(%d,%d)/100,Sab(%d,%d), XY(%d,%d),MEM(%d)\n\n", //VCC(%d)", // e(%d) PeDe(%d,%d)
              loopNowTime,
              loopDeltaTime,
              loopcount,
              IRvals[0], IRvals[1], IRvals[2],
              Kp*100, Kd*100, 
              //error, P_error, D_error,
-             speedA, speedB, manualA, manualB,
+             speedA, speedB,
              xAxisValue, yAxisValue,
              cb.getFreeMemory()
              //ANALOG_READ(BATTERY_PIN)

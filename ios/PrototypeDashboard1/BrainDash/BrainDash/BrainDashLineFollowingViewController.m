@@ -7,7 +7,7 @@
 //
 
 #import "BrainDashLineFollowingViewController.h"
-
+#import <CannybotsController.h>
 @interface BrainDashLineFollowingViewController ()
 {
 }
@@ -53,6 +53,11 @@
 }
 */
 - (IBAction)swapLanes:(id)sender {
+    CannybotsController* cb = [CannybotsController sharedInstance];
+    
+    NSArray* configDescriptors = [cb getConfigParameterList];
+    
+    NSLog(@"Config Params: %@",configDescriptors);
 }
 
 - (IBAction)goLeft:(id)sender {
@@ -62,6 +67,8 @@
 - (IBAction)stop:(id)sender {
 }
 - (IBAction)go:(id)sender {
+    CannybotsController* cb = [CannybotsController sharedInstance];
+
 }
 - (IBAction)speedChanged:(UISlider*)sender {
     int speed= (int)(sender.value * 255);

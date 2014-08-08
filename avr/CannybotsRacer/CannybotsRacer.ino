@@ -10,13 +10,20 @@
 Cannybots& cb = Cannybots::getInstance();
 
 
-uint16_t  cb_version = LF_MAJOR_VERSION*255 + LF_MINOR_VERSION;
-uint32_t  cb_bot_id  = 0xCB1FB075;
-bool debugEnabled = false;
+//TODO move to Cannybots lib
+uint32_t  cb_bot_type = 0xCB1FB075;
+uint16_t  cb_version  = LF_MAJOR_VERSION*255 + LF_MINOR_VERSION;
+uint32_t  cb_bot_id   = 0xCB1FB075;
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
+bool debugEnabled = false;
+
+
+
 // Bot Config
 #define PID_METHOD_1
 #define NUM_MOTORS       2
@@ -146,16 +153,11 @@ bool isLineFollowingMode = true;
 bool forceManualMode = false;
 int baseCruiseSpeed = 150;
 int cruiseSpeed = baseCruiseSpeed;
-int maxCruiseSpeed = MOTOR_MAX_SPEED;
 
 
 int speedA = 0;
 int speedB = 0;
 
-// speed only used in in manual mode:
-int manualA = 0;
-int manualB = 0;
-//int speeds[NUM_MOTORS];
 
 // Joystick
 int yAxisValue = 0;  // -255..255
@@ -201,38 +203,29 @@ void setup() {
 }
 
 void loop() {
-  // do some stats...
+  // do some stats...  
   loopcount++;
   loopNowTime = millis();
   loopDeltaTime = loopNowTime - loopLastTime;
   loopLastTime = loopNowTime;
-
-  // read and publish R sensor values
+  
+  // read IR sensor values
   read_ir_sensors();
-  //lf_emitIRValues(IRvals[0], IRvals[1], IRvals[2]);
-
-
+  // publish IR values
+  lf_emitIRValues(IRvals[0], IRvals[1], IRvals[2]);
+  
   // count up the time spent off the line, rahter than switching to manual mode the instance the mid sensor goes of the line
   if ((IRvals[1] <= WHITE_THRESHOLD )) {
-
     offTheLineTime += loopNowTime - offLineLastTime;
     offLineLastTime = loopNowTime;
-
     if (offTheLineTime > OFF_LINE_MAX_TIME) {
-      if (resetSpeed) {
-        speedA = speedB = manualA = manualB = 0;
-        resetSpeed = false;
-      }
       isLineFollowingMode = 0;
     }
-
   } else {
     offTheLineTime = 0;
     isLineFollowingMode = 1;
-    resetSpeed = true;
   }
-
-
+  
   if (forceManualMode) {
     isLineFollowingMode = 0;
   }
@@ -240,97 +233,30 @@ void loop() {
   lf_report_followingMode(isLineFollowingMode);
 
   if (isLineFollowingMode) {
-    enable_PID();
     calculate_PID();
+    speedA = speedA + (yAxisValue/3); //superpose yAxis with PID output speed
+    speedB = speedB + (yAxisValue/3);
   } else {
     // in manual mode
-    disable_PID();
     if ( (millis() - cb.getLastInboundCommandTime()) > MANUAL_MODE_RADIOSILENCE_TIMEOUT) {
       // no command has been received in the last X millis, err on the side of caution and stop!
       speedA = speedB =  0;
     } else {
-      // rate limit/ease the speed change
-      speedA = speedA + min((manualA - speedA) / MAX_MOTOR_DELTA_DIVISOR, MAX_MOTOR_DELTA * sign(manualA - speedA));
-      speedB = speedB + min((manualB - speedB) / MAX_MOTOR_DELTA_DIVISOR, MAX_MOTOR_DELTA * sign(manualB - speedB));
+      // just allow revese move to get back to line.. 
+      if (yAxisValue < 0){
+        speedA = yAxisValue/5; //-xAxisValue
+        speedB = yAxisValue/5; //xAxisValue
+      } else {
+        speedA = speedB = 0;
+      }
     }
   }
   motor(speedA, speedB);
+  delay(5);
   printvalues();
-
   cb.update();
-  //ignore this for now
-#ifdef USE_IR_WAYPOINT_DETECTION
-  irwaypoint_loop();
-#endif
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////
-// Joystick to motor speed conversion
-
-void calculateMotorSpeedFromJoystick(int xAxisValue, int yAxisValue, int* motor1, int* motor2) {
-  // direction (X axis) -255 .. +255
-  // throttle  (Y axis) -255 .. +255
-
-  // handle throttle
-  bool isForward = yAxisValue > 0;
-  long x2 = (long)xAxisValue * (long)xAxisValue;
-  long y2 = (long)yAxisValue * (long)yAxisValue;
-
-  // get the vecor length, constrain it to max motor speed and then remap to a phase angle range more suitable to an accelration curve
-  int throttle = constrain(sqrt( x2 + y2) , -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
-  throttle = map (throttle, -255, 255, 270, 270 + 180);
-  throttle = sin( radians(throttle) ) * MOTOR_MAX_SPEED;
-
-  float throttleRatio = (1.0 / MOTOR_MAX_SPEED) * throttle;
-
-  int leftMotorSpeed  = 0;
-  int rightMotorSpeed = 0;
-  rightMotorSpeed = leftMotorSpeed  = throttleRatio * MOTOR_MAX_SPEED;
-
-
-  // handle direction
-  // only calc left & right if outside of X axis deadzone (touch screens are terrible feedback devices, so be generous!)
-  unsigned int xMag  = abs(xAxisValue);
-
-  if ( xMag > XAXIS_DEADZONE  ) {
-    bool isLeft = xAxisValue < 0;
-    // adjust for the fact that the XAXIS_DEADZONE moves the start speed from 0 to XAXIS_DEADZONE
-    int direction = map (xAxisValue + (isForward ? XAXIS_DEADZONE : -XAXIS_DEADZONE), -255 - XAXIS_DEADZONE, 255 + XAXIS_DEADZONE, -255, 255);
-    direction = map (xAxisValue, -255, 255, 270, 270 + 180);
-    direction = sin( radians(direction) ) * MOTOR_MAX_SPEED;
-
-    float directionRatio = abs((1.0 / MOTOR_MAX_SPEED) * direction);
-
-    int speed = throttleRatio * MOTOR_MAX_SPEED;
-    if (isLeft) {
-      leftMotorSpeed  = (1.0 - directionRatio * 2) * speed;
-      rightMotorSpeed = directionRatio * speed;
-    } else {
-      leftMotorSpeed  = directionRatio * speed;
-      rightMotorSpeed = (1.0 - directionRatio * 2) * speed;
-    }
-  } // nothing, was outside X axis stick deadzone
-
-  // re-apply fwd/back sign from
-  leftMotorSpeed = leftMotorSpeed * (isForward ? 1 : -1);
-  rightMotorSpeed = rightMotorSpeed * (isForward ? 1 : -1);
-
-
-  CB_DBG("%lu: xAxisValue,yAxisValue(%d,%d) =  throttle(%d),  Left,Right(%d,%d)", millis(), xAxisValue, yAxisValue, throttle, leftMotorSpeed, rightMotorSpeed);
-#ifdef MOTOR_A_IS_ON_RIGHT
-  *motor1 = rightMotorSpeed;
-  *motor2 = leftMotorSpeed;
-#else
-  *motor2 = rightMotorSpeed;
-  *motor1 = leftMotorSpeed;
-#endif
-}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -452,30 +378,20 @@ void lf_report_followingMode(bool isLineMode) {
 
 
 void lf_updateMotorSpeeds(int _speedA, int _speedB, int _dummy) {
-  //CB_DBG("%d,%d", _speedA, _speedB)
-  manualA = _speedA;
 }
 
-void lf_updateAxis(int xAxis, int yAxis, int _dummy) {
-  //CB_DBG("axis=%d,%d", xAxis, yAxis);
-  xAxisValue = xAxis;          //joy X axis vale  = Direction  -255 to 255
+void lf_updateAxis(int xAxis, int yAxis, int _dummy) {  
+  xAxisValue = xAxis;  //joy X axis vale  = Direction  -255 to 255
   yAxisValue = yAxis;  //joy y axis vale = Throttle    -255 to 255
-  if (isLineFollowingMode) {
-    manualA = yAxisValue > 0 ? yAxisValue : 0;
-  } else if ( (0 == xAxisValue) && (yAxisValue == 0) ) {
-    manualA = manualB = 0;
-    speedA = speedB = 0;
-    motor(0, 0);                  // immediate stop
-  } else {
-    calculateMotorSpeedFromJoystick(xAxisValue, yAxisValue, &manualA, &manualB);
-  }
 }
 
 
 void lf_updatePID(int _Kp, int _Ki, int _Kd) {
   CB_DBG("PID=%d,%d,%d", _Kp, _Ki, _Kd);
-  update_PID(_Kp, _Ki, _Kd);
-
+  setPID_P(_Kp);
+  setPID_D(_Kd); 
+  cb.setConfigParameterValue(&cfg_pid_p, &_Kp);
+  cb.setConfigParameterValue(&cfg_pid_d, &_Kd);
 }
 
 void lf_updateBias (int b1, int b2, int b3) {
@@ -495,8 +411,8 @@ void lf_updateLineFollowingMode(int _forceManualMode, int _d1, int _d2) {
 }
 
 void lf_emitConfig(int _d1, int _d2, int _d3) {
-  //cb.callMethod(&RACER_PID, getPID_P(), getPID_I(), getPID_D());
-  //cb.callMethod(&RACER_IRBIAS, IRbias[0], IRbias[1], IRbias[2]);
+  cb.callMethod(&RACER_PID, getPID_P(), getPID_I(), getPID_D());
+  cb.callMethod(&RACER_IRBIAS, IRbias[0], IRbias[1], IRbias[2]);
 }
 
 void lf_emitIRValues(int v1, int v2, int v3) {
@@ -521,7 +437,6 @@ void lf_ping(int v1) {
 // Cannybots glulogic
 
 void mycannybots_setup() {
-  delay(5000);
   cb.registerHandler(&RACER_CRUISESPEED, lf_updateMotorSpeeds);
   cb.registerHandler(&RACER_LINEFOLLOWING_MODE, lf_updateLineFollowingMode);
   cb.registerHandler(&RACER_PID, lf_updatePID);
@@ -532,6 +447,7 @@ void mycannybots_setup() {
   cb.registerHandler(&RACER_PING, lf_ping);
 
   cb.setConfigStorage(CFG_ID, CFG_BASE, sizeof(cb_app_config), LF_MAJOR_VERSION, LF_MINOR_VERSION);
+  cb.registerConfigParameter(&cfg_version, &cb_bot_type);
   cb.registerConfigParameter(&cfg_version, &cb_version);
   cb.registerConfigParameter(&cfg_bot_id, &cb_bot_id);
   cb.registerConfigParameter(&cfg_battery_hasSense, &hasBattSense);
@@ -559,18 +475,18 @@ void mycannybots_setup() {
   cb.registerConfigParameter(&cfg_motorB_pin_sense, &pinBsense);
   cb.registerConfigParameter(&cfg_motorB_postiveSpeedisFwd, &MOTOR_B_POS_IS_FORWARD);
   cb.registerConfigParameter(&cfg_motorB_id, &motorB_id);
-  cb.registerConfigParameter(&cfg_motor_speedSmoothingDivisions, &MAX_MOTOR_DELTA_DIVISOR);
-  cb.registerConfigParameter(&cfg_motor_speedSmoothingMaxDelta, &MAX_MOTOR_DELTA);
+//  cb.registerConfigParameter(&cfg_motor_speedSmoothingDivisions, &MAX_MOTOR_DELTA_DIVISOR);
+//  cb.registerConfigParameter(&cfg_motor_speedSmoothingMaxDelta, &MAX_MOTOR_DELTA);
   cb.registerConfigParameter(&cfg_pid_p, &Kp);
   cb.registerConfigParameter(&cfg_pid_i, &Ki);
   cb.registerConfigParameter(&cfg_pid_d, &Kd);
-  cb.registerConfigParameter(&cfg_pid_divisor, &PID_DIV);
+//  cb.registerConfigParameter(&cfg_pid_divisor, &PID_DIV);
   cb.registerConfigParameter(&cfg_joystick_xAxisDeadzone, &XAXIS_DEADZONE);
   cb.registerConfigParameter(&cfg_cruiseSpeed_defaultSpeed, &baseCruiseSpeed);
-  cb.registerConfigParameter(&cfg_cruiseSpeed_manualMaxSpeed, &maxCruiseSpeed);
-  cb.registerConfigParameter(&cfg_offLineMaxTime, &OFF_LINE_MAX_TIME);
-  cb.registerConfigParameter(&cfg_info_printValsInterval, &PRINTVALS_INTERVAL);
-  cb.registerConfigParameter(&cfg_debugFlag, &debugEnabled);
+//  cb.registerConfigParameter(&cfg_cruiseSpeed_manualMaxSpeed, &maxCruiseSpeed);
+//  cb.registerConfigParameter(&cfg_offLineMaxTime, &OFF_LINE_MAX_TIME);
+//  cb.registerConfigParameter(&cfg_info_printValsInterval, &PRINTVALS_INTERVAL);
+//  cb.registerConfigParameter(&cfg_debugFlag, &debugEnabled);
   cb.populateVariablesFromConfig();
   cb.begin();
 }

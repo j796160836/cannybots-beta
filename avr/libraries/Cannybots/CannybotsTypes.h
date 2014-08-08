@@ -94,11 +94,11 @@ extern "C" {
 CB_ID(0-CB_MAX_SYS_DESCRIPTORS, _CB_SYS_CALL, "syscall");       // multi-purpose system call, first uint8_t param is function select, following bytes will depend on func.
 CB_ID(1-CB_MAX_SYS_DESCRIPTORS, _CB_SYS_LOG, "log");            // log a message (may be truncated to 20 bytes)
 
-#define _CANNYBOTS_SYSCALL_NOP                0
-#define _CANNYBOTS_SYSCALL_GET_DEVICE_ID      1
-#define _CANNYBOTS_SYSCALL_GET_VERSION        2
-#define _CANNYBOTS_SYSCALL_GET_APP_CONFIG_ID  3
-#define _CANNYBOTS_SYSCALL_GET_APP_CONFIG_VER 4
+#define _CB_SYSCALL_NOP                  0
+#define _CB_SYSCALL_GET_BOT_ID           1
+#define _CB_SYSCALL_GET_BOT_TYPE         2
+#define _CB_SYSCALL_GET_CFG_VERSION      3
+#define _CB_SYSCALL_GET_CFG_LIST         4
 
 
 

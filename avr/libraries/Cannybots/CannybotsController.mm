@@ -47,6 +47,9 @@
         }
         
          ];*/
+        
+        cb->begin();
+        
     }
     return self;
 }
@@ -135,6 +138,8 @@
 
 - (NSArray*) getConfigParameterList {
     
+    cb->getConfigParameterListFromRemote(); // call returns data asyncronoulsy
+    
     int len = cb->getConfigParameterListSize();
     NSMutableArray* desc = [[NSMutableArray alloc] initWithCapacity:len];
     
@@ -152,8 +157,8 @@
     //long      len = [data length];
     uint8_t * buf = (uint8_t*)[data bytes];
     
-    //NSString* hexString = [data hexRepresentationWithSpaces:YES];
-    //NSLog(@"Received: %@", hexString);
+    NSString* hexString = [data hexRepresentationWithSpaces:YES];
+    NSLog(@"Received: %@", hexString);
     
     uint8_t commandId = buf[CB_MSG_OFFSET_CMD];
     cb_descriptor* desc = cb->getDescriptorForCommand(commandId);

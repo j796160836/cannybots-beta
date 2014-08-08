@@ -50,7 +50,10 @@ typedef struct {
   uint32_t  cfg_bot_type;                           // 4 bytes intended to be ASCII (human readable)
   uint16_t  cfg_version;
   uint16_t  cfg_bot_id;
-
+  uint32_t  cfg_authentication_pin;
+  
+  uint32_t  _offsetPadding;
+  
   bool      cfg_battery_hasSense;
   uint8_t   cfg_battery_pin_sense;
 

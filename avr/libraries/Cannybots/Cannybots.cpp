@@ -252,6 +252,9 @@ void Cannybots::begin() {
     RFduinoBLE.begin();
     
 #endif
+    
+    
+    registerSysCalls();
 }
 
 
@@ -360,7 +363,7 @@ void RFduinoBLE_onReceive(char *data, int len) {
 void Cannybots::processInboundMessageQueue() {
     
     for (int i = 0; i < inboundMsgFIFO.count(); i++) {
-        //       CB_DBG("processInboundMessageQueue(%d)", i+1);
+               CB_DBG("processInboundMessageQueue(%d)", i+1);
         
         Message* msg = inboundMsgFIFO.dequeue();
 #ifdef ARDUINO
@@ -387,7 +390,7 @@ const char* Cannybots::getDeviceId() {
 void Cannybots::processOutboundMessageQueue() {
     
     for (int i = 0; i < outboundMsgFIFO.count(); i++) {
-        //CB_DBG("processOutboundMessageQueue(%d)", i+1);
+        CB_DBG("processOutboundMessageQueue(%d)", i+1);
         Message* msg = outboundMsgFIFO.dequeue();
 #ifdef ARDUINO
 #if defined(ARDUINO_AVR_LEONARDO)  || defined(ARDUINO_AVR_A_STAR_32U4)
@@ -416,7 +419,7 @@ void Cannybots::processOutboundMessageQueue() {
 //#import <cstring>
 
 void Cannybots::processMessage(Message* msg ) {
-    //CB_DBG("processMessage()",0);
+    CB_DBG("processMessage()",0);
 	
     // just print non-CB messages as strings
     if ( (msg->payload[0] != 'C'  ||  (msg->payload[1] != 'B' ) ) ) {
@@ -432,7 +435,7 @@ void Cannybots::processMessage(Message* msg ) {
     cb_descriptor* desc = getDescriptorForCommand(cmd);
     
     if (desc && CB_CMD_IS_METHOD(cmd)) {
-        //CB_DBG("isMethod",0);
+        CB_DBG("isMethod",0);
         switch (desc->type) {
             case CB_STRING:
                 ((cb_callback_string)desc->data)((const char*)& msg->payload[CB_MSG_OFFSET_DATA+0]);
@@ -493,9 +496,13 @@ int16_t Cannybots::getFreeMemory() {
 }
 
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//
 // Message Creation Helpers
 // TODO generalise, and make use of para count
+
 void Cannybots::createMessage(Message* msg, cb_id* cid, int16_t p1, int16_t p2, int16_t p3) {
     uint8_t tmpMsg[CB_MAX_MSG_SIZE] = {
         'C', 'B', 0,
@@ -509,6 +516,23 @@ void Cannybots::createMessage(Message* msg, cb_id* cid, int16_t p1, int16_t p2, 
     memcpy((char*)msg->payload, (char*)tmpMsg, CB_MAX_MSG_SIZE);
     msg->size = CB_MAX_MSG_SIZE;
 }
+
+
+void Cannybots::createMessage(Message* msg, cb_id* cid, int16_t p1, int16_t p2, int16_t p3, uint32_t ui32) {
+    uint8_t tmpMsg[CB_MAX_MSG_SIZE] = {
+        'C', 'B', 0,
+        Cannybots::CB_INT16_3, cid->cid,
+        3,
+        hiByteFromInt(p1),loByteFromInt(p1),
+        hiByteFromInt(p2),loByteFromInt(p2),
+        hiByteFromInt(p3),loByteFromInt(p3),
+        0,0,  0,0,  0,0, 0,0
+    };
+    memcpy((char*)msg->payload, (char*)tmpMsg, CB_MAX_MSG_SIZE);
+    msg->size = CB_MAX_MSG_SIZE;
+}
+
+
 void Cannybots::createMessage(Message* msg, cb_id* cid, int16_t p1, int16_t p2) {
     uint8_t tmpMsg[CB_MAX_MSG_SIZE] = {
         'C', 'B', 0,
@@ -610,30 +634,32 @@ void Cannybots::callMethod(cb_id* cid, const char* p1) {
 
 
 void Cannybots::setConfigStorage(const char* magic, const uint16_t start, const uint16_t size, uint8_t majorVersion, uint8_t minorVersion) {
+    
+    nvBaseAddress = start;
+
 #ifdef ARDUINO
-    EEPROM.setMemPool(start, start+size);
+    EEPROM.setMemPool(nvBaseAddress, nvBaseAddress+size);
     // Set maximum allowed writes to maxAllowedWrites.
     // More writes will only give errors when _EEPROMEX_DEBUG is set
     EEPROM.setMaxAllowedWrites(100);
     delay(2000);
     
-    nvBaseAddress = start;
     
     // TODO: check mage bytes at 'start'
     uint16_t len = strlen(magic);
     bool match=true;
     for (int i=0; i < len; i++) {
-        if (EEPROM.readByte(start+i) != magic[i]) {
+        if (EEPROM.readByte(nvBaseAddress+i) != magic[i]) {
             match=false;
         }
     }
     if (match == false) {
         CB_DBG("NV not set",-0);
         for (int i=0; i < len; i++) {
-            //nvSetByte(start+i, magic[i];
+            EEPROM.writeByte(nvBaseAddress+i, magic[i]);
         }
         for (int i=len; i < size; i++) {
-            EEPROM.writeByte(start+i, 0);
+            EEPROM.writeByte(nvBaseAddress+i, 0);
         }
     }
 #endif
@@ -660,6 +686,7 @@ void Cannybots::setConfigStorage(const char* magic, const uint16_t start, const 
  }
  */
 #define _CB_CFG_OFFSET(_id) nvBaseAddress+_id->cid
+
 void Cannybots::getConfigParameterValue(cb_nv_id* _id, uint8_t* v) {
     *v= EEPROM.readByte(_CB_CFG_OFFSET(_id));
 }
@@ -749,14 +776,58 @@ void Cannybots::populateVariablesFromConfig() {
 }
 
 
-        
 uint16_t Cannybots::getConfigParameterListSize() {
     return configVars.size();
 }
 
 cb_descriptor* Cannybots::getConfigParameterListItem(int16_t index) {
     return configVars.get(index);
+}
 
+void Cannybots::getConfigParameterListFromRemote() {
+
+    Message* msg = new Message();
+    createMessage(msg, &_CB_SYS_CALL, _CB_SYSCALL_GET_CFG_LIST);
+    addOutboundMessage(msg);
 }
 
 
+void Cannybots::sendConfigParameterList() {
+    
+    int len = getConfigParameterListSize();
+    for (int i = 0; i < len; i++) {
+        CB_DBG("Sending CFG %d", i);
+        cb_descriptor* desc= getConfigParameterListItem(i);
+        
+        //Message* msg = new Message();
+        //createMessage(msg, &_CB_SYS_CALL, _CB_SYSCALL_GET_CFG_LIST, desc->cid_t.cidNV->cid, desc->type, 0); // * (desc->data)
+        //addOutboundMessage(msg);
+#ifdef ARDUINO
+        delay(50);
+#endif
+    }
+}
+
+
+// the syscal handler for methods that need to run on the bot
+static void _cb_syscall_impl_bot(int16_t p1, int16_t p2, int16_t p3) {
+    switch (p1) {
+        case (_CB_SYSCALL_GET_CFG_LIST): {
+            Cannybots& cb = Cannybots::getInstance();
+            cb.sendConfigParameterList();
+            break;
+        }
+        default: {
+            CB_DBG("unknown syscall %d", p1);
+            break;
+        }
+    }
+}
+
+void Cannybots::registerSysCalls() {
+#ifdef ARDUINO
+    registerHandler(&_CB_SYS_CALL, _cb_syscall_impl_bot);
+#else
+    
+#endif
+}
