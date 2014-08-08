@@ -641,7 +641,7 @@ void Cannybots::setConfigStorage(const char* magic, const uint16_t start, const 
     EEPROM.setMemPool(nvBaseAddress, nvBaseAddress+size);
     // Set maximum allowed writes to maxAllowedWrites.
     // More writes will only give errors when _EEPROMEX_DEBUG is set
-    EEPROM.setMaxAllowedWrites(100);
+    EEPROM.setMaxAllowedWrites(1000);
     delay(2000);
     
     
@@ -654,11 +654,16 @@ void Cannybots::setConfigStorage(const char* magic, const uint16_t start, const 
         }
     }
     if (match == false) {
-        CB_DBG("NV not set",-0);
+        delay(2000);
+
+        CB_DBG("NV not set",0);
         for (int i=0; i < len; i++) {
+            CB_DBG("write %x @ %d", magic[i], nvBaseAddress+i);
+
             EEPROM.writeByte(nvBaseAddress+i, magic[i]);
         }
         for (int i=len; i < size; i++) {
+            CB_DBG("write 0 @ %d", nvBaseAddress+i);
             EEPROM.writeByte(nvBaseAddress+i, 0);
         }
     }
@@ -766,13 +771,22 @@ _CB_TEMPLATE_registerConfigParameter(uint32_t,CB_UINT32);
 
 void Cannybots::populateVariablesFromConfig() {
     cb_descriptor *desc=NULL;
-    // find mathicg methods
-    // TODO: optimise by searching the 'bands' defined in config.h:  CB_[MIN|MAX]_CMD_[METHOD|CONFIG|VARIABLE]_TYPE
     for(int i = 0; i < configVars.size(); i++){
         desc = configVars.get(i);
-        CB_DBG("NV: %d = %d\n", i, desc->cid_t.cidNV->cid);
+        switch (desc->type) {
+            case CB_BYTE:   getConfigParameterValue(desc->cid_t.cidNV, (uint8_t*) (desc->data)); break;
+            case CB_UINT8:  getConfigParameterValue(desc->cid_t.cidNV, (uint8_t*) (desc->data)); break;
+            case CB_INT8:   getConfigParameterValue(desc->cid_t.cidNV, (int8_t*)  (desc->data)); break;
+            case CB_UINT16: getConfigParameterValue(desc->cid_t.cidNV, (uint16_t*)(desc->data)); break;
+            case CB_INT16:  getConfigParameterValue(desc->cid_t.cidNV, (int16_t*) (desc->data)); break;
+            case CB_UINT32: getConfigParameterValue(desc->cid_t.cidNV, (uint32_t*)(desc->data)); break;
+            case CB_INT32:  getConfigParameterValue(desc->cid_t.cidNV, (int32_t*) (desc->data)); break;
+                
+            default:
+                CB_DBG("Unknown config type: %d", desc->type);
+                break;
+        }
     }
-
 }
 
 
