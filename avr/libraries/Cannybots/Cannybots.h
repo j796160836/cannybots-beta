@@ -105,7 +105,7 @@
 class Cannybots
 {
 public:
-    // Callback parameter prototype
+    // Type MetaInfo for: Message parameter type, Config type and Callback method signatures (up to 255)
     const static cb_type CB_VOID;
     const static cb_type CB_BYTE;
     const static cb_type CB_INT8;
@@ -214,9 +214,13 @@ public:
     // public queue methods
     
     void addInboundMessage(Message* msg)  { inboundMsgFIFO.enqueue(msg);  }
+    
+    // TODO: make sending immediately a configuration option
     void addOutboundMessage(Message* msg) { outboundMsgFIFO.enqueue(msg); }
     
     
+    void sendMessage(Message* msg);
+
     
     // Message Creation Helpers
     // TODO generalise, and make use of para count
@@ -274,6 +278,8 @@ public:
     void            getConfigParameterListFromRemote();
     uint16_t        getConfigParameterListSize();
     cb_descriptor*  getConfigParameterListItem(int16_t index);
+
+    void setConfigParameter(uint8_t cid, uint32_t value);
 
     void sendConfigParameterList();
 

@@ -8,6 +8,9 @@
 
 #import "BrainDashLineFollowingViewController.h"
 #import <CannybotsController.h>
+
+#import "CannybotsRacer.h"
+
 @interface BrainDashLineFollowingViewController ()
 {
 }
@@ -56,18 +59,34 @@
     CannybotsController* cb = [CannybotsController sharedInstance];
     
     NSArray* configDescriptors = [cb getConfigParameterList];
-    
+
+    [cb setConfigParameter_INT16:&cfg_ir_max   p1:1000];
+    [cb setConfigParameter_INT16:&cfg_ir_whiteThreshold   p1:700];
+    [cb setConfigParameter_UINT8:&cfg_ir_pin_1 p1:24];
+    [cb setConfigParameter_UINT8:&cfg_ir_pin_2 p1:26];
+    [cb setConfigParameter_UINT8:&cfg_ir_pin_3 p1:29];
+
     NSLog(@"Config Params: %@",configDescriptors);
 }
 
 - (IBAction)goLeft:(id)sender {
+
+    CannybotsController* cb = [CannybotsController sharedInstance];
+
+    [cb setConfigParameter_INT16:&cfg_ir_max   p1:1000];
+    [cb setConfigParameter_INT16:&cfg_ir_whiteThreshold   p1:700];
+    // TODO: cratea convineice for Arduiono pins
+    [cb setConfigParameter_UINT8:&cfg_ir_pin_1 p1:24];  // A6
+    [cb setConfigParameter_UINT8:&cfg_ir_pin_2 p1:26];  // A8
+    [cb setConfigParameter_UINT8:&cfg_ir_pin_3 p1:29];  // A10
+
 }
 - (IBAction)goRight:(id)sender {
+
 }
 - (IBAction)stop:(id)sender {
 }
 - (IBAction)go:(id)sender {
-    CannybotsController* cb = [CannybotsController sharedInstance];
 
 }
 - (IBAction)speedChanged:(UISlider*)sender {

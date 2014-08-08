@@ -138,17 +138,53 @@
 
 - (NSArray*) getConfigParameterList {
     
-    cb->getConfigParameterListFromRemote(); // call returns data asyncronoulsy
+    //cb->getConfigParameterListFromRemote(); // call returns data asyncronoulsy
+    [self callMethod:&_CB_SYS_CALL p1:_CB_SYSCALL_GET_CFG_LIST p2:0 p3:0];
     
     int len = cb->getConfigParameterListSize();
     NSMutableArray* desc = [[NSMutableArray alloc] initWithCapacity:len];
     
     for (int index = 0; index < len; index ++ ){
-        cb_descriptor* desc = cb->getConfigParameterListItem(index);
+        //cb_descriptor* desc = cb->getConfigParameterListItem(index);
     }
     
     return desc;
 }
+
+
+
+- (void) setConfigParameter_BOOL:(cb_nv_id*)cid p1:(uint8_t)p1 {
+    
+    [self callMethod:&_CB_SYS_CALL p1:_CB_SYSCALL_SET_CFG_PARAM p2:cid->cid  p3:p1];
+
+    
+}
+
+- (void) setConfigParameter_BYTE:(cb_nv_id*)cid p1:(uint8_t)p1 {
+    [self callMethod:&_CB_SYS_CALL p1:_CB_SYSCALL_SET_CFG_PARAM p2:cid->cid  p3:p1];
+}
+
+
+- (void) setConfigParameter_INT8:(cb_nv_id*)cid p1:(int8_t)p1 {
+    [self callMethod:&_CB_SYS_CALL p1:_CB_SYSCALL_SET_CFG_PARAM p2:cid->cid  p3:p1];
+}
+- (void) setConfigParameter_UINT8:(cb_nv_id*)cid p1:(uint8_t)p1 {
+    [self callMethod:&_CB_SYS_CALL p1:_CB_SYSCALL_SET_CFG_PARAM p2:cid->cid  p3:p1];
+}
+
+
+- (void) setConfigParameter_INT16:(cb_nv_id*)cid p1:(int16_t)p1 {
+    [self callMethod:&_CB_SYS_CALL p1:_CB_SYSCALL_SET_CFG_PARAM p2:cid->cid  p3:p1];
+    
+}
+
+- (void) setConfigParameter_UINT16:(cb_nv_id*)cid p1:(uint16_t)p1 {
+    [self callMethod:&_CB_SYS_CALL p1:_CB_SYSCALL_SET_CFG_PARAM p2:cid->cid  p3:p1];
+    
+}
+
+//- (void) setConfigParameter_UINT32:(cb_nv_id*)cid p1:(uint32_t)p1
+//- (void) setConfigParameter_INT32:(cb_nv_id*)cid p1:(int32_t)p1
 
 
 

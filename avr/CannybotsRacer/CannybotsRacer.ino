@@ -13,7 +13,7 @@ Cannybots& cb = Cannybots::getInstance();
 //TODO move to Cannybots lib
 uint32_t  cb_bot_type = 0xCB1FB075;
 uint16_t  cb_version  = LF_MAJOR_VERSION*255 + LF_MINOR_VERSION;
-uint32_t  cb_bot_id   = 0xCB1FB075;
+uint32_t  cb_bot_id   = 0x0000CB01;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -22,18 +22,14 @@ uint32_t  cb_bot_id   = 0xCB1FB075;
 //
 bool debugEnabled = false;
 
-
-
 // Bot Config
 #define PID_METHOD_1
 #define NUM_MOTORS       2
 #define NUM_IR_SENSORS 3
 
 // PID
-
 uint8_t  PID_SAMPLE_TIME      = 10;
 uint8_t  PID_DIV              = 10;
-
 
 uint16_t PRINTVALS_INTERVAL   = 1000;
 uint16_t OFF_LINE_MAX_TIME    = 200;
@@ -42,17 +38,12 @@ uint16_t MANUAL_MODE_RADIOSILENCE_TIMEOUT = 500;
 // Motor settings
 bool MOTOR_A_POS_IS_FORWARD = 1;
 bool MOTOR_B_POS_IS_FORWARD = 0;
-
 uint8_t motorA_id = 0;
 uint8_t motorB_id = 1;
-
 uint8_t motorDriverType = 0;
-
 bool motorDriverHasMode = false;
-uint8_t motorDriverMode = false;
-
+uint8_t motorDriverMode = 0;
 bool motorDriverHasSense = false;
-
 uint8_t MOTOR_MAX_SPEED          = 255;
 uint8_t MAX_MOTOR_DELTA_DIVISOR  =  100.0;                // number of divisions between current and target motor speed
 uint8_t MAX_MOTOR_DELTA          =   255.0;              // max motor speed change
@@ -118,7 +109,7 @@ uint8_t BATTERY_PIN=A1;                                  // Battery Voltage sens
 //#define pinB1 6
 //#define pinB2 9
 //#define pin_MODE 2
-//#define BOT_TYPE_CUSTOM_PCB 1
+//#define BOT_TYPE_CUSTOM_PCB 1¨¨
 //#define IR_MAX 1000
 //#define WHITE_THRESHOLD 700
 
@@ -165,20 +156,17 @@ int xAxisValue = 0;  // -255..255
 
 int IRvals[NUM_IR_SENSORS];
 int IRbias[NUM_IR_SENSORS];
-bool IRonBlack[NUM_IR_SENSORS];
 
 volatile unsigned long lastCommandTime = millis();
 
 unsigned long offTheLineTime = 0;
 unsigned long offLineLastTime = millis();
-bool resetSpeed = true;
 
 
 // some counters
 volatile unsigned long loopNowTime = millis();
 volatile unsigned long loopLastTime = millis();
 volatile unsigned long loopDeltaTime = millis();
-unsigned long loopcount = 0;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -204,7 +192,6 @@ void setup() {
 
 void loop() {
   // do some stats...  
-  loopcount++;
   loopNowTime = millis();
   loopDeltaTime = loopNowTime - loopLastTime;
   loopLastTime = loopNowTime;
@@ -269,25 +256,15 @@ void loop() {
 // read the IR sensors:
 // set limit on reading. The reading can be very high and inaccurate on pitch black
 void read_ir_sensors() {
-
-#ifndef USE_ANALOG_LIB
-  //ANALOG_READ(IR1); delay(ANALOG_READING_DELAY);
-#endif
+  //analogRead(IR1); delay(ANALOG_READING_DELAY);
   IRvals[0] = constrain(analogRead(IR1) - IRbias[0], 0, IR_MAX); //left looking from behind
-
-#ifndef USE_ANALOG_LIB
-  //ANALOG_READ(IR2); delay(ANALOG_READING_DELAY);
-#endif
+  //analogRead(IR2); delay(ANALOG_READING_DELAY);
   IRvals[1] = constrain(analogRead(IR2) - IRbias[1], 0, IR_MAX); //centre
-
-#ifndef USE_ANALOG_LIB
-  //ANALOG_READ(IR3); delay(ANALOG_READING_DELAY);
-#endif
+  //analogRead(IR3); delay(ANALOG_READING_DELAY);
   IRvals[2] = constrain(analogRead(IR3) - IRbias[2], 0, IR_MAX); //right
-
-  IRonBlack[0] = IRvals[0] > WHITE_THRESHOLD;
-  IRonBlack[1] = IRvals[1] > WHITE_THRESHOLD;
-  IRonBlack[2] = IRvals[2] > WHITE_THRESHOLD;
+  
+  delay (100);
+  CB_DBG("%d,%d,%d, A=%d,%d,%d, IRB(%d,%d,%d)", IR1, IR2, IR3, A6, A8, A11, IRbias[0],IRbias[1], IRbias[2]);
 }
 
 void motor(int _speedA, int _speedB) {
@@ -359,16 +336,10 @@ void lf_report_followingMode(bool isLineMode) {
   static unsigned long lastCall = millis();
   // throttle sending to 1000/x times a second
   if (millis() - lastCall > 500) {
-    cb.callMethod(&RACER_LINEFOLLOWING_MODE, isLineMode);
+    //cb.callMethod(&RACER_LINEFOLLOWING_MODE, isLineMode);
     lastCall = millis();
   }
 }
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//
-// Stored Settings  (EEPROM/Flash)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -429,6 +400,33 @@ void lf_ping(int v1) {
 }
 
 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
+/// Testing
+
+void test(int16_t p1, int16_t p2, int16_t p3) {
+
+  switch (p1) {
+    case CANNYBOTSRACER_TEST_MOTORS:
+      motor(MOTOR_MAX_SPEED, 0);
+      delay(500);
+      motor(-MOTOR_MAX_SPEED, 0);
+      delay(500);
+      motor(0, MOTOR_MAX_SPEED);
+      delay(500);
+      motor(0, -MOTOR_MAX_SPEED);
+      delay(500);
+      motor(0, 0);
+      break;
+    default:
+      break;
+  }
+}
+
+
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -446,6 +444,7 @@ void mycannybots_setup() {
   cb.registerHandler(&RACER_IRVALS, lf_emitIRValues);
   cb.registerHandler(&RACER_PING, lf_ping);
 
+  // Stored Settings  (EEPROM/Flash)
   cb.setConfigStorage(CFG_ID, CFG_BASE, sizeof(cb_app_config), LF_MAJOR_VERSION, LF_MINOR_VERSION);
   cb.registerConfigParameter(&cfg_version, &cb_bot_type);
   cb.registerConfigParameter(&cfg_version, &cb_version);
@@ -475,55 +474,15 @@ void mycannybots_setup() {
   cb.registerConfigParameter(&cfg_motorB_pin_sense, &pinBsense);
   cb.registerConfigParameter(&cfg_motorB_postiveSpeedisFwd, &MOTOR_B_POS_IS_FORWARD);
   cb.registerConfigParameter(&cfg_motorB_id, &motorB_id);
-//  cb.registerConfigParameter(&cfg_motor_speedSmoothingDivisions, &MAX_MOTOR_DELTA_DIVISOR);
-//  cb.registerConfigParameter(&cfg_motor_speedSmoothingMaxDelta, &MAX_MOTOR_DELTA);
+  cb.registerConfigParameter(&cfg_motor_speedSmoothingDivisions, &MAX_MOTOR_DELTA_DIVISOR);
+  cb.registerConfigParameter(&cfg_motor_speedSmoothingMaxDelta, &MAX_MOTOR_DELTA);
   cb.registerConfigParameter(&cfg_pid_p, &Kp);
   cb.registerConfigParameter(&cfg_pid_i, &Ki);
   cb.registerConfigParameter(&cfg_pid_d, &Kd);
-//  cb.registerConfigParameter(&cfg_pid_divisor, &PID_DIV);
   cb.registerConfigParameter(&cfg_joystick_xAxisDeadzone, &XAXIS_DEADZONE);
   cb.registerConfigParameter(&cfg_cruiseSpeed_defaultSpeed, &baseCruiseSpeed);
-//  cb.registerConfigParameter(&cfg_cruiseSpeed_manualMaxSpeed, &maxCruiseSpeed);
-//  cb.registerConfigParameter(&cfg_offLineMaxTime, &OFF_LINE_MAX_TIME);
-//  cb.registerConfigParameter(&cfg_info_printValsInterval, &PRINTVALS_INTERVAL);
-//  cb.registerConfigParameter(&cfg_debugFlag, &debugEnabled);
   cb.populateVariablesFromConfig();
   cb.begin();
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//
-/// Testing
-
-void test(int16_t p1, int16_t p2, int16_t p3) {
-
-  switch (p1) {
-    case CANNYBOTSRACER_TEST_MOTORS:
-      motor(MOTOR_MAX_SPEED, 0);
-      delay(500);
-      motor(-MOTOR_MAX_SPEED, 0);
-      delay(500);
-      motor(0, MOTOR_MAX_SPEED);
-      delay(500);
-      motor(0, -MOTOR_MAX_SPEED);
-      delay(500);
-      motor(0, 0);
-      break;
-    default:
-      break;
-  }
-}
-
-
-// bets
-
-// idetify areas of code with high changle volatility
-
-// document:
-//          CB API example
-//          ARchitecture
-//          calss diagram
-//        Areas of work
 

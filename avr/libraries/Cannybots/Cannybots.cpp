@@ -363,7 +363,7 @@ void RFduinoBLE_onReceive(char *data, int len) {
 void Cannybots::processInboundMessageQueue() {
     
     for (int i = 0; i < inboundMsgFIFO.count(); i++) {
-               CB_DBG("processInboundMessageQueue(%d)", i+1);
+               //CB_DBG("processInboundMessageQueue(%d)", i+1);
         
         Message* msg = inboundMsgFIFO.dequeue();
 #ifdef ARDUINO
@@ -387,28 +387,32 @@ const char* Cannybots::getDeviceId() {
     //Serial.println(getDeviceIdHigh(), HEX);
 }
 
+void Cannybots::sendMessage(Message* msg) {
+#ifdef ARDUINO
+#if defined(ARDUINO_AVR_LEONARDO)  || defined(ARDUINO_AVR_A_STAR_32U4)
+    Serial1.write(">>");
+    Serial1.write(msg->payload, CB_MAX_MSG_SIZE);
+#else
+    
+#ifdef __RFduino__
+    //CB_DBG("BLE len = %d", msg->size);
+    RFduinoBLE.send((char*)msg->payload, msg->size);
+#else
+    Serial.write(">>");
+    Serial.write(msg->payload, CB_MAX_MSG_SIZE);
+#endif //__RFduino__
+    
+#endif // ARDUINO_AVR_LEONARDO
+#endif // ARDUINO
+    
+}
+
 void Cannybots::processOutboundMessageQueue() {
     
     for (int i = 0; i < outboundMsgFIFO.count(); i++) {
-        CB_DBG("processOutboundMessageQueue(%d)", i+1);
+        //CB_DBG("processOutboundMessageQueue(%d)", i+1);
         Message* msg = outboundMsgFIFO.dequeue();
-#ifdef ARDUINO
-#if defined(ARDUINO_AVR_LEONARDO)  || defined(ARDUINO_AVR_A_STAR_32U4)
-        Serial1.write(">>");
-        Serial1.write(msg->payload, CB_MAX_MSG_SIZE);
-#else
-        
-#ifdef __RFduino__
-        CB_DBG("BLE len = %d", msg->size);
-         RFduinoBLE.send((char*)msg->payload, msg->size);
-#else
-        Serial.write(">>");
-        Serial.write(msg->payload, CB_MAX_MSG_SIZE);
-#endif //__RFduino__
-
-#endif // ARDUINO_AVR_LEONARDO
-#endif // ARDUINO
-        
+        sendMessage(msg);
         delete msg;
     }
 }
@@ -419,13 +423,13 @@ void Cannybots::processOutboundMessageQueue() {
 //#import <cstring>
 
 void Cannybots::processMessage(Message* msg ) {
-    CB_DBG("processMessage()",0);
+    //CB_DBG("processMessage()",0);
 	
     // just print non-CB messages as strings
     if ( (msg->payload[0] != 'C'  ||  (msg->payload[1] != 'B' ) ) ) {
         //CB_DBG("Non CB message", 0);
         msg->payload[ (msg->size)-1]=0;
-        CB_DBG("PM:%s", msg->payload);
+        //CB_DBG("PM:%s", msg->payload);
         return;
     }
     // TODO: check CRC, payload length and if this is a contination
@@ -435,7 +439,7 @@ void Cannybots::processMessage(Message* msg ) {
     cb_descriptor* desc = getDescriptorForCommand(cmd);
     
     if (desc && CB_CMD_IS_METHOD(cmd)) {
-        CB_DBG("isMethod",0);
+        //CB_DBG("isMethod",0);
         switch (desc->type) {
             case CB_STRING:
                 ((cb_callback_string)desc->data)((const char*)& msg->payload[CB_MSG_OFFSET_DATA+0]);
@@ -628,7 +632,7 @@ void Cannybots::callMethod(cb_id* cid, const char* p1) {
 
 
 ///////////////////////////////////////////////////////////////////////
-// Non-volatile methods
+// Non-volatile Configuration methods  (EEPROM/ Flash)
 
 
 
@@ -642,7 +646,7 @@ void Cannybots::setConfigStorage(const char* magic, const uint16_t start, const 
     // Set maximum allowed writes to maxAllowedWrites.
     // More writes will only give errors when _EEPROMEX_DEBUG is set
     EEPROM.setMaxAllowedWrites(1000);
-    delay(2000);
+    //delay(2000);
     
     
     // TODO: check mage bytes at 'start'
@@ -654,16 +658,16 @@ void Cannybots::setConfigStorage(const char* magic, const uint16_t start, const 
         }
     }
     if (match == false) {
-        delay(2000);
+       // delay(2000);
 
-        CB_DBG("NV not set",0);
+        //CB_DBG("NV not set",0);
         for (int i=0; i < len; i++) {
-            CB_DBG("write %x @ %d", magic[i], nvBaseAddress+i);
+            //CB_DBG("write %x @ %d", magic[i], nvBaseAddress+i);
 
             EEPROM.writeByte(nvBaseAddress+i, magic[i]);
         }
         for (int i=len; i < size; i++) {
-            CB_DBG("write 0 @ %d", nvBaseAddress+i);
+            //CB_DBG("write 0 @ %d", nvBaseAddress+i);
             EEPROM.writeByte(nvBaseAddress+i, 0);
         }
     }
@@ -684,11 +688,7 @@ void Cannybots::setConfigStorage(const char* magic, const uint16_t start, const 
 
 
 /*
- //getter/setters
- // if not on ARDUION build messag eand send
- // if on arduon use EEPROMex library
- 
- }
+ // TODO: if not on ARDUION build Message and send
  */
 #define _CB_CFG_OFFSET(_id) nvBaseAddress+_id->cid
 
@@ -783,7 +783,7 @@ void Cannybots::populateVariablesFromConfig() {
             case CB_INT32:  getConfigParameterValue(desc->cid_t.cidNV, (int32_t*) (desc->data)); break;
                 
             default:
-                CB_DBG("Unknown config type: %d", desc->type);
+                CB_DBG("?cfg:%d", desc->type);
                 break;
         }
     }
@@ -799,31 +799,72 @@ cb_descriptor* Cannybots::getConfigParameterListItem(int16_t index) {
 }
 
 void Cannybots::getConfigParameterListFromRemote() {
-
+// call on platform that process the queues (e.f. areduiono, not iOS currently)
     Message* msg = new Message();
     createMessage(msg, &_CB_SYS_CALL, _CB_SYSCALL_GET_CFG_LIST);
     addOutboundMessage(msg);
 }
 
-
+// TODO: send this in the background (will stall main loop)
 void Cannybots::sendConfigParameterList() {
     
     int len = getConfigParameterListSize();
     for (int i = 0; i < len; i++) {
-        CB_DBG("Sending CFG %d", i);
+        //CB_DBG("Sending CFG %d", i);
         cb_descriptor* desc= getConfigParameterListItem(i);
         
-        //Message* msg = new Message();
-        //createMessage(msg, &_CB_SYS_CALL, _CB_SYSCALL_GET_CFG_LIST, desc->cid_t.cidNV->cid, desc->type, 0); // * (desc->data)
+        Message* msg = new Message();
+        createMessage(msg, &_CB_SYS_CALL, _CB_SYSCALL_GET_CFG_LIST, desc->cid_t.cidNV->cid, desc->type, 0); // * (desc->data)
         //addOutboundMessage(msg);
+        sendMessage(msg);
+        delete msg;
 #ifdef ARDUINO
         delay(50);
 #endif
     }
 }
 
+void Cannybots::setConfigParameter(uint8_t cid, uint32_t value) {
+    cb_descriptor* desc = NULL;
+    
+    int len = getConfigParameterListSize();
+    for (int i = 0; i < len; i++) {
+        desc = getConfigParameterListItem(i);
+        if (cid == desc->cid_t.cidNV->cid) {
+            CB_DBG("id/off,type=%d,%d", cid, desc->type);
+            break;
+        }
+    }
+    
+    if (desc) {
+        switch (desc->type) {
+            case CB_BYTE:   setConfigParameterValue(desc->cid_t.cidNV, (uint8_t*) (&value)); *(uint8_t*)(desc->data) = (uint8_t)value;break;
+            case CB_UINT8:  setConfigParameterValue(desc->cid_t.cidNV, (uint8_t*) (&value)); *(uint8_t*)(desc->data) = (uint8_t)value;break;
+            case CB_INT8:   setConfigParameterValue(desc->cid_t.cidNV, (int8_t*)  (&value)); *(int8_t*)(desc->data) = (int8_t)value;break;
+            case CB_UINT16: setConfigParameterValue(desc->cid_t.cidNV, (uint16_t*)(&value)); *(uint16_t*)(desc->data) = (uint16_t)value;break;
+            case CB_INT16:  setConfigParameterValue(desc->cid_t.cidNV, (int16_t*) (&value)); *(int16_t*)(desc->data) = (uint16_t)value;break;
+            case CB_UINT32: setConfigParameterValue(desc->cid_t.cidNV, (uint32_t*)(&value)); *(uint32_t*)(desc->data) = (uint32_t)value;break;
+            case CB_INT32:  setConfigParameterValue(desc->cid_t.cidNV, (int32_t*) (&value)); *(int32_t*)(desc->data) = (int32_t)value;break;
+                
+            default:
+                CB_DBG("?cfT:%d", desc->type);
+                break;
+        }
+    } else {
+        CB_DBG("?cfI:%d", cid);
+    }
+    
+    for (int i = 0; i < len; i++) {
+        desc = getConfigParameterListItem(i);
+        CB_DBG("%d=%x", desc->cid_t.cidNV->cid, * (uint32_t*)desc->data);
+    }
+}
+
+
 
 // the syscal handler for methods that need to run on the bot
+
+// TODO: change parameter p3 to a UINT32
 static void _cb_syscall_impl_bot(int16_t p1, int16_t p2, int16_t p3) {
     switch (p1) {
         case (_CB_SYSCALL_GET_CFG_LIST): {
@@ -831,8 +872,13 @@ static void _cb_syscall_impl_bot(int16_t p1, int16_t p2, int16_t p3) {
             cb.sendConfigParameterList();
             break;
         }
+        case (_CB_SYSCALL_SET_CFG_PARAM): {
+            Cannybots& cb = Cannybots::getInstance();
+            cb.setConfigParameter(p2, p3);
+            break;
+        }
         default: {
-            CB_DBG("unknown syscall %d", p1);
+            CB_DBG("?sc%d", p1);
             break;
         }
     }

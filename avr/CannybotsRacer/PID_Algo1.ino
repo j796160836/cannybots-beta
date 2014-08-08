@@ -52,17 +52,14 @@ int getPID_D() {
 }
 
 void printvals_PID() {
-  CB_DBG(    "%lu(%lu@%lu): IR(%u,%u,%u),Kpd(%d,%d)/100,Sab(%d,%d), XY(%d,%d),MEM(%d)\n\n", //VCC(%d)", // e(%d) PeDe(%d,%d)
+  CB_DBG(    "%lu(%lu): IR(%u,%u,%u),Kpd(%d,%d)/100,Sab(%d,%d), XY(%d,%d),MEM(%d)\n",
              loopNowTime,
              loopDeltaTime,
-             loopcount,
              IRvals[0], IRvals[1], IRvals[2],
              Kp*100, Kd*100, 
-             //error, P_error, D_error,
              speedA, speedB,
              xAxisValue, yAxisValue,
              cb.getFreeMemory()
-             //ANALOG_READ(BATTERY_PIN)
         );
 }
 
