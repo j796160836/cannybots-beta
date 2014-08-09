@@ -5,7 +5,12 @@
 //
 // Cannybots glulogic
 
-void mycannybots_setup() {
+//TODO move to Cannybots lib
+uint32_t  cb_bot_type = 0xCB1FB075;
+uint16_t  cb_version  = LF_MAJOR_VERSION*255 + LF_MINOR_VERSION;
+uint32_t  cb_bot_id   = 0x0000CB01; 
+
+void cannybots_setup() {
   cb.registerHandler(&RACER_CRUISESPEED, lf_updateMotorSpeeds);
   cb.registerHandler(&RACER_LINEFOLLOWING_MODE, lf_updateLineFollowingMode);
   cb.registerHandler(&RACER_PID, lf_updatePID);
