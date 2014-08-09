@@ -2,7 +2,16 @@
 #define _CANNYBOTSRACER_H
 #include <CannybotsTypes.h>
 
-// This file is shared with Arduino and: iOS, Android Python etc.
+// This file is shared with Arduino and the client platforms such as: iOS, Android Python etc.
+
+// TODO: move to EEPROM config
+#define NUM_MOTORS      2
+#define NUM_IR_SENSORS  3
+#define STATUS_LED      13
+#define BOT_TYPE_CUSTOM_PCB 1
+#define MANUAL_MODE_RADIOSILENCE_TIMEOUT 500
+
+
 
 // Methods
 CB_ID(1, RACER_IRBIAS, "IRbias");
@@ -87,15 +96,16 @@ typedef struct __attribute__((packed)) {
   uint8_t   cfg_motorB_pin_sense;
   bool      cfg_motorB_postiveSpeedisFwd;
   uint8_t   cfg_motorB_id;                        // e.g. 0 = left, 1 = right
-  uint16_t  cfg_motor_speedSmoothingDivisions;
-  uint8_t   cfg_motor_speedSmoothingMaxDelta;
+  uint16_t  cfg_motor_speedSmoothingDivisions;    // in manual mode: number of divisions between current and target motor speed
+  uint8_t   cfg_motor_speedSmoothingMaxDelta;     // in manual mode: max motor speed change
 
   uint16_t  cfg_pid_p;
   uint16_t  cfg_pid_i;
   uint16_t  cfg_pid_d;
   uint16_t  cfg_pid_divisor;
+  uint16_t  cfg_pid_sampleTime;
 
-  uint8_t   cfg_joystick_xAxisDeadzone;
+  uint8_t   cfg_joystick_xAxisDeadzone;        
 
   uint8_t   cfg_cruiseSpeed_defaultSpeed;
   uint8_t   cfg_cruiseSpeed_manualMaxSpeed;
@@ -143,6 +153,7 @@ CB_CFG_ID(cfg_pid_p);
 CB_CFG_ID(cfg_pid_i);
 CB_CFG_ID(cfg_pid_d);
 CB_CFG_ID(cfg_pid_divisor);
+CB_CFG_ID(cfg_pid_sampleTime);
 CB_CFG_ID(cfg_joystick_xAxisDeadzone);
 CB_CFG_ID(cfg_cruiseSpeed_defaultSpeed);
 CB_CFG_ID(cfg_cruiseSpeed_manualMaxSpeed);

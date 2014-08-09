@@ -6,9 +6,9 @@
 // Cannybots glulogic
 
 //TODO move to Cannybots lib
-uint32_t  cb_bot_type = 0xCB1FB075;
-uint16_t  cb_version  = LF_MAJOR_VERSION*255 + LF_MINOR_VERSION;
-uint32_t  cb_bot_id   = 0x0000CB01; 
+//uint32_t  cb_bot_type = 0xCB1FB075;
+//uint16_t  cb_version  = LF_MAJOR_VERSION*255 + LF_MINOR_VERSION;
+//uint32_t  cb_bot_id   = 0x0000CB01; 
 
 void cannybots_setup() {
   cb.registerHandler(&RACER_CRUISESPEED, lf_updateMotorSpeeds);
@@ -22,6 +22,9 @@ void cannybots_setup() {
 
   // Stored Settings  (EEPROM/Flash)
   cb.setConfigStorage(CFG_ID, CFG_BASE, sizeof(cb_app_config), LF_MAJOR_VERSION, LF_MINOR_VERSION);
+#define CB_REGISTER_CONFIG(_p)    cb.registerConfigParameter(&_p, &settings._p);
+
+/*
   cb.registerConfigParameter(&cfg_bot_type, &cb_bot_type);
   cb.registerConfigParameter(&cfg_version, &cb_version);
   cb.registerConfigParameter(&cfg_bot_id, &cb_bot_id);
@@ -56,8 +59,46 @@ void cannybots_setup() {
   cb.registerConfigParameter(&cfg_pid_i, &Ki);
   cb.registerConfigParameter(&cfg_pid_d, &Kd);
   cb.registerConfigParameter(&cfg_joystick_xAxisDeadzone, &XAXIS_DEADZONE);
-  cb.registerConfigParameter(&cfg_cruiseSpeed_defaultSpeed, &baseCruiseSpeed);
-  //cb.populateVariablesFromConfig();
+  cb.registerConfigParameter(&cfg_cruiseSpeed_defaultSpeed, &settings.cfg_cruiseSpeed_defaultSpeed);
+
+  */
+  CB_REGISTER_CONFIG(cfg_bot_type);
+  CB_REGISTER_CONFIG(cfg_version);
+  CB_REGISTER_CONFIG(cfg_bot_id);
+  CB_REGISTER_CONFIG(cfg_battery_hasSense);
+  CB_REGISTER_CONFIG(cfg_battery_pin_sense);
+  CB_REGISTER_CONFIG(cfg_ir_max);
+  CB_REGISTER_CONFIG(cfg_ir_whiteThreshold);
+  CB_REGISTER_CONFIG(cfg_ir_pin_1);
+  CB_REGISTER_CONFIG(cfg_ir_pin_2);
+  CB_REGISTER_CONFIG(cfg_ir_pin_3);
+  CB_REGISTER_CONFIG(cfg_ir_bias_1);
+  CB_REGISTER_CONFIG(cfg_ir_bias_2);
+  CB_REGISTER_CONFIG(cfg_ir_bias_3);
+  CB_REGISTER_CONFIG(cfg_motorDriver_type);
+  CB_REGISTER_CONFIG(cfg_motorDriver_driveModePin);
+  CB_REGISTER_CONFIG(cfg_motorDriver_maxSpeed);
+  CB_REGISTER_CONFIG(cfg_motorDriver_hasDriveMode);
+  CB_REGISTER_CONFIG(cfg_motorDriver_hasMotorSense);
+  CB_REGISTER_CONFIG(cfg_motorA_pin_1);
+  CB_REGISTER_CONFIG(cfg_motorA_pin_2);
+  CB_REGISTER_CONFIG(cfg_motorA_pin_sense);
+  CB_REGISTER_CONFIG(cfg_motorA_postiveSpeedisFwd);
+  CB_REGISTER_CONFIG(cfg_motorA_id);
+  CB_REGISTER_CONFIG(cfg_motorB_pin_1);
+  CB_REGISTER_CONFIG(cfg_motorB_pin_2);
+  CB_REGISTER_CONFIG(cfg_motorB_pin_sense);
+  CB_REGISTER_CONFIG(cfg_motorB_postiveSpeedisFwd);
+  CB_REGISTER_CONFIG(cfg_motorB_id);
+  CB_REGISTER_CONFIG(cfg_motor_speedSmoothingDivisions);
+  CB_REGISTER_CONFIG(cfg_motor_speedSmoothingMaxDelta);
+  CB_REGISTER_CONFIG(cfg_pid_p);
+  CB_REGISTER_CONFIG(cfg_pid_i);
+  CB_REGISTER_CONFIG(cfg_pid_d);
+  CB_REGISTER_CONFIG(cfg_joystick_xAxisDeadzone);
+  CB_REGISTER_CONFIG(cfg_cruiseSpeed_defaultSpeed);
+
+  cb.populateVariablesFromConfig();
   cb.begin();
 }
 

@@ -21,16 +21,16 @@ volatile unsigned long loopDeltaTime = millis();
 
 
 void lineFollowing_setup() {
-    pinMode(pinA1, OUTPUT);
-  pinMode(pinA2, OUTPUT);
-  pinMode(pinB1, OUTPUT);
-  pinMode(pinB2, OUTPUT);
+  pinMode(settings.cfg_motorA_pin_1, OUTPUT);
+  pinMode(settings.cfg_motorA_pin_2, OUTPUT);
+  pinMode(settings.cfg_motorB_pin_1, OUTPUT);
+  pinMode(settings.cfg_motorB_pin_2, OUTPUT);
   pinMode(STATUS_LED, OUTPUT);
   digitalWrite(STATUS_LED, HIGH);
 
 #ifdef BOT_TYPE_CUSTOM_PCB
-  pinMode(pin_MODE, OUTPUT);
-  digitalWrite(pin_MODE, HIGH); //to set controller to Phase/Enable mode
+  pinMode(settings.cfg_motorDriver_driveModePin, OUTPUT);
+  digitalWrite(settings.cfg_motorDriver_driveModePin, HIGH); //to set controller to Phase/Enable mode
 #endif
 
 }
@@ -47,10 +47,10 @@ void lineFollowing_loop() {
   // publish IR values
   lf_emitIRValues(IRvals[0], IRvals[1], IRvals[2]);
    // count up the time spent off the line, rahter than switching to manual mode the instance the mid sensor goes of the line
-  if ((IRvals[1] <= WHITE_THRESHOLD )) {
+  if ((IRvals[1] <= settings.cfg_ir_whiteThreshold )) {
     offTheLineTime += loopNowTime - offLineLastTime;
     offLineLastTime = loopNowTime;
-    if (offTheLineTime > OFF_LINE_MAX_TIME) {
+    if (offTheLineTime > settings.cfg_offLineMaxTime) {
       isLineFollowingMode = 0;
     }
   } else {
@@ -65,7 +65,7 @@ void lineFollowing_loop() {
   lf_report_followingMode(isLineFollowingMode);
 
   if (isLineFollowingMode) {
-      if ((loopNowTime - pidLastTime) > PID_SAMPLE_TIME){
+      if ((loopNowTime - pidLastTime) > settings.cfg_pid_sampleTime){
         pidLastTime= loopNowTime;
         pid_calculate();
      }
@@ -81,8 +81,8 @@ void lineFollowing_loop() {
   }
   
   //
-  speedA = constrain( MOTOR_A_POS_IS_FORWARD?speedA:-speedA, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
-  speedB = constrain( MOTOR_B_POS_IS_FORWARD?speedB:-speedB, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
+  speedA = constrain( settings.cfg_motorB_postiveSpeedisFwd?speedA:-speedA, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
+  speedB = constrain( settings.cfg_motorB_postiveSpeedisFwd?speedB:-speedB, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
 
   motor(speedA, speedB);
   //delay(5);
@@ -103,11 +103,11 @@ void lineFollowing_loop() {
 // set limit on reading. The reading can be very high and inaccurate on pitch black
 void read_ir_sensors() {
   //analogRead(IR1); delay(ANALOG_READING_DELAY);
-  IRvals[0] = constrain(analogRead(IR1) - IRbias[0], 0, IR_MAX); //left looking from behind
+  IRvals[0] = constrain(analogRead(settings.cfg_ir_pin_1) - settings.cfg_ir_bias_1, 0, settings.cfg_ir_max); //left looking from behind
   //analogRead(IR2); delay(ANALOG_READING_DELAY);
-  IRvals[1] = constrain(analogRead(IR2) - IRbias[1], 0, IR_MAX); //centre
+  IRvals[1] = constrain(analogRead(settings.cfg_ir_pin_2) - settings.cfg_ir_bias_2, 0, settings.cfg_ir_max); //centre
   //analogRead(IR3); delay(ANALOG_READING_DELAY);
-  IRvals[2] = constrain(analogRead(IR3) - IRbias[2], 0, IR_MAX); //right
+  IRvals[2] = constrain(analogRead(settings.cfg_ir_pin_3) - settings.cfg_ir_bias_3, 0, settings.cfg_ir_max); //right
   
   //delay (100);
   //CB_DBG("%d,%d,%d, A=%d,%d,%d, IRB(%d,%d,%d), IRMAX=%d, WTHR=%d", IR1, IR2, IR3, A6, A8, A11, IRbias[0],IRbias[1], IRbias[2], IR_MAX, WHITE_THRESHOLD);
@@ -125,35 +125,35 @@ void motor(int _speedA, int _speedB) {
 
 void motor_customPCB(int _speedA, int _speedB)
 {
-  _speedA = constrain(_speedA, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
-  _speedB = constrain(_speedB, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
+  _speedA = constrain(_speedA, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
+  _speedB = constrain(_speedB, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
 
-  digitalWrite(pinA1, _speedA >= 0 ? HIGH : LOW) ;
-  analogWrite (pinA2, abs(_speedA));
+  digitalWrite(settings.cfg_motorA_pin_1, _speedA >= 0 ? HIGH : LOW) ;
+  analogWrite (settings.cfg_motorA_pin_2, abs(_speedA));
 
-  digitalWrite(pinB1, _speedB >= 0 ? HIGH : LOW);
-  analogWrite (pinB2, abs(_speedB));
+  digitalWrite(settings.cfg_motorB_pin_1, _speedB >= 0 ? HIGH : LOW);
+  analogWrite (settings.cfg_motorB_pin_2, abs(_speedB));
 }
 
 
 // motor controller function
 void motor_ORG(int _speedA, int _speedB) // V4
 {
-  _speedA = constrain(_speedA, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
-  _speedB = constrain(_speedB, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
+  _speedA = constrain(_speedA, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
+  _speedB = constrain(_speedB, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
   if (_speedA >= 0) {
-    analogWrite(pinA1, _speedA);
-    analogWrite(pinA2, 0);
+    analogWrite(settings.cfg_motorA_pin_1, _speedA);
+    analogWrite(settings.cfg_motorA_pin_2, 0);
   } else {
-    analogWrite(pinA1, 0);
-    analogWrite(pinA2, abs(_speedA));
+    analogWrite(settings.cfg_motorA_pin_1, 0);
+    analogWrite(settings.cfg_motorA_pin_2, abs(_speedA));
   }
   if (_speedB >= 0) {
-    analogWrite(pinB1, _speedB);
-    analogWrite(pinB2, 0);
+    analogWrite(settings.cfg_motorB_pin_1, _speedB);
+    analogWrite(settings.cfg_motorB_pin_2, 0);
   } else {
-    analogWrite(pinB1, 0);
-    analogWrite(pinB2, abs(_speedB));
+    analogWrite(settings.cfg_motorB_pin_1, 0);
+    analogWrite(settings.cfg_motorB_pin_2, abs(_speedB));
   }
 }
 
@@ -172,7 +172,7 @@ bool sign(double x) {
 void printvalues ()
 {
   static unsigned long lastPrint = millis();
-  if ( millis() - lastPrint < PRINTVALS_INTERVAL )
+  if ( millis() - lastPrint < settings.cfg_info_printValsInterval )
     return;
   lastPrint = millis();
   printvals_PID();
@@ -226,6 +226,63 @@ int getPID_I() {
 }
 int getPID_D() {
   return Kd;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Remotely called funcs
+
+
+void lf_updateMotorSpeeds(int _speedA, int _speedB, int _dummy) {
+}
+
+void lf_updateAxis(int xAxis, int yAxis, int _dummy) {  
+  xAxisValue = xAxis;  //joy X axis vale  = Direction  -255 to 255
+  yAxisValue = yAxis;  //joy y axis vale = Throttle    -255 to 255
+  //CB_DBG("joy=%d,%d", xAxis,yAxis);
+
+}
+
+
+void lf_updatePID(int _Kp, int _Ki, int _Kd) {
+  //CB_DBG("PID=%d,%d,%d", _Kp, _Ki, _Kd);
+  setPID_P(_Kp);
+  setPID_D(_Kd); 
+  cb.setConfigParameterValue(&cfg_pid_p, &_Kp);
+  cb.setConfigParameterValue(&cfg_pid_d, &_Kd);
+}
+
+void lf_updateBias (int b1, int b2, int b3) {
+  //CB_DBG("Bias=%d,%d,%d", b1, b2, b3);
+  // TODO: change to the generic:  cb.setConfigParameterValue(&NV_IRBIAS_1), no need to specify variable address again
+  cb.setConfigParameterValue(&cfg_ir_bias_1, &settings.cfg_ir_bias_1);
+  cb.setConfigParameterValue(&cfg_ir_bias_2, &settings.cfg_ir_bias_1);
+  cb.setConfigParameterValue(&cfg_ir_bias_3, &settings.cfg_ir_bias_1);
+}
+
+void lf_updateLineFollowingMode(int _forceManualMode, int _d1, int _d2) {
+  //CB_DBG("ForceManual=%d", _forceManualMode);
+  forceManualMode = _forceManualMode;
+}
+
+void lf_emitConfig(int _d1, int _d2, int _d3) {
+  cb.callMethod(&RACER_PID, getPID_P(), getPID_I(), getPID_D());
+  cb.callMethod(&RACER_IRBIAS, settings.cfg_ir_bias_1,settings.cfg_ir_bias_2, settings.cfg_ir_bias_3);
+}
+
+void lf_emitIRValues(int v1, int v2, int v3) {
+  static unsigned long lastCall = millis();
+  if (millis() - lastCall > 200) {
+    cb.callMethod(&RACER_IRVALS, v1, v2, v3);
+    lastCall = millis();
+  }
+}
+
+
+void lf_ping(int v1) {
+  //CB_DBG("ping", v1)
 }
 
 

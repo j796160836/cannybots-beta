@@ -74,6 +74,7 @@
     PAUSE_HACK;
     [cb setConfigParameter_UINT8:&cfg_battery_pin_sense p1:0];
     PAUSE_HACK;
+
     
     // TODO: crate convineice for Arduiono pins
     [cb setConfigParameter_UINT8:&cfg_ir_pin_1 p1:24];  // A6
@@ -128,6 +129,15 @@
     PAUSE_HACK;
     [cb setConfigParameter_INT16:&cfg_ir_whiteThreshold   p1:700];
     PAUSE_HACK;
+
+    
+    [cb setConfigParameter_INT16:&cfg_pid_p   p1:3];    PAUSE_HACK;
+    [cb setConfigParameter_INT16:&cfg_pid_i   p1:0];    PAUSE_HACK;
+    [cb setConfigParameter_INT16:&cfg_pid_d   p1:1];    PAUSE_HACK;
+    [cb setConfigParameter_INT16:&cfg_pid_divisor   p1:1];    PAUSE_HACK;
+    [cb setConfigParameter_INT16:&cfg_pid_sampleTime   p1:5];    PAUSE_HACK;
+
+    
 
     
     [cb setConfigParameter_INT16:&cfg_offLineMaxTime   p1:200];
