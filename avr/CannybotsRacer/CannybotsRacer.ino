@@ -1,31 +1,26 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
 // Libraries
 #include <EEPROMex.h>
-
-
 #include <Cannybots.h>
 #include "CannybotsRacer.h"
 Cannybots& cb = Cannybots::getInstance();
 
 
-//TODO move to Cannybots lib
-uint32_t  cb_bot_type = 0xCB1FB075;
-uint16_t  cb_version  = LF_MAJOR_VERSION*255 + LF_MINOR_VERSION;
-uint32_t  cb_bot_id   = 0x0000CB01;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
-bool debugEnabled = false;
 
 // Bot Config
-#define PID_METHOD_1
 #define NUM_MOTORS       2
 #define NUM_IR_SENSORS 3
+#define STATUS_LED 13
+//TODO move to Cannybots lib
+uint32_t  cb_bot_type = 0xCB1FB075;
+uint16_t  cb_version  = LF_MAJOR_VERSION*255 + LF_MINOR_VERSION;
+uint32_t  cb_bot_id   = 0x0000CB01; 
+
+bool debugEnabled = false;
 
 // PID
 uint8_t  PID_SAMPLE_TIME      = 10;
@@ -41,8 +36,7 @@ bool MOTOR_B_POS_IS_FORWARD = 0;
 uint8_t motorA_id = 0;
 uint8_t motorB_id = 1;
 uint8_t motorDriverType = 0;
-bool motorDriverHasMode = false;
-uint8_t motorDriverMode = 0;
+bool motorDriverHasMode = true;
 bool motorDriverHasSense = false;
 uint8_t MOTOR_MAX_SPEED          = 255;
 uint8_t MAX_MOTOR_DELTA_DIVISOR  =  100.0;                // number of divisions between current and target motor speed
@@ -71,53 +65,6 @@ bool    hasBattSense =false;
 uint8_t BATTERY_PIN=A1;                                  // Battery Voltage sensing
 
 
-// REdbot
-/*
-#define IR_MAX 100
-#define WHITE_THRESHOLD 100
-
-#define IR1 A9
-#define IR2 A8
-#define IR3 A6
-
-#define pinA1 5
-#define pinA2 6
-#define pinB1 10
-#define pinB2 11
-*/
-
-
-// white bot
-//#define IR1 A8
-//#define IR2 A9
-//#define IR3 A10
-// orange bot (Custom PCB)
-//#define IR1 A6
-//#define IR2 A8
-//#define IR3 A11
-
-// small white bot
-//#define pinA1 6
-//#define pinA2 5
-//#define pinB1 4
-//#define pinB2 3
-//#define pin_MODE 7
-
-// orange bot (Custom PCB)
-//#define pinA1 3
-//#define pinA2 5
-//#define pinB1 6
-//#define pinB2 9
-//#define pin_MODE 2
-//#define BOT_TYPE_CUSTOM_PCB 1¨¨
-//#define IR_MAX 1000
-//#define WHITE_THRESHOLD 700
-
-
-// Indicator LED
-#define STATUS_LED 13
-
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -128,9 +75,9 @@ uint8_t BATTERY_PIN=A1;                                  // Battery Voltage sens
 #define pid_t int
 #define pid_m 1
 
-pid_t Kp = 0;
+pid_t Kp = 5;
 pid_t Ki = 0;
-pid_t Kd = 0;
+pid_t Kd = 3;
 
 pid_t P_error = 0;
 pid_t D_error = 0;
@@ -157,18 +104,16 @@ int xAxisValue = 0;  // -255..255
 int IRvals[NUM_IR_SENSORS];
 int IRbias[NUM_IR_SENSORS];
 
-volatile unsigned long lastCommandTime = millis();
-
 unsigned long offTheLineTime = 0;
 unsigned long offLineLastTime = millis();
 
 
 // some counters
+volatile unsigned long lastCommandTime = millis();
 volatile unsigned long loopNowTime = millis();
 volatile unsigned long loopLastTime = millis();
 volatile unsigned long loopDeltaTime = millis();
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -252,6 +197,8 @@ void loop() {
 
 // Sensors and actuators
 
+// TODO: move to a CannyBots line following library
+
 
 // read the IR sensors:
 // set limit on reading. The reading can be very high and inaccurate on pitch black
@@ -263,8 +210,8 @@ void read_ir_sensors() {
   //analogRead(IR3); delay(ANALOG_READING_DELAY);
   IRvals[2] = constrain(analogRead(IR3) - IRbias[2], 0, IR_MAX); //right
   
-  delay (100);
-  CB_DBG("%d,%d,%d, A=%d,%d,%d, IRB(%d,%d,%d)", IR1, IR2, IR3, A6, A8, A11, IRbias[0],IRbias[1], IRbias[2]);
+  //delay (100);
+  //CB_DBG("%d,%d,%d, A=%d,%d,%d, IRB(%d,%d,%d), IRMAX=%d, WTHR=%d", IR1, IR2, IR3, A6, A8, A11, IRbias[0],IRbias[1], IRbias[2], IR_MAX, WHITE_THRESHOLD);
 }
 
 void motor(int _speedA, int _speedB) {
@@ -336,153 +283,9 @@ void lf_report_followingMode(bool isLineMode) {
   static unsigned long lastCall = millis();
   // throttle sending to 1000/x times a second
   if (millis() - lastCall > 500) {
-    //cb.callMethod(&RACER_LINEFOLLOWING_MODE, isLineMode);
+    cb.callMethod(&RACER_LINEFOLLOWING_MODE, isLineMode);
     lastCall = millis();
   }
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//
-// Remotely called funcs
-
-
-void lf_updateMotorSpeeds(int _speedA, int _speedB, int _dummy) {
-}
-
-void lf_updateAxis(int xAxis, int yAxis, int _dummy) {  
-  xAxisValue = xAxis;  //joy X axis vale  = Direction  -255 to 255
-  yAxisValue = yAxis;  //joy y axis vale = Throttle    -255 to 255
-}
-
-
-void lf_updatePID(int _Kp, int _Ki, int _Kd) {
-  CB_DBG("PID=%d,%d,%d", _Kp, _Ki, _Kd);
-  setPID_P(_Kp);
-  setPID_D(_Kd); 
-  cb.setConfigParameterValue(&cfg_pid_p, &_Kp);
-  cb.setConfigParameterValue(&cfg_pid_d, &_Kd);
-}
-
-void lf_updateBias (int b1, int b2, int b3) {
-  CB_DBG("Bias=%d,%d,%d", b1, b2, b3);
-  IRbias[0] = b1;
-  IRbias[1] = b2;
-  IRbias[2] = b3;
-  // TODO: change to the generic:  cb.setConfigParameterValue(&NV_IRBIAS_1), no need to specify variable address again
-  cb.setConfigParameterValue(&cfg_ir_bias_1, &IRbias[0]);
-  cb.setConfigParameterValue(&cfg_ir_bias_2, &IRbias[1]);
-  cb.setConfigParameterValue(&cfg_ir_bias_3, &IRbias[2]);
-}
-
-void lf_updateLineFollowingMode(int _forceManualMode, int _d1, int _d2) {
-  CB_DBG("ForceManual=%d", _forceManualMode);
-  forceManualMode = _forceManualMode;
-}
-
-void lf_emitConfig(int _d1, int _d2, int _d3) {
-  cb.callMethod(&RACER_PID, getPID_P(), getPID_I(), getPID_D());
-  cb.callMethod(&RACER_IRBIAS, IRbias[0], IRbias[1], IRbias[2]);
-}
-
-void lf_emitIRValues(int v1, int v2, int v3) {
-  static unsigned long lastCall = millis();
-  if (millis() - lastCall > 200) {
-    cb.callMethod(&RACER_IRVALS, v1, v2, v3);
-    lastCall = millis();
-  }
-}
-
-
-void lf_ping(int v1) {
-  //CB_DBG("ping", v1)
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//
-/// Testing
-
-void test(int16_t p1, int16_t p2, int16_t p3) {
-
-  switch (p1) {
-    case CANNYBOTSRACER_TEST_MOTORS:
-      motor(MOTOR_MAX_SPEED, 0);
-      delay(500);
-      motor(-MOTOR_MAX_SPEED, 0);
-      delay(500);
-      motor(0, MOTOR_MAX_SPEED);
-      delay(500);
-      motor(0, -MOTOR_MAX_SPEED);
-      delay(500);
-      motor(0, 0);
-      break;
-    default:
-      break;
-  }
-}
-
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//
-// Cannybots glulogic
-
-void mycannybots_setup() {
-  cb.registerHandler(&RACER_CRUISESPEED, lf_updateMotorSpeeds);
-  cb.registerHandler(&RACER_LINEFOLLOWING_MODE, lf_updateLineFollowingMode);
-  cb.registerHandler(&RACER_PID, lf_updatePID);
-  cb.registerHandler(&RACER_IRBIAS, lf_updateBias);
-  cb.registerHandler(&RACER_JOYAXIS, lf_updateAxis);
-  cb.registerHandler(&RACER_CONFIG, lf_emitConfig);
-  cb.registerHandler(&RACER_IRVALS, lf_emitIRValues);
-  cb.registerHandler(&RACER_PING, lf_ping);
-
-  // Stored Settings  (EEPROM/Flash)
-  cb.setConfigStorage(CFG_ID, CFG_BASE, sizeof(cb_app_config), LF_MAJOR_VERSION, LF_MINOR_VERSION);
-  cb.registerConfigParameter(&cfg_version, &cb_bot_type);
-  cb.registerConfigParameter(&cfg_version, &cb_version);
-  cb.registerConfigParameter(&cfg_bot_id, &cb_bot_id);
-  cb.registerConfigParameter(&cfg_battery_hasSense, &hasBattSense);
-  cb.registerConfigParameter(&cfg_battery_pin_sense, &BATTERY_PIN);
-  cb.registerConfigParameter(&cfg_ir_max, &IR_MAX);
-  cb.registerConfigParameter(&cfg_ir_whiteThreshold, &WHITE_THRESHOLD);
-  cb.registerConfigParameter(&cfg_ir_pin_1, &IR1);
-  cb.registerConfigParameter(&cfg_ir_pin_2, &IR2);
-  cb.registerConfigParameter(&cfg_ir_pin_3, &IR3);
-  cb.registerConfigParameter(&cfg_ir_bias_1, &IRbias[0]);
-  cb.registerConfigParameter(&cfg_ir_bias_2, &IRbias[1]);
-  cb.registerConfigParameter(&cfg_ir_bias_3, &IRbias[2]);
-  cb.registerConfigParameter(&cfg_motorDriver_type, &motorDriverType);
-  cb.registerConfigParameter(&cfg_motorDriver_mode, &motorDriverMode);
-  cb.registerConfigParameter(&cfg_motorDriver_maxSpeed, &MOTOR_MAX_SPEED);
-  cb.registerConfigParameter(&cfg_motorDriver_hasDriveMode, &motorDriverHasMode);
-  cb.registerConfigParameter(&cfg_motorDriver_hasMotorSense, &motorDriverHasSense);
-  cb.registerConfigParameter(&cfg_motorA_pin_1, &pinA1);
-  cb.registerConfigParameter(&cfg_motorA_pin_2, &pinA2);
-  cb.registerConfigParameter(&cfg_motorA_pin_sense, &pinAsense);
-  cb.registerConfigParameter(&cfg_motorA_postiveSpeedisFwd, &MOTOR_A_POS_IS_FORWARD);
-  cb.registerConfigParameter(&cfg_motorA_id, &motorA_id);
-  cb.registerConfigParameter(&cfg_motorB_pin_1, &pinB1);
-  cb.registerConfigParameter(&cfg_motorB_pin_2, &pinB2);
-  cb.registerConfigParameter(&cfg_motorB_pin_sense, &pinBsense);
-  cb.registerConfigParameter(&cfg_motorB_postiveSpeedisFwd, &MOTOR_B_POS_IS_FORWARD);
-  cb.registerConfigParameter(&cfg_motorB_id, &motorB_id);
-  cb.registerConfigParameter(&cfg_motor_speedSmoothingDivisions, &MAX_MOTOR_DELTA_DIVISOR);
-  cb.registerConfigParameter(&cfg_motor_speedSmoothingMaxDelta, &MAX_MOTOR_DELTA);
-  cb.registerConfigParameter(&cfg_pid_p, &Kp);
-  cb.registerConfigParameter(&cfg_pid_i, &Ki);
-  cb.registerConfigParameter(&cfg_pid_d, &Kd);
-  cb.registerConfigParameter(&cfg_joystick_xAxisDeadzone, &XAXIS_DEADZONE);
-  cb.registerConfigParameter(&cfg_cruiseSpeed_defaultSpeed, &baseCruiseSpeed);
-  cb.populateVariablesFromConfig();
-  cb.begin();
 }
 
 

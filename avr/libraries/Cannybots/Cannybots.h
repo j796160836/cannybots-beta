@@ -284,6 +284,8 @@ public:
     void sendConfigParameterList();
 
 
+    void dumpConfig();
+
 private:
     static Cannybots instance; // Guaranteed to be destroyed. (yeah, when the power goes lol)
 
@@ -314,6 +316,8 @@ private:
     
     // utils
     bool         debug;
+    
+
     
 #ifdef ARDUINO
     void readSerial(HardwareSerial &ser);

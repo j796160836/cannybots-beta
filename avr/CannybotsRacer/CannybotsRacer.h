@@ -2,7 +2,7 @@
 #define _CANNYBOTSRACER_H
 #include <CannybotsTypes.h>
 
-
+// This file is shared with Arduino and: iOS, Android Python etc.
 
 // Methods
 CB_ID(1, RACER_IRBIAS, "IRbias");
@@ -44,37 +44,37 @@ CB_ID(9, RACER_PING, "ping");
 
 // The struct needs a prefix because these end up as global static constants and 'stringinfied' versions on variable names used on the iOS/Android scripting side as-is
 // A C/C++ structs order will not be changed by the compiler so the member offset of a cfg value lower down the list will have a unique higher address (no unions!)
-// the offset is stored in a 8bit variable, so don't let it go over 255! (supports 128 ints, more than enough?)
-
-typedef struct {
+// the offset is stored in a 8bit variable, so don't let it go over 255! (e.g. supports 128 ints, more than enough?)
+// 1024 EEPROM = settings for 4 different bots types or 4 versions of config
+typedef struct __attribute__((packed)) {
   uint32_t  cfg_bot_type;                           // 4 bytes intended to be ASCII (human readable)
-  uint16_t  cfg_version;
-  uint16_t  cfg_bot_id;
-  uint32_t  cfg_authentication_pin;
+  uint16_t  cfg_version;                       // 4
+  uint16_t  cfg_bot_id;                        // 6
+  uint32_t  cfg_authentication_pin;            // 8 
   
-  uint32_t  _offsetPadding;
+  uint32_t  _offsetPadding;                    // 12
   
-  bool      cfg_battery_hasSense;
-  uint8_t   cfg_battery_pin_sense;
+  bool      cfg_battery_hasSense;              // 16
+  uint8_t   cfg_battery_pin_sense;             // 17
 
-  uint16_t  cfg_ir_max;
-  uint16_t  cfg_ir_whiteThreshold;
-  uint8_t   cfg_ir_pin_1;
-  uint8_t   cfg_ir_pin_2;
-  uint8_t   cfg_ir_pin_3;
-  int16_t   cfg_ir_bias_1;  
-  int16_t   cfg_ir_bias_2;  
-  int16_t   cfg_ir_bias_3;  
+  uint16_t  cfg_ir_max;                        // 18
+  uint16_t  cfg_ir_whiteThreshold;             // 20
+  uint8_t   cfg_ir_pin_1;                      // 22
+  uint8_t   cfg_ir_pin_2;                      // 23
+  uint8_t   cfg_ir_pin_3;                      // 24
+  int16_t   cfg_ir_bias_1;                     // 25
+  int16_t   cfg_ir_bias_2;                     // 27
+  int16_t   cfg_ir_bias_3;                     // 29
 
-  uint8_t   cfg_motorDriver_type;
-  uint8_t   cfg_motorDriver_mode;
-  uint8_t   cfg_motorDriver_maxSpeed;
-  bool      cfg_motorDriver_hasDriveMode;
-  bool      cfg_motorDriver_hasMotorSense;
-  uint8_t   cfg_motorA_pin_1;
-  uint8_t   cfg_motorA_pin_2;
-  uint8_t   cfg_motorA_pin_sense;
-  bool      cfg_motorA_postiveSpeedisFwd;
+  uint8_t   cfg_motorDriver_type;              // 31
+  uint8_t   cfg_motorDriver_driveModePin;      // 32
+  uint8_t   cfg_motorDriver_maxSpeed;          // 33
+  bool      cfg_motorDriver_hasDriveMode;      // 34
+  bool      cfg_motorDriver_hasMotorSense;     // 35
+  uint8_t   cfg_motorA_pin_1;                  // 36
+  uint8_t   cfg_motorA_pin_2;                  // 37
+  uint8_t   cfg_motorA_pin_sense;              // 38
+  bool      cfg_motorA_postiveSpeedisFwd;     
   uint8_t   cfg_motorA_id;                        // e.g. 0 = left, 1 = right
   uint8_t   cfg_motorB_pin_1;
   uint8_t   cfg_motorB_pin_2;
@@ -117,7 +117,7 @@ CB_CFG_ID(cfg_ir_bias_1);
 CB_CFG_ID(cfg_ir_bias_2);
 CB_CFG_ID(cfg_ir_bias_3);
 CB_CFG_ID(cfg_motorDriver_type);
-CB_CFG_ID(cfg_motorDriver_mode);
+CB_CFG_ID(cfg_motorDriver_driveModePin);
 CB_CFG_ID(cfg_motorDriver_maxSpeed);
 CB_CFG_ID(cfg_motorDriver_hasDriveMode);
 CB_CFG_ID(cfg_motorDriver_hasMotorSense);
