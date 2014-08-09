@@ -10,8 +10,7 @@ cb_app_config settings;
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // App State
-// IR sensors values 0 dark .. [settings.cfg_ir_max]  light
-// Updated automatically.
+// IR sensors values dark=0..~1000 =light, updated automatically.
 int IRvals[NUM_IR_SENSORS];      
 
 // Speed
@@ -22,7 +21,7 @@ int speedA = 0, speedB = 0;
 int yAxisValue = 0;  // -255..255
 int xAxisValue = 0;  // -255..255
 
-bool forceManualMode = false;          // wgen true the user is forcing manual mode (a butotn press) from the phone app/joypad
+bool forceManualMode = false;          // when true the user is forcing manual mode from the phone app/joypad
 
 // Lap Timing
 unsigned long currentStartLapTime = 0;
@@ -36,7 +35,7 @@ int Kp = 0, Ki = 0, Kd = 0;
 int P_error = 0, D_error = 0;
 int error = 0;
 int error_last = 0;                                     // to calculate D_error = error - error_last
-int correction = 0;                                     //error after PID filter
+int correction = 0;                                     // error after PID filter
 
 void pid_calculate() {
   // Note: to override config just set 'Kp' and 'Kd' here, for example.
