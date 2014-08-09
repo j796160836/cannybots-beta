@@ -97,7 +97,7 @@ void cannybots_setup() {
   CB_REGISTER_CONFIG(cfg_pid_d);
   CB_REGISTER_CONFIG(cfg_joystick_xAxisDeadzone);
   CB_REGISTER_CONFIG(cfg_cruiseSpeed_defaultSpeed);
-
+  CB_REGISTER_CONFIG(cfg_info_printValsInterval);
   cb.populateVariablesFromConfig();
   cb.begin();
 }

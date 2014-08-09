@@ -51,7 +51,7 @@ CB_ID(32, LAPCOUNTER_LAPCOUNT, "lapCount");
 
 
 #define CFG_ID                           "CBLF"
-#define CFG_BASE                         64
+#define CFG_BASE                         0
 
 #define LF_MAJOR_VERSION 0
 #define LF_MINOR_VERSION 1
