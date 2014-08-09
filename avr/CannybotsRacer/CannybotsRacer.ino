@@ -1,8 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Required Libraries
-
-// No need to change this section
+// Required Libraries - No need to change this section
 #include <EEPROMex.h>
 #include <Cannybots.h>
 #include "CannybotsRacer.h"
@@ -12,15 +10,13 @@ cb_app_config settings;
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // App State
-
 // IR sensors values 0 dark .. [settings.cfg_ir_max]  light
 // Updated automatically.
 int IRvals[NUM_IR_SENSORS];      
 
 // Speed
 int cruiseSpeed = settings.cfg_cruiseSpeed_defaultSpeed;
-int speedA = 0;
-int speedB = 0;
+int speedA = 0, speedB = 0;
 
 // Joystick
 int yAxisValue = 0;  // -255..255
@@ -32,25 +28,18 @@ bool forceManualMode = false;          // wgen true the user is forcing manual m
 unsigned long currentStartLapTime = 0;
 int  lapCount=0;
 
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // PID
 
-int Kp = 0;
-int Ki = 0;
-int Kd = 0;
-int P_error = 0;
-int D_error = 0;
+int Kp = 0, Ki = 0, Kd = 0;
+int P_error = 0, D_error = 0;
 int error = 0;
-int error_last = 0; // to calculate D_error = error - error_last
-int correction = 0; //error after PID filter
-
+int error_last = 0;                                     // to calculate D_error = error - error_last
+int correction = 0;                                     //error after PID filter
 
 void pid_calculate() {
-  // Note: to override config:
-  Kp= 3;
-  Kd= 1;  
+  // Note: to override config just set 'Kp' and 'Kd' here, for example.
   
   // process IR readings via PID
   error_last = error;                                   // store previous error before new one is caluclated
@@ -77,10 +66,8 @@ void joystick_manualControlMode() {
     speedA =  (yAxisValue + xAxisValue)/4; //-xAxisValue
     speedB =  (yAxisValue - xAxisValue)/4; //xAxisValue
 }
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Lap Timing
-
 
 // this should be called at least once to inform the phone that the bot has started racing
 void lap_started() {
@@ -95,7 +82,6 @@ void lap_completed() {
   currentStartLapTime = millis();
   lapCount++;
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
