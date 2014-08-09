@@ -38,7 +38,8 @@ int error_last = 0;                                     // to calculate D_error 
 int correction = 0;                                     // error after PID filter
 
 void pid_calculate() {
-  // Note: to override config just set 'Kp' and 'Kd' here, for example.
+  Kp = settings.cfg_pid_p;
+  Kd = settings.cfg_pid_d;
   
   // process IR readings via PID
   error_last = error;                                   // store previous error before new one is caluclated
