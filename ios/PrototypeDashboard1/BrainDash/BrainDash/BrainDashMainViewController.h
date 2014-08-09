@@ -29,4 +29,7 @@
 - (IBAction)speedChanged:(id)sender;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *modeSegment;
 
+@property (weak, nonatomic) IBOutlet UITextField *lapCounterTextField;
+@property (weak, nonatomic) IBOutlet UITextField *lapTimeTextField;
+@property (weak, nonatomic) IBOutlet UITextField *bestLapTimeTextField;
 @end

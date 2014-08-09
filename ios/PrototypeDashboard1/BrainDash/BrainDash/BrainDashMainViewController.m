@@ -228,8 +228,31 @@
     
 }
 
+- (IBAction)restLapStatsPressed:(id)sender {
+}
 
 
+- (void) recordLapTime:(float)time {
+    NSLog(@"Lap time %f", time);
+    
+   // int laps = _lapCounterTextField.text.integerValue;
+    //_lapCounterTextField.text = [NSString stringWithFormat:@"%d", laps++];
+    
+    _lapTimeTextField.text = [NSString stringWithFormat:@"%0.2f", time];
+}
+
+
+- (void) lapCount:(int)count {
+    NSLog(@"Lap count %d", count);
+    //int laps = _lapCounterTextField.text.integerValue;
+    _lapCounterTextField.text = [NSString stringWithFormat:@"%d", count];
+}
+
+- (void) startLapTimer {
+    NSLog(@"Lap time %f", time);
+    
+    
+}
 
 - (void) viewDidAppear:(BOOL)animated {
     NSLog(@"viewDidAppear");
@@ -238,7 +261,20 @@
         [self.modeSegment setSelectedSegmentIndex:p1>0?1:0];
     }];
 
+    [cb registerHandler:&LAPCOUNTER_LAPTIME withBlockFor_INT16_1: ^(int16_t p1)
+     {
+         [self recordLapTime: p1/1000 ];
+     }];
+
+    [cb registerHandler:&LAPCOUNTER_GETREADY withBlockFor_INT16_1: ^(int16_t p1)
+     {
+         [self startLapTimer ];
+     }];
     
+    [cb registerHandler:&LAPCOUNTER_LAPCOUNT withBlockFor_INT16_1: ^(int16_t p1)
+     {
+         [self lapCount:p1];
+     }];
     [self reloadScene];
 }
 

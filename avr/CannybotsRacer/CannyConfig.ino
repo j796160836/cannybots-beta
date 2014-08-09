@@ -57,7 +57,7 @@ void cannybots_setup() {
   cb.registerConfigParameter(&cfg_pid_d, &Kd);
   cb.registerConfigParameter(&cfg_joystick_xAxisDeadzone, &XAXIS_DEADZONE);
   cb.registerConfigParameter(&cfg_cruiseSpeed_defaultSpeed, &baseCruiseSpeed);
-  cb.populateVariablesFromConfig();
+  //cb.populateVariablesFromConfig();
   cb.begin();
 }
 

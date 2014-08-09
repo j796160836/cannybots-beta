@@ -5,12 +5,6 @@
 
 bool forceManualMode = false;
 
-// TODO: to be moved to LineFollowing lib
-// Joystick
-int yAxisValue = 0;  // -255..255
-int xAxisValue = 0;  // -255..255
-
-
 void lf_updateMotorSpeeds(int _speedA, int _speedB, int _dummy) {
 }
 

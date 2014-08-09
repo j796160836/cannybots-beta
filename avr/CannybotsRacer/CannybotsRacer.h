@@ -17,6 +17,12 @@ CB_ID(9, RACER_PING, "ping");
 //CB_ID(10, RACER_MOVE, "move");
 //CB_ID(11, RACER_TEST, "test");
 
+CB_ID(30, LAPCOUNTER_GETREADY, "getReady");
+CB_ID(31, LAPCOUNTER_LAPTIME,  "lapTime");
+CB_ID(32, LAPCOUNTER_LAPCOUNT, "lapCount");
+
+
+
 // constants for 'move' method
 #define CANNYBOTSRACER_MOVE_STOP     0
 #define CANNYBOTSRACER_MOVE_GO       1

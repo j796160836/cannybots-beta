@@ -67,27 +67,25 @@ void lineFollowing_loop() {
   if (isLineFollowingMode) {
       if ((loopNowTime - pidLastTime) > PID_SAMPLE_TIME){
         pidLastTime= loopNowTime;
-        calculate_PID();
+        pid_calculate();
      }
-    speedA = speedA + (yAxisValue/3); //superpose yAxis with PID output speed
-    speedB = speedB + (yAxisValue/3);
+     joystick_lineFollowingControlMode();
   } else {
     // in manual mode
     if ( (millis() - cb.getLastInboundCommandTime()) > MANUAL_MODE_RADIOSILENCE_TIMEOUT) {
       // no command has been received in the last X millis, err on the side of caution and stop!
       speedA = speedB =  0;
     } else {
-      // just allow revese move to get back to line.. 
-      if (yAxisValue < 0){
-        speedA = yAxisValue/5; //-xAxisValue
-        speedB = yAxisValue/5; //xAxisValue
-      } else {
-        speedA = speedB = 0;
-      }
+      joystick_manualControlMode();
     }
   }
+  
+  //
+  speedA = constrain( MOTOR_A_POS_IS_FORWARD?speedA:-speedA, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
+  speedB = constrain( MOTOR_B_POS_IS_FORWARD?speedB:-speedB, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
+
   motor(speedA, speedB);
-  delay(5);
+  //delay(5);
   printvalues();
 
 }
@@ -127,8 +125,8 @@ void motor(int _speedA, int _speedB) {
 
 void motor_customPCB(int _speedA, int _speedB)
 {
-  _speedA = constrain(_speedA, -255, 255);
-  _speedB = constrain(_speedB, -255, 255);
+  _speedA = constrain(_speedA, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
+  _speedB = constrain(_speedB, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
 
   digitalWrite(pinA1, _speedA >= 0 ? HIGH : LOW) ;
   analogWrite (pinA2, abs(_speedA));
@@ -141,8 +139,8 @@ void motor_customPCB(int _speedA, int _speedB)
 // motor controller function
 void motor_ORG(int _speedA, int _speedB) // V4
 {
-  _speedA = constrain(_speedA, -255, 255);
-  _speedB = constrain(_speedB, -255, 255);
+  _speedA = constrain(_speedA, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
+  _speedB = constrain(_speedB, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
   if (_speedA >= 0) {
     analogWrite(pinA1, _speedA);
     analogWrite(pinA2, 0);
@@ -186,6 +184,9 @@ void lf_report_followingMode(bool isLineMode) {
   if (millis() - lastCall > 500) {
     cb.callMethod(&RACER_LINEFOLLOWING_MODE, isLineMode);
     lastCall = millis();
+    //lap_started(); 
+    //lap_completed();
+
   }
 }
 

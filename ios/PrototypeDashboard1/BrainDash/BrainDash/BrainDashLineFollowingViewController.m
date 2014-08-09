@@ -106,7 +106,7 @@
 
     [cb setConfigParameter_UINT8:&cfg_motorB_id p1:1];
     PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorB_postiveSpeedisFwd p1:0];
+    [cb setConfigParameter_UINT8:&cfg_motorB_postiveSpeedisFwd p1:1];
     PAUSE_HACK;
     [cb setConfigParameter_UINT8:&cfg_motorB_pin_1 p1:6];
     PAUSE_HACK;
