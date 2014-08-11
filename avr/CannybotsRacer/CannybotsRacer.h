@@ -134,7 +134,7 @@ CB_CFG_ID(cfg_ir_max);
 CB_CFG_ID(cfg_ir_whiteThreshold);
 CB_CFG_ID(cfg_ir_pin_1);
 CB_CFG_ID(cfg_ir_pin_2);
-CB_CFG_ID(cfg_ir_pin_3);
+CB_CFG_ID(cfg_ir_pin_3);  
 CB_CFG_ID(cfg_ir_bias_1);
 CB_CFG_ID(cfg_ir_bias_2);
 CB_CFG_ID(cfg_ir_bias_3);

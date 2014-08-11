@@ -40,7 +40,10 @@
         
         bsle     = [BrainSpeakBLE sharedInstance];
         bsle.cbdelegate = self;
+
         
+        cb->begin();
+
         // TODO: re-instate this when we can push/pop handlers using the API
         /*[self registerHandler:&_CB_SYS_LOG withBlockFor_STRING:^(const char* p1){
             NSLog(@"CB_REMOTE_DBG:%s", p1);
@@ -48,7 +51,30 @@
         
          ];*/
         
-        cb->begin();
+        
+        
+        [self registerHandler:&_CB_SYS_CALL withBlockFor_INT16_3:^(int16_t p1, int16_t p2, int16_t p3) {
+            switch (p1) {
+                case _CB_SYSCALL_NOP: break;
+                case _CB_SYSCALL_CFG_PARAM_META: {
+                    
+                    cb_descriptor* desc = cb->getDescriptorForConfigParameter(p2);
+                    if (desc) {
+                        NSLog(@"param[%d][%s] type=%d", p2, desc->cid_t.cidNV->name, p3);
+                    } else {
+                        NSLog(@"unknown param %d", p2);
+                    }
+                    
+                    break;
+                }
+                    
+                default:
+                    NSLog(@"Unrecognised Sys call: %d, %d,%d", p1, p2, p3);
+            }
+        }
+        ];
+
+        //            NSLog(@"CB_REMOTE_DBG:%s", p1);
         
     }
     return self;

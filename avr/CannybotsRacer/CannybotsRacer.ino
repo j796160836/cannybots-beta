@@ -53,8 +53,8 @@ void pid_calculate() {
   error_last = error;                                   // store previous error before new one is caluclated
   error = IRvals[0] - IRvals[2];                        // TODO: change to lineFOllowingLib.getIRreading(IR_SENSORID);
 
-  P_error = error * Kp / settings.cfg_pid_divisor;                               // calculate proportional term
-  D_error = (error - error_last) * Kd / settings.cfg_pid_divisor;                // calculate differential term
+  P_error = error * Kp / (float)settings.cfg_pid_divisor;                               // calculate proportional term
+  D_error = (error - error_last) * Kd / (float)settings.cfg_pid_divisor;                // calculate differential term
   correction = P_error + D_error;
   
   speedA = cruiseSpeed + correction;
@@ -101,8 +101,9 @@ void lap_stopTiming() {
   cb.callMethod(&LAPCOUNTER_STOP, lapCount);
 }
 
-// Debuggin
+// Debugging
 
+// this is called as often as 'settings.cfg_info_printValsInterval' specifies, in ms.
 void print_debug() {
   
   CB_DBG(    "%lu(%lu): IR(%u,%u,%u),Kpd(%d,%d)/100,Sab(%d,%d), XY(%d,%d),MEM(%d)\n",
@@ -114,9 +115,6 @@ void print_debug() {
              xAxisValue, yAxisValue,
              cb.getFreeMemory()
         );
-   
-   cb.dumpConfig();  
-   delay(100);
 }
 
 
@@ -131,6 +129,7 @@ void setup() {
 }
 
 void loop() {
+  delay(100);
   lineFollowing_loop();
   cb.update();
 }

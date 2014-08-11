@@ -165,6 +165,8 @@ cb_descriptor* Cannybots::getDescriptorForCommand(uint8_t commandId) {
     return NULL;
 }
 
+
+
 int16_t Cannybots::getIndexForDescriptor(LinkedList<cb_descriptor*> list, cb_descriptor* desc) {
     for(int16_t i = 0; i < list.size(); i++){
         if (desc == methods.get(i)) {
@@ -697,6 +699,8 @@ void Cannybots::getConfigParameterValue(cb_nv_id* _id, uint8_t* v) {
 
 void Cannybots::setConfigParameterValue(cb_nv_id* _id, uint8_t* v) {
     EEPROM.writeByte(_CB_CFG_OFFSET(_id),*v);
+    cb_descriptor* desc = getDescriptorForConfigParameter(_id->cid);
+    *((uint8_t*)desc->data) = *v;
 }
 
 void Cannybots::getConfigParameterValue(cb_nv_id* _id, int8_t* v) {
@@ -705,6 +709,8 @@ void Cannybots::getConfigParameterValue(cb_nv_id* _id, int8_t* v) {
 
 void Cannybots::setConfigParameterValue(cb_nv_id* _id, int8_t* v) {
     EEPROM.writeByte(_CB_CFG_OFFSET(_id),*v);
+    cb_descriptor* desc = getDescriptorForConfigParameter(_id->cid);
+    *((int8_t*)desc->data) = *v;
 }
 
 void Cannybots::getConfigParameterValue(cb_nv_id* _id, int16_t* v) {
@@ -713,6 +719,8 @@ void Cannybots::getConfigParameterValue(cb_nv_id* _id, int16_t* v) {
 
 void Cannybots::setConfigParameterValue(cb_nv_id* _id, int16_t* v) {
     EEPROM.writeInt(_CB_CFG_OFFSET(_id),*v);
+    cb_descriptor* desc = getDescriptorForConfigParameter(_id->cid);
+    *((int16_t*)desc->data) = *v;
 }
 
 void Cannybots::getConfigParameterValue(cb_nv_id* _id, uint16_t* v) {
@@ -721,14 +729,19 @@ void Cannybots::getConfigParameterValue(cb_nv_id* _id, uint16_t* v) {
 
 void Cannybots::setConfigParameterValue(cb_nv_id* _id, uint16_t* v) {
     EEPROM.writeInt(_CB_CFG_OFFSET(_id),*v);
+    cb_descriptor* desc = getDescriptorForConfigParameter(_id->cid);
+    *((uint16_t*)desc->data) = *v;
 }
 
 void Cannybots::getConfigParameterValue(cb_nv_id* _id, int32_t* v) {
     *v= EEPROM.readLong(_CB_CFG_OFFSET(_id));
+    
 }
 
 void Cannybots::setConfigParameterValue(cb_nv_id* _id, int32_t* v) {
     EEPROM.writeLong(_CB_CFG_OFFSET(_id),*v);
+    cb_descriptor* desc = getDescriptorForConfigParameter(_id->cid);
+    *(int32_t*)(desc->data) = *v;
 }
 
 void Cannybots::getConfigParameterValue(cb_nv_id* _id, uint32_t* v) {
@@ -737,6 +750,8 @@ void Cannybots::getConfigParameterValue(cb_nv_id* _id, uint32_t* v) {
 
 void Cannybots::setConfigParameterValue(cb_nv_id* _id, uint32_t* v) {
     EEPROM.writeLong(_CB_CFG_OFFSET(_id),*v);
+    cb_descriptor* desc = getDescriptorForConfigParameter(_id->cid);
+    *(uint32_t*)(desc->data) = *v;
 }
 
 
@@ -746,6 +761,9 @@ void Cannybots::getConfigParameterValue(cb_nv_id* _id, bool* v) {
 
 void Cannybots::setConfigParameterValue(cb_nv_id* _id, bool* v) {
     EEPROM.writeByte(_CB_CFG_OFFSET(_id),*v);
+    cb_descriptor* desc = getDescriptorForConfigParameter(_id->cid);
+    *(uint8_t*)(desc->data) = *v;
+
 }
 
 #endif // __RFduino__
@@ -807,7 +825,7 @@ void Cannybots::sendConfigParameterList() {
         cb_descriptor* desc= getConfigParameterListItem(i);
         
         Message* msg = new Message();
-        createMessage(msg, &_CB_SYS_CALL, _CB_SYSCALL_GET_CFG_LIST, desc->cid_t.cidNV->cid, desc->type, 0); // * (desc->data)
+        createMessage(msg, &_CB_SYS_CALL, _CB_SYSCALL_CFG_PARAM_META, desc->cid_t.cidNV->cid, desc->type, 0); // * (desc->data)
         //addOutboundMessage(msg);
         sendMessage(msg);
         delete msg;
@@ -817,7 +835,15 @@ void Cannybots::sendConfigParameterList() {
     }
 }
 
-void Cannybots::setConfigParameter(uint8_t cid, uint32_t value) {
+
+//void Cannybots::setConfigParameter(cb_descriptor* desc, uint8_t value) {
+//}
+
+//void Cannybots::setConfigParameter(cb_nv_id* cid, uint32_t value) {
+//}
+
+cb_descriptor* Cannybots::getDescriptorForConfigParameter(uint8_t cid) {
+
     cb_descriptor* desc = NULL;
     
     int len = getConfigParameterListSize();
@@ -825,22 +851,27 @@ void Cannybots::setConfigParameter(uint8_t cid, uint32_t value) {
     for (int i = 0; i < len; i++) {
         desc = getConfigParameterListItem(i);
         if (cid == desc->cid_t.cidNV->cid) {
-            CB_DBG("id/off,type=%d,%d", cid, desc->type);
             found = true;
+            CB_DBG("found!:%d", cid);
             break;
         }
     }
+    return found?desc:NULL;
+}
+
+// use this when we only have the cid (offset) of the config value
+void Cannybots::setConfigParameter(uint8_t cid, uint32_t value) {
+    cb_descriptor* desc = getDescriptorForConfigParameter(cid);
     
-    uint8_t  v1 = value & 0xFF;
-    int8_t   v1b = value & 0xFF;
-    uint16_t v2 = value & 0xFFFF;
-    uint32_t v3 = value ;
-    
-    if (found && desc) {
+    if (desc) {
+        uint8_t  v1 = value & 0xFF;
+        int8_t   v1b = value & 0xFF;
+        uint16_t v2 = value & 0xFFFF;
+        uint32_t v3 = value ;
         switch (desc->type) {
             case CB_BYTE:   setConfigParameterValue(desc->cid_t.cidNV, &v1); *(uint8_t*)(desc->data) = v1;break;
             case CB_UINT8:  setConfigParameterValue(desc->cid_t.cidNV, &v1); *(uint8_t*)(desc->data) = v1;break;
-            case CB_INT8:   setConfigParameterValue(desc->cid_t.cidNV, &v1b); *(int8_t*)(desc->data) = v1b;break;
+            case CB_INT8:   setConfigParameterValue(desc->cid_t.cidNV, &v1b);*(int8_t*)(desc->data) = v1b;break;
             case CB_UINT16: setConfigParameterValue(desc->cid_t.cidNV, &v2); *(uint16_t*)(desc->data)= v2;break;
             case CB_INT16:  setConfigParameterValue(desc->cid_t.cidNV, &v2); *(int16_t*)(desc->data) = v2;break;
             case CB_UINT32: setConfigParameterValue(desc->cid_t.cidNV, &v3); *(uint32_t*)(desc->data) = v3;break;
@@ -853,8 +884,6 @@ void Cannybots::setConfigParameter(uint8_t cid, uint32_t value) {
     } else {
         CB_DBG("?cfI:%d", cid);
     }
-    
-    //dumpConfig();
 }
 
 void Cannybots::dumpConfig() {
@@ -887,6 +916,7 @@ void Cannybots::dumpConfig() {
 
 
 // the syscal handler for methods that need to run on the bot
+// the (non-Arduino) handler isn't defined, it may just be simpler to use the native lanuage to process the syscalls directly (e.g. Objective c++)
 
 // TODO: change parameter p3 to a UINT32
 static void _cb_syscall_impl_bot(int16_t p1, int16_t p2, int16_t p3) {

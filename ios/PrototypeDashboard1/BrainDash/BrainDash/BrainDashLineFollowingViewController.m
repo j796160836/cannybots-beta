@@ -70,84 +70,53 @@
 
     CannybotsController* cb = [CannybotsController sharedInstance];
 
-    //[cb setConfigParameter_UINT32:&cfg_bot_type p1:0xFF00FF00];
-    //PAUSE_HACK;
+    //[cb setConfigParameter_UINT32:&cfg_bot_type p1:0xFF00FF00]; PAUSE_HACK;
 
-    [cb setConfigParameter_UINT16:&cfg_version p1:0xABCD];
-    PAUSE_HACK;
+    [cb setConfigParameter_UINT16:&cfg_version p1:0xABCD];    PAUSE_HACK;
 
     
-    [cb setConfigParameter_UINT16:&cfg_bot_id p1:0x0707];
-    PAUSE_HACK;
+    [cb setConfigParameter_UINT16:&cfg_bot_id p1:0x0707];    PAUSE_HACK;
 
     
-    [cb setConfigParameter_UINT8:&cfg_battery_hasSense p1:0];
-    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_battery_pin_sense p1:0];
-    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_battery_hasSense p1:0];    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_battery_pin_sense p1:0];    PAUSE_HACK;
 
     
-    [cb setConfigParameter_INT16:&cfg_ir_max   p1:1000];
-    PAUSE_HACK;
-    [cb setConfigParameter_INT16:&cfg_ir_whiteThreshold   p1:700];
-    PAUSE_HACK;
+    [cb setConfigParameter_INT16:&cfg_ir_max   p1:1000];    PAUSE_HACK;
+    [cb setConfigParameter_INT16:&cfg_ir_whiteThreshold   p1:700];    PAUSE_HACK;
 
     
     // TODO: crate convineice for Arduiono pins
-    [cb setConfigParameter_UINT8:&cfg_ir_pin_1 p1:24];  // A6
-    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_ir_pin_2 p1:26];  // A8
-    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_ir_pin_3 p1:29];  // A10
-    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_ir_pin_1 p1:24];  // A6    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_ir_pin_2 p1:26];  // A8    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_ir_pin_3 p1:29];  // A10    PAUSE_HACK;
     
-    [cb setConfigParameter_UINT8:&cfg_ir_bias_1 p1:1];  // A6
-    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_ir_bias_2 p1:2];  // A8
-    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_ir_bias_3 p1:3];  // A10
-    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_ir_bias_1 p1:1];  // A6    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_ir_bias_2 p1:2];  // A8    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_ir_bias_3 p1:3];  // A10    PAUSE_HACK;
     
 
-    [cb setConfigParameter_UINT8:&cfg_motorDriver_type p1:0];
-    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorDriver_driveModePin p1:2]; // 255 for max motor speed fix
-    //TODO: fixstruct offset issue, (need to conver 'local' offset to positianl value and send that to be converted back by the bot
-    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorDriver_maxSpeed p1:255];
-    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorDriver_hasDriveMode p1:1];
-    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorDriver_hasMotorSense p1:0];
-    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_motorDriver_type p1:0];    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_motorDriver_driveModePin p1:2];    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_motorDriver_maxSpeed p1:255];    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_motorDriver_hasDriveMode p1:1];    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_motorDriver_hasMotorSense p1:0];    PAUSE_HACK;
 
 
-    [cb setConfigParameter_UINT8:&cfg_motorA_pin_1 p1:3];
-    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorA_pin_2 p1:5];
-    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorA_pin_sense p1:0];
-    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorA_postiveSpeedisFwd p1:1];
-    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorA_id p1:0];
-    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_motorA_pin_1 p1:3];    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_motorA_pin_2 p1:5];    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_motorA_pin_sense p1:0];    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_motorA_postiveSpeedisFwd p1:1];    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_motorA_id p1:0];    PAUSE_HACK;
 
-    [cb setConfigParameter_UINT8:&cfg_motorB_pin_1 p1:6];
-    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorB_pin_2 p1:9];
-    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorB_pin_sense p1:0];
-    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorB_postiveSpeedisFwd p1:1];
-    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorB_id p1:1];
-    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_motorB_pin_1 p1:6];    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_motorB_pin_2 p1:9];    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_motorB_pin_sense p1:0];    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_motorB_postiveSpeedisFwd p1:1];    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_motorB_id p1:1];    PAUSE_HACK;
 
-    [cb setConfigParameter_UINT8:&cfg_motor_speedSmoothingDivisions p1:1];
-    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motor_speedSmoothingMaxDelta p1:255];
-    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_motor_speedSmoothingDivisions p1:1];    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_motor_speedSmoothingMaxDelta p1:255];    PAUSE_HACK;
 
     [cb setConfigParameter_INT16:&cfg_pid_p   p1:3];    PAUSE_HACK;
     [cb setConfigParameter_INT16:&cfg_pid_i   p1:0];    PAUSE_HACK;
@@ -156,43 +125,32 @@
     [cb setConfigParameter_INT16:&cfg_pid_sampleTime   p1:5];    PAUSE_HACK;
 
 
-    [cb setConfigParameter_UINT8:&cfg_joystick_xAxisDeadzone p1:50];
-    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_joystick_xAxisDeadzone p1:50];    PAUSE_HACK;
 
-    [cb setConfigParameter_UINT8:&cfg_cruiseSpeed_defaultSpeed p1:120];
-    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_cruiseSpeed_manualMaxSpeed p1:255];
-    PAUSE_HACK;
-
+    [cb setConfigParameter_UINT8:&cfg_cruiseSpeed_defaultSpeed p1:120];    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_cruiseSpeed_manualMaxSpeed p1:255];    PAUSE_HACK;
     
-    [cb setConfigParameter_INT16:&cfg_offLineMaxTime   p1:200];
-    PAUSE_HACK;
-    [cb setConfigParameter_UINT16:&cfg_info_printValsInterval p1:1000];
-    PAUSE_HACK;
-
+    [cb setConfigParameter_INT16:&cfg_offLineMaxTime   p1:200];    PAUSE_HACK;
+    [cb setConfigParameter_UINT16:&cfg_info_printValsInterval p1:100];    PAUSE_HACK;
     
-    [cb setConfigParameter_BOOL:&cfg_debugFlag p1:false];
-    PAUSE_HACK;
+    [cb setConfigParameter_BOOL:&cfg_debugFlag p1:false];    PAUSE_HACK;
 
 }
+
 - (IBAction)goRight:(id)sender {
-
 }
+
 - (IBAction)stop:(id)sender {
 }
-- (IBAction)go:(id)sender {
 
+- (IBAction)go:(id)sender {
 }
+
 - (IBAction)speedChanged:(UISlider*)sender {
     int speed= (int)(sender.value * 255);
     NSLog(@"Speed = %d", speed);
 }
 
-
-
-- (void) didReceiveCommand:(uint8_t)cmd forId:(uint8_t)_id withArg:(int16_t)arg1 {
-//             [self.tabBarController setSelectedIndex:1];
-}
 
 
 @end

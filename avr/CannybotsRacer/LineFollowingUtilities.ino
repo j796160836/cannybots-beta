@@ -77,6 +77,9 @@ void lineFollowing_loop() {
     }
   }
   //
+  
+  CB_DBG("isfwd: %d,%d", settings.cfg_motorA_postiveSpeedisFwd, settings.cfg_motorB_postiveSpeedisFwd);
+  
   speedA = constrain( settings.cfg_motorA_postiveSpeedisFwd?speedA:-speedA, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
   speedB = constrain( settings.cfg_motorB_postiveSpeedisFwd?speedB:-speedB, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
 
@@ -99,11 +102,11 @@ void lineFollowing_loop() {
 // set limit on reading. The reading can be very high and inaccurate on pitch black
 void read_ir_sensors() {
   //analogRead(IR1); delay(ANALOG_READING_DELAY);
-  IRvals[0] = constrain(analogRead(settings.cfg_ir_pin_1) - settings.cfg_ir_bias_1, 0, settings.cfg_ir_max); //left looking from behind
+  IRvals[0] = constrain(analogRead(settings.cfg_ir_pin_1) + settings.cfg_ir_bias_1, 0, settings.cfg_ir_max); //left looking from behind
   //analogRead(IR2); delay(ANALOG_READING_DELAY);
-  IRvals[1] = constrain(analogRead(settings.cfg_ir_pin_2) - settings.cfg_ir_bias_2, 0, settings.cfg_ir_max); //centre
+  IRvals[1] = constrain(analogRead(settings.cfg_ir_pin_2) + settings.cfg_ir_bias_2, 0, settings.cfg_ir_max); //centre
   //analogRead(IR3); delay(ANALOG_READING_DELAY);
-  IRvals[2] = constrain(analogRead(settings.cfg_ir_pin_3) - settings.cfg_ir_bias_3, 0, settings.cfg_ir_max); //right
+  IRvals[2] = constrain(analogRead(settings.cfg_ir_pin_3) + settings.cfg_ir_bias_3, 0, settings.cfg_ir_max); //right
   
   //delay (100);
   //CB_DBG("%d,%d,%d, A=%d,%d,%d, IRB(%d,%d,%d), IRMAX=%d, WTHR=%d", IR1, IR2, IR3, A6, A8, A11, IRbias[0],IRbias[1], IRbias[2], IR_MAX, WHITE_THRESHOLD);
@@ -119,6 +122,7 @@ void motor_customPCB(int _speedA, int _speedB)
   _speedA = constrain(_speedA, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
   _speedB = constrain(_speedB, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
 
+  CB_DBG("A=%d,B=%d, %d,%d,%d,%d", _speedA, _speedB, settings.cfg_motorA_pin_1, settings.cfg_motorA_pin_2, settings.cfg_motorB_pin_1, settings.cfg_motorB_pin_2);
   digitalWrite(settings.cfg_motorA_pin_1, _speedA >= 0 ? HIGH : LOW) ;
   analogWrite (settings.cfg_motorA_pin_2, abs(_speedA));
 
@@ -205,17 +209,15 @@ void lf_updateAxis(int xAxis, int yAxis, int _dummy) {
 
 void lf_updatePID(int _Kp, int _Ki, int _Kd) {
   //CB_DBG("PID=%d,%d,%d", _Kp, _Ki, _Kd);
-
-  cb.setConfigParameterValue(&cfg_pid_p, &settings.cfg_pid_p);
-  cb.setConfigParameterValue(&cfg_pid_d, &settings.cfg_pid_d);
+  cb.setConfigParameterValue(&cfg_pid_p, &_Kp);
+  cb.setConfigParameterValue(&cfg_pid_d, &_Kd);
 }
 
 void lf_updateBias (int b1, int b2, int b3) {
   //CB_DBG("Bias=%d,%d,%d", b1, b2, b3);
-  // TODO: change to the generic:  cb.setConfigParameterValue(&NV_IRBIAS_1), no need to specify variable address again
-  cb.setConfigParameterValue(&cfg_ir_bias_1, &settings.cfg_ir_bias_1);
-  cb.setConfigParameterValue(&cfg_ir_bias_2, &settings.cfg_ir_bias_2);
-  cb.setConfigParameterValue(&cfg_ir_bias_3, &settings.cfg_ir_bias_3);
+  cb.setConfigParameterValue(&cfg_ir_bias_1, &b1);
+  cb.setConfigParameterValue(&cfg_ir_bias_2, &b2);
+  cb.setConfigParameterValue(&cfg_ir_bias_3, &b3);
 }
 
 void lf_updateLineFollowingMode(int _forceManualMode, int _d1, int _d2) {
@@ -243,6 +245,99 @@ void lf_emitIRValues(int v1, int v2, int v3) {
 void lf_ping(int v1) {
   //CB_DBG("ping", v1)
 }
+
+
+
+
+/* Debugging bits'n'pieces:
+
+  cb.dumpConfig();  
+   
+  CB_DBG("s=%ld",settings.cfg_bot_type);
+  CB_DBG("s=%d",settings.cfg_version);
+  CB_DBG("s=%ld",settings.cfg_bot_id);
+  CB_DBG("s=%d",settings.cfg_battery_hasSense);
+  CB_DBG("s=%d",settings.cfg_battery_pin_sense);
+  CB_DBG("s=%d",settings.cfg_ir_max);
+  CB_DBG("s=%d",settings.cfg_ir_whiteThreshold);
+  CB_DBG("s=%d",settings.cfg_ir_pin_1);
+  CB_DBG("s=%d",settings.cfg_ir_pin_2);
+  CB_DBG("s=%d",settings.cfg_ir_pin_3);
+  CB_DBG("s=%d",settings.cfg_ir_bias_1);
+  CB_DBG("s=%d",settings.cfg_ir_bias_2);
+  CB_DBG("s=%d",settings.cfg_ir_bias_3);
+  CB_DBG("s=%d",settings.cfg_motorDriver_type);
+  CB_DBG("s=%d",settings.cfg_motorDriver_driveModePin);
+  CB_DBG("s=%d",settings.cfg_motorDriver_maxSpeed);
+  CB_DBG("s=%d",settings.cfg_motorDriver_hasDriveMode);
+  CB_DBG("s=%d",settings.cfg_motorDriver_hasMotorSense);
+  CB_DBG("s=%d",settings.cfg_motorA_pin_1);
+  CB_DBG("s=%d",settings.cfg_motorA_pin_2);
+  CB_DBG("s=%d",settings.cfg_motorA_pin_sense);
+  CB_DBG("s=%d",settings.cfg_motorA_postiveSpeedisFwd);
+  CB_DBG("s=%d",settings.cfg_motorA_id);
+  CB_DBG("s=%d",settings.cfg_motorB_pin_1);
+  CB_DBG("s=%d",settings.cfg_motorB_pin_2);
+  CB_DBG("s=%d",settings.cfg_motorB_pin_sense);
+  CB_DBG("s=%d",settings.cfg_motorB_postiveSpeedisFwd);
+  CB_DBG("s=%d",settings.cfg_motorB_id);
+  CB_DBG("s=%d",settings.cfg_motor_speedSmoothingDivisions);
+  CB_DBG("s=%d",settings.cfg_motor_speedSmoothingMaxDelta);
+  CB_DBG("s=%d",settings.cfg_pid_p);
+  CB_DBG("s=%d",settings.cfg_pid_i);
+  CB_DBG("s=%d",settings.cfg_pid_d);
+  CB_DBG("s=%d",settings.cfg_pid_divisor);
+  CB_DBG("s=%d",settings.cfg_pid_sampleTime);
+  CB_DBG("s=%d",settings.cfg_joystick_xAxisDeadzone);
+  CB_DBG("s=%d",settings.cfg_cruiseSpeed_defaultSpeed);
+  CB_DBG("s=%d",settings.cfg_cruiseSpeed_manualMaxSpeed);
+  CB_DBG("s=%d",settings.cfg_offLineMaxTime);
+  CB_DBG("s=%d",settings.cfg_info_printValsInterval);
+*/
+
+
+// Various bot wiring configs...
+
+// REdbot
+/*
+#define IR_MAX 100
+#define WHITE_THRESHOLD 100
+
+#define IR1 A9
+#define IR2 A8
+#define IR3 A6
+
+#define pinA1 5
+#define pinA2 6
+#define pinB1 10
+#define pinB2 11
+*/
+
+
+// white bot
+//#define IR1 A8
+//#define IR2 A9
+//#define IR3 A10
+// orange bot (Custom PCB)
+//#define IR1 A6
+//#define IR2 A8
+//#define IR3 A11
+
+// small white bot
+//#define pinA1 6
+//#define pinA2 5
+//#define pinB1 4
+//#define pinB2 3
+//#define pin_MODE 7
+
+// orange bot (Custom PCB)
+//#define pinA1 3
+//#define pinA2 5
+//#define pinB1 6
+//#define pinB2 9
+//#define pin_MODE 2
+
+
 
 
 

@@ -1,11 +1,6 @@
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Cannybots glulogic
-
-
 
 void cannybots_setup() {
   cb.registerHandler(&RACER_CRUISESPEED, lf_updateMotorSpeeds);
@@ -65,52 +60,4 @@ void cannybots_setup() {
   cb.populateVariablesFromConfig();
   cb.begin();
 }
-
-
-
-
-
-// REdbot
-/*
-#define IR_MAX 100
-#define WHITE_THRESHOLD 100
-
-#define IR1 A9
-#define IR2 A8
-#define IR3 A6
-
-#define pinA1 5
-#define pinA2 6
-#define pinB1 10
-#define pinB2 11
-*/
-
-
-// white bot
-//#define IR1 A8
-//#define IR2 A9
-//#define IR3 A10
-// orange bot (Custom PCB)
-//#define IR1 A6
-//#define IR2 A8
-//#define IR3 A11
-
-// small white bot
-//#define pinA1 6
-//#define pinA2 5
-//#define pinB1 4
-//#define pinB2 3
-//#define pin_MODE 7
-
-// orange bot (Custom PCB)
-//#define pinA1 3
-//#define pinA2 5
-//#define pinB1 6
-//#define pinB2 9
-//#define pin_MODE 2
-
-
-
-
-
 

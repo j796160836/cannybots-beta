@@ -101,7 +101,7 @@ CB_ID(1-CB_MAX_SYS_DESCRIPTORS, _CB_SYS_LOG, "log");            // log a message
 #define _CB_SYSCALL_GET_CFG_LIST         4
 #define _CB_SYSCALL_GET_CFG_PARAM        5
 #define _CB_SYSCALL_SET_CFG_PARAM        6
-
+#define _CB_SYSCALL_CFG_PARAM_META       7
 
 
 #endif

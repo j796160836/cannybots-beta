@@ -266,7 +266,19 @@ public:
     void registerConfigParameter(cb_nv_id* _id, uint16_t* v);
     void registerConfigParameter(cb_nv_id* _id, int32_t* v);
     void registerConfigParameter(cb_nv_id* _id, uint32_t* v);
+  
+/*
+    void setConfigParameter(cb_descriptor* desc, bool value);
+    void setConfigParameter(cb_descriptor* desc, int8_t value);
+    void setConfigParameter(cb_descriptor* desc, uint8_t value);
+    void setConfigParameter(cb_descriptor* desc, int16_t value);
+    void setConfigParameter(cb_descriptor* desc, uint16_t value);
+    void setConfigParameter(cb_descriptor* desc, int32_t value);
+    void setConfigParameter(cb_descriptor* desc, uint32_t value);
+*/
     
+    // these function just work of the cid info (e.g. struct memebr offset) direct to/from EEPROM
+    // they dont know the location of the user sketch variable (e.g. the data pointed to by a descriptor, i.e. the 'settings' struct data) )
     void getConfigParameterValue(cb_nv_id* _id, int8_t* v);
     void setConfigParameterValue(cb_nv_id* _id, int8_t* v);
     void getConfigParameterValue(cb_nv_id* _id, uint8_t* v);
@@ -290,9 +302,9 @@ public:
     cb_descriptor*  getConfigParameterListItem(int16_t index);
 
     void setConfigParameter(uint8_t cid, uint32_t value);
-
     void sendConfigParameterList();
 
+    cb_descriptor* getDescriptorForConfigParameter(uint8_t cid);
 
     void dumpConfig();
 
