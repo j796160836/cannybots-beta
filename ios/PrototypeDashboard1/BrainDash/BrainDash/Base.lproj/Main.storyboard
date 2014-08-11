@@ -195,28 +195,36 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" id="fDW-eq-zwW">
-                                <rect key="frame" x="59" y="89" width="203" height="29"/>
+                                <rect key="frame" x="16" y="89" width="288" height="29"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <segments>
-                                    <segment title="Manual"/>
+                                    <segment title="Joystick"/>
                                     <segment title="Line Following"/>
+                                    <segment title="Tank Mode"/>
                                 </segments>
                                 <connections>
                                     <action selector="modeChanged:" destination="YuC-Cb-irg" eventType="valueChanged" id="HDB-t8-RmQ"/>
                                 </connections>
                             </segmentedControl>
+                            <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" minValue="-255" maxValue="255" minimumValueImage="Speed Low Rot.png" maximumValueImage="Speed High Rot.png" id="g3F-LA-ed0" userLabel="Left Speed">
+                                <rect key="frame" x="-60" y="265" width="284" height="38"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <connections>
+                                    <action selector="leftSpeedChanged:" destination="YuC-Cb-irg" eventType="valueChanged" id="9i0-m3-LMn"/>
+                                </connections>
+                            </slider>
+                            <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" minValue="-255" maxValue="255" minimumValueImage="Speed Low Rot.png" maximumValueImage="Speed High Rot.png" id="T7e-fy-QzZ" userLabel="Right Speed">
+                                <rect key="frame" x="110" y="265" width="284" height="38"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <connections>
+                                    <action selector="rightSpeedChanged:" destination="YuC-Cb-irg" eventType="valueChanged" id="3pv-dI-sMC"/>
+                                </connections>
+                            </slider>
                             <view contentMode="scaleToFill" id="3eX-5C-B1n" userLabel="Joypad View">
                                 <rect key="frame" x="0.0" y="137" width="320" height="308"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                             </view>
-                            <slider hidden="YES" opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="left" contentVerticalAlignment="center" minValue="0.0" maxValue="1" minimumValueImage="Speed Low Rot.png" maximumValueImage="Speed High Rot.png" id="g3F-LA-ed0" userLabel="Speed">
-                                <rect key="frame" x="-88" y="250" width="284" height="38"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <connections>
-                                    <action selector="speedChanged:" destination="YuC-Cb-irg" eventType="valueChanged" id="Iop-q9-Ttc"/>
-                                </connections>
-                            </slider>
                             <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Cannybots_Logo_2000x446.png" id="Dua-Ne-KFU">
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="57"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -277,8 +285,9 @@
                         <outlet property="joypadView" destination="3eX-5C-B1n" id="4JX-oq-VKd"/>
                         <outlet property="lapCounterTextField" destination="Slq-zl-z40" id="bFr-te-7Ai"/>
                         <outlet property="lapTimeTextField" destination="XXg-Md-S8C" id="deY-ZY-9a9"/>
+                        <outlet property="leftSpeedSlider" destination="g3F-LA-ed0" id="m9J-zY-4OB"/>
                         <outlet property="modeSegment" destination="fDW-eq-zwW" id="DxW-cL-lbd"/>
-                        <outlet property="speedSlider" destination="g3F-LA-ed0" id="bvM-dG-j1Y"/>
+                        <outlet property="rightSpeedSlider" destination="T7e-fy-QzZ" id="0Ev-fr-IHC"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="gry-5F-eW4" userLabel="First Responder" sceneMemberID="firstResponder"/>

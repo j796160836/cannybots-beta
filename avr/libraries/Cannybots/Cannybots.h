@@ -105,6 +105,7 @@
 
 #define _CB_TEMPLATE_registerConfigParameter(_ctype, _cb_type) \
 void Cannybots::registerConfigParameter(cb_nv_id* _id, _ctype *v) { \
+CB_DBG("Reg:%d type=%d", _id->cid, _cb_type);\
 cb_descriptor* desc =  CB_ALLOC_DESC(); \
 desc->cid_t.cidNV = _id; \
 desc->type = _cb_type; \

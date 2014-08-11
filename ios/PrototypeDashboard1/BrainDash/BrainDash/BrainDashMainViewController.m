@@ -26,6 +26,9 @@
 @interface BrainDashMainViewController () {
     CannybotsController* cb;
     CCNode* myGame;
+    
+    bool joystickMode;
+    int leftMotorSpeed, rightMotorSpeed;
 }
 @end
 
@@ -36,7 +39,8 @@
 {
     CGAffineTransform sliderRotation = CGAffineTransformIdentity;
     sliderRotation = CGAffineTransformRotate(sliderRotation, -(M_PI / 2));
-    _speedSlider.transform = sliderRotation;
+    _leftSpeedSlider.transform = sliderRotation;
+    _rightSpeedSlider.transform = sliderRotation;
     
     CCDirector *director = [CCDirector sharedDirector];
     
@@ -86,6 +90,7 @@
     
     cb = [CannybotsController sharedInstance];
 
+    joystickMode = true;
     
 }
 
@@ -169,10 +174,6 @@
                               @"Pinch - scale = %f, velocity = %f",
                               scale, velocity];
     _statusLabel.text = resultString;
-    
-    
-
-    
 }
 
 #define RADIANS_TO_DEGREES(radians) ((radians) * (180.0 / M_PI))
@@ -213,17 +214,36 @@
 }
 
 
-- (IBAction)speedChanged:(UISlider*)sender {
+- (IBAction)leftSpeedChanged:(UISlider*)sender {
+    leftMotorSpeed=(int)(sender.value);
+    [cb callMethod:&RACER_JOYAXIS p1:leftMotorSpeed p2:rightMotorSpeed];
     
-    int speed= (int)(sender.value * 255);
-    NSLog(@"Speed = %d", speed);
 }
+- (IBAction)rightSpeedChanged:(UISlider*)sender {
+    rightMotorSpeed=(int)(sender.value);
+    [cb callMethod:&RACER_JOYAXIS p1:leftMotorSpeed p2:rightMotorSpeed];
+}
+
+
 - (IBAction)modeChanged:(UISegmentedControl *)sender {
     
     if ( 0 == sender.selectedSegmentIndex) {
-        [cb callMethod:&RACER_LINEFOLLOWING_MODE p1:1];
+        joystickMode=true;
+        _joypadView.hidden=false;
+        _leftSpeedSlider.hidden=true;
+        _rightSpeedSlider.hidden=true;
+        //[cb callMethod:&RACER_LINEFOLLOWING_MODE p1:1];
+        [cb callMethod:&RACER_TANKCONTROL_MODE p1:0 ];
+
     } else if ( 1 == sender.selectedSegmentIndex) {
         [cb callMethod:&RACER_LINEFOLLOWING_MODE p1:0 ];
+    } else if ( 2 == sender.selectedSegmentIndex) {
+        joystickMode=false;
+        _joypadView.hidden=true;
+        _leftSpeedSlider.hidden=false;
+        _rightSpeedSlider.hidden=false;
+        
+        [cb callMethod:&RACER_TANKCONTROL_MODE p1:1 ];
     }
     
 }
@@ -258,7 +278,12 @@
     NSLog(@"viewDidAppear");
     [cb registerHandler:&RACER_LINEFOLLOWING_MODE withBlockFor_INT16_3: ^(int16_t p1, int16_t p2, int16_t p3)
     {
-        [self.modeSegment setSelectedSegmentIndex:p1>0?1:0];
+        if (joystickMode) {
+            [self.modeSegment setSelectedSegmentIndex:p1>0?1:0];
+        } else {
+            [self.modeSegment setSelectedSegmentIndex:p1>0?1:2];
+
+        }
     }];
 
     [cb registerHandler:&LAPCOUNTER_LAPTIME withBlockFor_INT16_1: ^(int16_t p1)

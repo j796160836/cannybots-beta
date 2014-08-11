@@ -17,7 +17,11 @@
 
 @property (weak, nonatomic) IBOutlet UILabel *statusLabel;
 
-@property (weak, nonatomic) IBOutlet UISlider *speedSlider;
+
+@property (weak, nonatomic) IBOutlet UISlider *leftSpeedSlider;
+@property (weak, nonatomic) IBOutlet UISlider *rightSpeedSlider;
+
+
 - (IBAction)tapDetected:(UITapGestureRecognizer *)sender;
 - (IBAction)rotationDetected:(UIRotationGestureRecognizer *)sender;
 - (IBAction)pinchDetected:(UIPinchGestureRecognizer *)sender;
@@ -26,7 +30,6 @@
 - (IBAction)panDetected:(UIPanGestureRecognizer *)sender;
 
 @property (strong, nonatomic) IBOutlet UIPinchGestureRecognizer *pinchRecognizer;
-- (IBAction)speedChanged:(id)sender;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *modeSegment;
 
 @property (weak, nonatomic) IBOutlet UITextField *lapCounterTextField;

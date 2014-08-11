@@ -14,20 +14,26 @@ cb_app_config settings;
 int IRvals[NUM_IR_SENSORS];      
 
 // Speed
+// speeds are fullspeed back -255 .. 255 full speed forward 
 int cruiseSpeed = settings.cfg_cruiseSpeed_defaultSpeed;
-int speedA = 0, speedB = 0;
+int speedA = 0; // viewed from behind motor 'A' is on the left  and a +ve speed rotates the wheel in the forward direction (made to be true by config)
+int speedB = 0; // viewed from behind motor 'B' is on the right and a +ve speed rotates the wheel in the forward direction (made to be true by config)
 
 // Joystick
-int yAxisValue = 0;  // -255..255
-int xAxisValue = 0;  // -255..255
+int xAxisValue = 0;  // (left) -255 .. 255 (right)
+int yAxisValue = 0;  // (down) -255 .. 255 (up)
 
-bool isLineFollowingMode = true;
+bool isLineFollowingMode = true;       // set when the bot has detected it's on the line and thus being controlled by PID (always 'false' when forceManualMode is 'true') 
 bool forceManualMode = false;          // when true the user is forcing manual mode from the phone app/joypad
-bool isTankControlMode = false;               // when true the client has a left (xAxisValue) and right (yAxisValue) throttle, e.g. like tank tracks.
+bool isTankControlMode = false;        // when true the client has a left (xAxisValue) and right (yAxisValue) throttle, e.g. like tank ontrol for independant left/right track speed controll.
 
 // Lap Timing
 unsigned long currentStartLapTime = 0;
 int  lapCount=0;
+
+// used for stats and logging
+volatile unsigned long loopNowTime = millis();
+volatile unsigned long loopDeltaTime = millis();
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -66,11 +72,11 @@ void  joystick_lineFollowingControlMode() {
 // Use it to map the joystick X & Y axis (which both range from -255..255) to motor speeds (also -255..255)
 void joystick_manualControlMode() {
   if (isTankControlMode) {
-    speedA =  xAxisValue;
-    speedB =  yAxisValue;
+    speedA =  xAxisValue/4;
+    speedB =  yAxisValue/4;
   } else {
-    speedA =  (yAxisValue + xAxisValue)/4; //-xAxisValue
-    speedB =  (yAxisValue - xAxisValue)/4; //xAxisValue
+    speedA =  (yAxisValue + xAxisValue)/4; 
+    speedB =  (yAxisValue - xAxisValue)/4; 
   }
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -90,17 +96,38 @@ void lap_completed() {
   lapCount++;
 }
 
+// this should be called to tell the phone that lap timing has finished
 void lap_stopTiming() {
   cb.callMethod(&LAPCOUNTER_STOP, lapCount);
 }
 
+// Debuggin
+
+void print_debug() {
+  
+  CB_DBG(    "%lu(%lu): IR(%u,%u,%u),Kpd(%d,%d)/100,Sab(%d,%d), XY(%d,%d),MEM(%d)\n",
+             loopNowTime,
+             loopDeltaTime,
+             IRvals[0], IRvals[1], IRvals[2],
+             Kp*100, Kd*100, 
+             speedA, speedB,
+             xAxisValue, yAxisValue,
+             cb.getFreeMemory()
+        );
+   
+   cb.dumpConfig();  
+   delay(100);
+}
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Normal Arduino Setup & Main Loop
-
 void setup() {
   lineFollowing_setup();
+  delay(2000);
   cannybots_setup(); 
+  cb.dumpConfig();
 }
 
 void loop() {

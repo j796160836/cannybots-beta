@@ -14,9 +14,7 @@ unsigned long offLineLastTime = millis();
 
 // some counters
 volatile unsigned long lastCommandTime = millis();
-volatile unsigned long loopNowTime = millis();
 volatile unsigned long loopLastTime = millis();
-volatile unsigned long loopDeltaTime = millis();
 
 
 void lineFollowing_setup() {
@@ -78,9 +76,8 @@ void lineFollowing_loop() {
       joystick_manualControlMode();
     }
   }
-  
   //
-  speedA = constrain( settings.cfg_motorB_postiveSpeedisFwd?speedA:-speedA, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
+  speedA = constrain( settings.cfg_motorA_postiveSpeedisFwd?speedA:-speedA, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
   speedB = constrain( settings.cfg_motorB_postiveSpeedisFwd?speedB:-speedB, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
 
   motor(speedA, speedB);
@@ -113,13 +110,8 @@ void read_ir_sensors() {
 }
 
 void motor(int _speedA, int _speedB) {
-  // TODO: read config from eeprom
-#ifdef BOT_TYPE_CUSTOM_PCB
-  motor_customPCB(_speedA, _speedB);  // TODO:  move to config!!
-#else
-  motor_ORG(_speedA, _speedB);
-#endif
-
+  // TODO: use settings.cfg_moterDriver_type
+  motor_customPCB(_speedA, _speedB);  
 }
 
 void motor_customPCB(int _speedA, int _speedB)
@@ -136,7 +128,7 @@ void motor_customPCB(int _speedA, int _speedB)
 
 
 // motor controller function
-void motor_ORG(int _speedA, int _speedB) // V4
+void motor_ORG12(int _speedA, int _speedB) // V4
 {
   _speedA = constrain(_speedA, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
   _speedB = constrain(_speedB, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
@@ -174,7 +166,7 @@ void printvalues ()
   if ( millis() - lastPrint < settings.cfg_info_printValsInterval )
     return;
   lastPrint = millis();
-  printvals_PID();
+  print_debug();
 }
 
 void lf_report_followingMode(bool isLineMode) {
@@ -190,42 +182,9 @@ void lf_report_followingMode(bool isLineMode) {
 }
 
 
-
-void printvals_PID() {
-  CB_DBG(    "%lu(%lu): IR(%u,%u,%u),Kpd(%d,%d)/100,Sab(%d,%d), XY(%d,%d),MEM(%d)\n",
-             loopNowTime,
-             loopDeltaTime,
-             IRvals[0], IRvals[1], IRvals[2],
-             Kp*100, Kd*100, 
-             speedA, speedB,
-             xAxisValue, yAxisValue,
-             cb.getFreeMemory()
-        );
-   //cb.dumpConfig();
-}
-
-
 // default getter/setters
 
 
-void setPID_P(int v) {
-  Kp = v;
-}
-void setPID_I(int v) {
-  Ki = v;
-}
-void setPID_D(int v) {
-  Kd = v;
-}
-int getPID_P() {
-  return Kp;
-}
-int getPID_I() {
-  return Ki;
-}
-int getPID_D() {
-  return Kd;
-}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -240,45 +199,41 @@ void lf_updateMotorSpeeds(int _speedA, int _speedB, int _dummy) {
 void lf_updateAxis(int xAxis, int yAxis, int _dummy) {  
   xAxisValue = xAxis;  //joy X axis vale  = Direction  -255 to 255
   yAxisValue = yAxis;  //joy y axis vale = Throttle    -255 to 255
-  //CB_DBG("joy=%d,%d", xAxis,yAxis);
-
+  CB_DBG("joy=%d,%d", xAxis,yAxis);
 }
 
 
 void lf_updatePID(int _Kp, int _Ki, int _Kd) {
   //CB_DBG("PID=%d,%d,%d", _Kp, _Ki, _Kd);
-  setPID_P(_Kp);
-  setPID_D(_Kd); 
-  cb.setConfigParameterValue(&cfg_pid_p, &_Kp);
-  cb.setConfigParameterValue(&cfg_pid_d, &_Kd);
+
+  cb.setConfigParameterValue(&cfg_pid_p, &settings.cfg_pid_p);
+  cb.setConfigParameterValue(&cfg_pid_d, &settings.cfg_pid_d);
 }
 
 void lf_updateBias (int b1, int b2, int b3) {
   //CB_DBG("Bias=%d,%d,%d", b1, b2, b3);
   // TODO: change to the generic:  cb.setConfigParameterValue(&NV_IRBIAS_1), no need to specify variable address again
   cb.setConfigParameterValue(&cfg_ir_bias_1, &settings.cfg_ir_bias_1);
-  cb.setConfigParameterValue(&cfg_ir_bias_2, &settings.cfg_ir_bias_1);
-  cb.setConfigParameterValue(&cfg_ir_bias_3, &settings.cfg_ir_bias_1);
+  cb.setConfigParameterValue(&cfg_ir_bias_2, &settings.cfg_ir_bias_2);
+  cb.setConfigParameterValue(&cfg_ir_bias_3, &settings.cfg_ir_bias_3);
 }
 
 void lf_updateLineFollowingMode(int _forceManualMode, int _d1, int _d2) {
   //CB_DBG("ForceManual=%d", _forceManualMode);
-  forceManualMode = _forceManualMode;
+  //forceManualMode = _forceManualMode;
 }
 void lf_updateTankControlMode(int _isTankControlMode, int _d1, int _d2) {
   isTankControlMode = isTankControlMode;
 }
 
-
-
 void lf_emitConfig(int _d1, int _d2, int _d3) {
-  cb.callMethod(&RACER_PID, getPID_P(), getPID_I(), getPID_D());
+  cb.callMethod(&RACER_PID, settings.cfg_pid_p, settings.cfg_pid_i, settings.cfg_pid_d);
   cb.callMethod(&RACER_IRBIAS, settings.cfg_ir_bias_1,settings.cfg_ir_bias_2, settings.cfg_ir_bias_3);
 }
 
 void lf_emitIRValues(int v1, int v2, int v3) {
   static unsigned long lastCall = millis();
-  if (millis() - lastCall > 200) {
+  if (millis() - lastCall > IR_EMIT_VALUES_INTERVAL) {
     cb.callMethod(&RACER_IRVALS, v1, v2, v3);
     lastCall = millis();
   }

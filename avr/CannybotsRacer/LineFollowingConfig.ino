@@ -5,10 +5,7 @@
 //
 // Cannybots glulogic
 
-//TODO move to Cannybots lib
-//uint32_t  cb_bot_type = 0xCB1FB075;
-//uint16_t  cb_version  = LF_MAJOR_VERSION*255 + LF_MINOR_VERSION;
-//uint32_t  cb_bot_id   = 0x0000CB01; 
+
 
 void cannybots_setup() {
   cb.registerHandler(&RACER_CRUISESPEED, lf_updateMotorSpeeds);
@@ -58,8 +55,12 @@ void cannybots_setup() {
   CB_REGISTER_CONFIG(cfg_pid_p);
   CB_REGISTER_CONFIG(cfg_pid_i);
   CB_REGISTER_CONFIG(cfg_pid_d);
+  CB_REGISTER_CONFIG(cfg_pid_divisor);
+  CB_REGISTER_CONFIG(cfg_pid_sampleTime);
   CB_REGISTER_CONFIG(cfg_joystick_xAxisDeadzone);
   CB_REGISTER_CONFIG(cfg_cruiseSpeed_defaultSpeed);
+  CB_REGISTER_CONFIG(cfg_cruiseSpeed_manualMaxSpeed);
+  CB_REGISTER_CONFIG(cfg_offLineMaxTime);
   CB_REGISTER_CONFIG(cfg_info_printValsInterval);
   cb.populateVariablesFromConfig();
   cb.begin();
@@ -107,9 +108,6 @@ void cannybots_setup() {
 //#define pinB1 6
 //#define pinB2 9
 //#define pin_MODE 2
-//#define BOT_TYPE_CUSTOM_PCB 1¨¨
-//#define IR_MAX 1000
-//#define WHITE_THRESHOLD 700
 
 
 

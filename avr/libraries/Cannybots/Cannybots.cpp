@@ -640,14 +640,13 @@ void Cannybots::callMethod(cb_id* cid, const char* p1) {
 void Cannybots::setConfigStorage(const char* magic, const uint16_t start, const uint16_t size, uint8_t majorVersion, uint8_t minorVersion) {
     
     nvBaseAddress = start;
+    CB_DBG("EE:@%d,l=%d", start, size);
 
 #ifdef ARDUINO
     EEPROM.setMemPool(nvBaseAddress, nvBaseAddress+size);
     // Set maximum allowed writes to maxAllowedWrites.
     // More writes will only give errors when _EEPROMEX_DEBUG is set
     EEPROM.setMaxAllowedWrites(1000);
-    //delay(2000);
-    
     
     // TODO: check mage bytes at 'start'
     uint16_t len = strlen(magic);
@@ -764,10 +763,6 @@ _CB_TEMPLATE_registerConfigParameter(uint32_t,CB_UINT32);
 
 
 void Cannybots::populateVariablesFromConfig() {
-#ifdef ARDUINO
-    delay(2000);
-#endif
-    dumpConfig();
     cb_descriptor *desc=NULL;
     for(int i = 0; i < configVars.size(); i++){
         desc = configVars.get(i);
@@ -781,7 +776,7 @@ void Cannybots::populateVariablesFromConfig() {
             case CB_INT32:  getConfigParameterValue(desc->cid_t.cidNV, (int32_t*) (desc->data)); break;
                 
             default:
-                CB_DBG("?cfg:%d", desc->type);
+                CB_DBG("?cfgT:%d", desc->type);
                 break;
         }
     }
@@ -826,11 +821,12 @@ void Cannybots::setConfigParameter(uint8_t cid, uint32_t value) {
     cb_descriptor* desc = NULL;
     
     int len = getConfigParameterListSize();
-    
+    bool found = false;
     for (int i = 0; i < len; i++) {
         desc = getConfigParameterListItem(i);
         if (cid == desc->cid_t.cidNV->cid) {
             CB_DBG("id/off,type=%d,%d", cid, desc->type);
+            found = true;
             break;
         }
     }
@@ -840,15 +836,15 @@ void Cannybots::setConfigParameter(uint8_t cid, uint32_t value) {
     uint16_t v2 = value & 0xFFFF;
     uint32_t v3 = value ;
     
-    if (desc) {
+    if (found && desc) {
         switch (desc->type) {
             case CB_BYTE:   setConfigParameterValue(desc->cid_t.cidNV, &v1); *(uint8_t*)(desc->data) = v1;break;
             case CB_UINT8:  setConfigParameterValue(desc->cid_t.cidNV, &v1); *(uint8_t*)(desc->data) = v1;break;
             case CB_INT8:   setConfigParameterValue(desc->cid_t.cidNV, &v1b); *(int8_t*)(desc->data) = v1b;break;
-            case CB_UINT16: setConfigParameterValue(desc->cid_t.cidNV, (uint16_t*)(&value)); *(uint16_t*)(desc->data) = (uint16_t)value;break;
-            case CB_INT16:  setConfigParameterValue(desc->cid_t.cidNV, (int16_t*) (&value)); *(int16_t*)(desc->data) = (uint16_t)value;break;
-            case CB_UINT32: setConfigParameterValue(desc->cid_t.cidNV, (uint32_t*)(&value)); *(uint32_t*)(desc->data) = (uint32_t)value;break;
-            case CB_INT32:  setConfigParameterValue(desc->cid_t.cidNV, (int32_t*) (&value)); *(int32_t*)(desc->data) = (int32_t)value;break;
+            case CB_UINT16: setConfigParameterValue(desc->cid_t.cidNV, &v2); *(uint16_t*)(desc->data)= v2;break;
+            case CB_INT16:  setConfigParameterValue(desc->cid_t.cidNV, &v2); *(int16_t*)(desc->data) = v2;break;
+            case CB_UINT32: setConfigParameterValue(desc->cid_t.cidNV, &v3); *(uint32_t*)(desc->data) = v3;break;
+            case CB_INT32:  setConfigParameterValue(desc->cid_t.cidNV, &v3); *(int32_t*)(desc->data)  = v3;break;
                 break;
             default:
                 CB_DBG("?cfT:%d", desc->type);
@@ -864,19 +860,28 @@ void Cannybots::setConfigParameter(uint8_t cid, uint32_t value) {
 void Cannybots::dumpConfig() {
     cb_descriptor* desc = NULL;
     int len = getConfigParameterListSize();
-    uint8_t  v1;
-    uint16_t v2;
-    uint32_t v3;
-
+    uint8_t  ui8;
+    uint16_t ui16;
+    uint32_t ui32;
+    int8_t  i8;
+    int16_t i16;
+    int32_t i32;
+    
     for (int i = 0; i < len; i++) {
         desc = getConfigParameterListItem(i);
-        getConfigParameterValue(desc->cid_t.cidNV, &v1);
-        getConfigParameterValue(desc->cid_t.cidNV, &v2);
-        getConfigParameterValue(desc->cid_t.cidNV, &v3);
-        CB_DBG("c[%d]=\t%x\t%x\t%x\t\tv=\t%x\t%x\t%x",
-               desc->cid_t.cidNV->cid,
-               v1,v2,v3,
-               (*(uint8_t*)desc->data) & 0xFF, (*((uint16_t*)desc->data) ) & 0xFFFF, *((uint32_t*)desc->data));
+        switch (desc->type) {
+            case CB_BYTE:   getConfigParameterValue(desc->cid_t.cidNV, &ui8);  CB_DBG("c[%02d]=\t%x\tv=%x", desc->cid_t.cidNV->cid, ui8,  *((uint8_t*)desc->data));break;
+            case CB_UINT8:  getConfigParameterValue(desc->cid_t.cidNV, &ui8);  CB_DBG("c[%02d]=\t%x\tv=%x", desc->cid_t.cidNV->cid, ui8,  *((uint8_t*)desc->data));break;
+            case CB_INT8:   getConfigParameterValue(desc->cid_t.cidNV, &i8);   CB_DBG("c[%02d]=\t%x\tv=%x", desc->cid_t.cidNV->cid, i8,   *((int8_t*)desc->data));break;
+            case CB_UINT16: getConfigParameterValue(desc->cid_t.cidNV, &ui16); CB_DBG("c[%02d]=\t%x\tv=%x", desc->cid_t.cidNV->cid, ui16, *((uint16_t*)desc->data));break;
+            case CB_INT16:  getConfigParameterValue(desc->cid_t.cidNV, &i16);  CB_DBG("c[%02d]=\t%x\tv=%x", desc->cid_t.cidNV->cid, i16,  *((int16_t*)desc->data));break;
+            case CB_UINT32: getConfigParameterValue(desc->cid_t.cidNV, &ui32); CB_DBG("c[%02d]=\t%lx\tv=%lx", desc->cid_t.cidNV->cid, ui32, *((uint32_t*)desc->data));break;
+            case CB_INT32:  getConfigParameterValue(desc->cid_t.cidNV, &i32);  CB_DBG("c[%02d]=\t%lx\tv=%xlx", desc->cid_t.cidNV->cid, i32,  *((int32_t*)desc->data));break;
+                break;
+            default:
+                CB_DBG("?cfT:%d", desc->type);
+                break;
+        }
     }
 }
 
