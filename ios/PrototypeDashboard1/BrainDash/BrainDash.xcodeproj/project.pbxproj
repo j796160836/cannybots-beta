@@ -107,9 +107,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B010D3AE1999411B002DDBA3 /* CannybotsRacerGlu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CannybotsRacerGlu.h; sourceTree = "<group>"; };
 		B01EEBDD1948F94F00E6D3A4 /* Speed High Rot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Speed High Rot.png"; sourceTree = "<group>"; };
 		B01EEBDE1948F94F00E6D3A4 /* Speed Low Rot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Speed Low Rot.png"; sourceTree = "<group>"; };
-		B02B512C196C62A2006EEC2B /* CannybotsRacer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CannybotsRacer.h; path = ../../../avr/CannybotsRacer/CannybotsRacer.h; sourceTree = "<group>"; };
 		B069D2C5197145E800F4378A /* CannyLapCounter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CannyLapCounter.h; path = ../../../avr/CannyLapCounter/CannyLapCounter.h; sourceTree = "<group>"; };
 		B0B067BC196D542B00ABC209 /* CannybotsController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CannybotsController.mm; sourceTree = "<group>"; };
 		B0B067BF196D559C00ABC209 /* CannybotsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CannybotsController.h; sourceTree = "<group>"; };
@@ -241,6 +241,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B010D3AC1999411B002DDBA3 /* CannybotsRacer */ = {
+			isa = PBXGroup;
+			children = (
+				B010D3AE1999411B002DDBA3 /* CannybotsRacerGlu.h */,
+			);
+			name = CannybotsRacer;
+			path = ../../../avr/CannybotsRacer;
+			sourceTree = "<group>";
+		};
 		B0BE4120196093E2003F530B /* Cannybots */ = {
 			isa = PBXGroup;
 			children = (
@@ -292,9 +301,9 @@
 		B92C59D118FEC8FE005EC882 = {
 			isa = PBXGroup;
 			children = (
+				B010D3AC1999411B002DDBA3 /* CannybotsRacer */,
 				B0DDB035198C3F980062AA13 /* JRTranscriptView */,
 				B069D2C5197145E800F4378A /* CannyLapCounter.h */,
-				B02B512C196C62A2006EEC2B /* CannybotsRacer.h */,
 				B0C8734919674B8800238594 /* HighScores */,
 				B0BE4120196093E2003F530B /* Cannybots */,
 				B9AD5E5C193EF58A00BC9631 /* graphics */,

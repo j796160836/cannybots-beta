@@ -9,7 +9,12 @@
 #ifndef _CannybotsTypes_h
 #define _CannybotsTypes_h
 
+#include <stdint.h>
+#include <stdlib.h>
+#include <stddef.h>     /* offsetof */
+
 #include <CannybotsConfig.h>
+
 
 typedef uint8_t cb_publish_type ;
 typedef uint8_t cb_type ;

@@ -4,13 +4,12 @@
 
 // This file is shared with Arduino sketches and the client platforms such as: iOS, Android, Python etc.
 
-#define CFG_ID                           "CBLF"
-#define CFG_BASE                         0
-#define LF_MAJOR_VERSION 0
-#define LF_MINOR_VERSION 1
+#define CFG_ID             "CBLF"
+#define CFG_BASE           0
+#define LF_MAJOR_VERSION   0
+#define LF_MINOR_VERSION   1
 
-
-//TODO: move to Cannybots lib
+//maybe TODO: move to Cannybots lib
 //uint32_t  cb_bot_type = 0xCB1F0001;
 //uint16_t  cb_version  = LF_MAJOR_VERSION*255 + LF_MINOR_VERSION;
 //uint32_t  cb_bot_id   = 0x0000CB01; 
@@ -20,7 +19,6 @@
 #define NUM_MOTORS      2
 #define NUM_IR_SENSORS  3
 #define STATUS_LED      13
-#define BOT_TYPE_CUSTOM_PCB 1
 #define MANUAL_MODE_RADIOSILENCE_TIMEOUT 500
 #define IR_EMIT_VALUES_INTERVAL 2000
 
@@ -43,8 +41,6 @@ CB_ID(30, LAPCOUNTER_GETREADY, "getReady");
 CB_ID(31, LAPCOUNTER_LAPTIME,  "lapTime");
 CB_ID(32, LAPCOUNTER_LAPCOUNT, "lapCount");
 CB_ID(32, LAPCOUNTER_STOP,     "lapStop");
-
-
 
 // constants for 'move' method
 #define CANNYBOTSRACER_MOVE_STOP     0
@@ -166,6 +162,10 @@ CB_CFG_ID(cfg_cruiseSpeed_manualMaxSpeed);
 CB_CFG_ID(cfg_offLineMaxTime);
 CB_CFG_ID(cfg_info_printValsInterval);
 CB_CFG_ID(cfg_debugFlag);
+
+
+void cannybotsRacerGlu_setup(cb_app_config* settings);  
+void cannybotsRacerGlu_setupConfig(cb_app_config* settings);
 
 #endif
 

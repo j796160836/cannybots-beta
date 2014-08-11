@@ -1,22 +1,18 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Cannybots glulogic
+#include "CannybotsRacerGlu.h"
+#include <Cannybots.h>
 
-void cannybots_setup() {
-  cb.registerHandler(&RACER_CRUISESPEED, lf_updateMotorSpeeds);
-  cb.registerHandler(&RACER_LINEFOLLOWING_MODE, lf_updateLineFollowingMode);
-  cb.registerHandler(&RACER_TANKCONTROL_MODE, lf_updateTankControlMode);
-  
-  cb.registerHandler(&RACER_PID, lf_updatePID);
-  cb.registerHandler(&RACER_IRBIAS, lf_updateBias);
-  cb.registerHandler(&RACER_JOYAXIS, lf_updateAxis);
-  cb.registerHandler(&RACER_CONFIG, lf_emitConfig);
-  cb.registerHandler(&RACER_IRVALS, lf_emitIRValues);
-  cb.registerHandler(&RACER_PING, lf_ping);
+void cannybotsRacerGlu_setup(cb_app_config* settings) {   
+  Cannybots::getInstance().setConfigStorage(CFG_ID, CFG_BASE, sizeof(cb_app_config), LF_MAJOR_VERSION, LF_MINOR_VERSION);
+  cannybotsRacerGlu_setupConfig(settings);
+  Cannybots::getInstance().populateVariablesFromConfig();
+}
 
-  // Stored Settings  (EEPROM/Flash)
-  cb.setConfigStorage(CFG_ID, CFG_BASE, sizeof(cb_app_config), LF_MAJOR_VERSION, LF_MINOR_VERSION);
-
+// Stored Settings  (EEPROM/Flash)
+// these registrations are in a function without reference to 'local' storage so we can call this from Arduino, iOS, Android etc 
+void cannybotsRacerGlu_setupConfig(cb_app_config* settings) {
   CB_REGISTER_CONFIG(cfg_bot_type);
   CB_REGISTER_CONFIG(cfg_version);
   CB_REGISTER_CONFIG(cfg_bot_id);
@@ -57,7 +53,5 @@ void cannybots_setup() {
   CB_REGISTER_CONFIG(cfg_cruiseSpeed_manualMaxSpeed);
   CB_REGISTER_CONFIG(cfg_offLineMaxTime);
   CB_REGISTER_CONFIG(cfg_info_printValsInterval);
-  cb.populateVariablesFromConfig();
-  cb.begin();
 }
 

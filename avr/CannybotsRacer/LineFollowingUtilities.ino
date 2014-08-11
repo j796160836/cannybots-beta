@@ -25,11 +25,20 @@ void lineFollowing_setup() {
   pinMode(STATUS_LED, OUTPUT);
   digitalWrite(STATUS_LED, HIGH);
 
-#ifdef BOT_TYPE_CUSTOM_PCB
-  pinMode(settings.cfg_motorDriver_driveModePin, OUTPUT);
-  digitalWrite(settings.cfg_motorDriver_driveModePin, HIGH); //to set controller to Phase/Enable mode
-#endif
-
+  if (settings.cfg_motorDriver_hasDriveMode) {
+    pinMode(settings.cfg_motorDriver_driveModePin, OUTPUT);
+    digitalWrite(settings.cfg_motorDriver_driveModePin, HIGH); //to set controller to Phase/Enable mode
+  }
+  
+  Cannybots& cb = Cannybots::getInstance();
+  cb.registerHandler(&RACER_LINEFOLLOWING_MODE, lf_updateLineFollowingMode);
+  cb.registerHandler(&RACER_TANKCONTROL_MODE, lf_updateTankControlMode);
+  cb.registerHandler(&RACER_PID, lf_updatePID);
+  cb.registerHandler(&RACER_JOYAXIS, lf_updateAxis);
+  cb.registerHandler(&RACER_CONFIG, lf_emitConfig);
+  cb.registerHandler(&RACER_IRVALS, lf_emitIRValues);
+  cb.registerHandler(&RACER_IRBIAS, lf_updateBias);
+  cb.registerHandler(&RACER_PING, lf_ping);
 }
 
 
@@ -78,7 +87,7 @@ void lineFollowing_loop() {
   }
   //
   
-  CB_DBG("isfwd: %d,%d", settings.cfg_motorA_postiveSpeedisFwd, settings.cfg_motorB_postiveSpeedisFwd);
+  //CB_DBG("isfwd: %d,%d", settings.cfg_motorA_postiveSpeedisFwd, settings.cfg_motorB_postiveSpeedisFwd);
   
   speedA = constrain( settings.cfg_motorA_postiveSpeedisFwd?speedA:-speedA, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
   speedB = constrain( settings.cfg_motorB_postiveSpeedisFwd?speedB:-speedB, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
@@ -113,16 +122,19 @@ void read_ir_sensors() {
 }
 
 void motor(int _speedA, int _speedB) {
-  // TODO: use settings.cfg_moterDriver_type
-  motor_customPCB(_speedA, _speedB);  
+  switch (settings.cfg_motorDriver_type) {
+    case 0:   motor_customPCB_v1(_speedA, _speedB);  break;
+    case 1:   motor_v0(_speedA, _speedB);  break;
+    default:  motor_customPCB_v1(_speedA, _speedB);  break;
+  }
 }
 
-void motor_customPCB(int _speedA, int _speedB)
+void motor_customPCB_v1(int _speedA, int _speedB)
 {
   _speedA = constrain(_speedA, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
   _speedB = constrain(_speedB, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
 
-  CB_DBG("A=%d,B=%d, %d,%d,%d,%d", _speedA, _speedB, settings.cfg_motorA_pin_1, settings.cfg_motorA_pin_2, settings.cfg_motorB_pin_1, settings.cfg_motorB_pin_2);
+  //CB_DBG("A=%d,B=%d, %d,%d,%d,%d", _speedA, _speedB, settings.cfg_motorA_pin_1, settings.cfg_motorA_pin_2, settings.cfg_motorB_pin_1, settings.cfg_motorB_pin_2);
   digitalWrite(settings.cfg_motorA_pin_1, _speedA >= 0 ? HIGH : LOW) ;
   analogWrite (settings.cfg_motorA_pin_2, abs(_speedA));
 
@@ -132,7 +144,7 @@ void motor_customPCB(int _speedA, int _speedB)
 
 
 // motor controller function
-void motor_ORG12(int _speedA, int _speedB) // V4
+void motor_v0(int _speedA, int _speedB) // V4
 {
   _speedA = constrain(_speedA, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
   _speedB = constrain(_speedB, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);

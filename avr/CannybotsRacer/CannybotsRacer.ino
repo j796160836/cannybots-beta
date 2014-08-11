@@ -3,7 +3,7 @@
 // Required Libraries - No need to change this section
 #include <EEPROMex.h>
 #include <Cannybots.h>
-#include "CannybotsRacer.h"
+#include "CannybotsRacerGlu.h"
 Cannybots& cb = Cannybots::getInstance();
 cb_app_config settings;
 
@@ -88,7 +88,7 @@ void lap_started() {
   cb.callMethod(&LAPCOUNTER_GETREADY, currentStartLapTime); 
 }
 
-// call on lap complete, updates phone with current lap time, lap count and restarts the lap timer
+// call on lap complete, updates phone with current lap time & lap count, it then restarts the lap timer and incremetn the laptcount
 void lap_completed() {
   cb.callMethod(&LAPCOUNTER_LAPTIME, millis()-currentStartLapTime);
   cb.callMethod(&LAPCOUNTER_LAPCOUNT, lapCount);
@@ -96,7 +96,7 @@ void lap_completed() {
   lapCount++;
 }
 
-// this should be called to tell the phone that lap timing has finished
+// this should be called to tell the phone that lap timing and counting has finished
 void lap_stopTiming() {
   cb.callMethod(&LAPCOUNTER_STOP, lapCount);
 }
@@ -105,7 +105,6 @@ void lap_stopTiming() {
 
 // this is called as often as 'settings.cfg_info_printValsInterval' specifies, in ms.
 void print_debug() {
-  
   CB_DBG(    "%lu(%lu): IR(%u,%u,%u),Kpd(%d,%d)/100,Sab(%d,%d), XY(%d,%d),MEM(%d)\n",
              loopNowTime,
              loopDeltaTime,
@@ -122,14 +121,13 @@ void print_debug() {
 //
 // Normal Arduino Setup & Main Loop
 void setup() {
-  delay(2000);
-  cannybots_setup(); 
-  cb.dumpConfig();
+  cannybotsRacerGlu_setup(&settings); 
+  cb.begin();
+
   lineFollowing_setup();
 }
 
 void loop() {
-  delay(100);
   cb.update();
   lineFollowing_loop();
 }
