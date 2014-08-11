@@ -2,7 +2,7 @@
 #define _CANNYBOTSRACER_H
 #include <CannybotsTypes.h>
 
-// This file is shared with Arduino and the client platforms such as: iOS, Android Python etc.
+// This file is shared with Arduino sketches and the client platforms such as: iOS, Android, Python etc.
 
 // TODO: move to EEPROM config
 #define NUM_MOTORS      2
@@ -23,12 +23,14 @@ CB_ID(6, RACER_PID, "PID");
 CB_ID(7, RACER_CONFIG, "config");
 CB_ID(8, RACER_IRVALS, "IRvals");
 CB_ID(9, RACER_PING, "ping");
+CB_ID(10, RACER_TANKCONTROL_MODE, "isTankControlMode");
 //CB_ID(10, RACER_MOVE, "move");
 //CB_ID(11, RACER_TEST, "test");
 
 CB_ID(30, LAPCOUNTER_GETREADY, "getReady");
 CB_ID(31, LAPCOUNTER_LAPTIME,  "lapTime");
 CB_ID(32, LAPCOUNTER_LAPCOUNT, "lapCount");
+CB_ID(32, LAPCOUNTER_STOP,     "lapStop");
 
 
 
@@ -57,7 +59,7 @@ CB_ID(32, LAPCOUNTER_LAPCOUNT, "lapCount");
 #define LF_MINOR_VERSION 1
 
 
-// The struct needs a prefix because these end up as global static constants and 'stringinfied' versions on variable names used on the iOS/Android scripting side as-is
+// The struct members needs a prefix because these end up as global static constants and 'stringinfied' versions of variable names are used in the iOS/Android scripting side as-is
 // A C/C++ structs order will not be changed by the compiler so the member offset of a cfg value lower down the list will have a unique higher address (no unions!)
 // the offset is stored in a 8bit variable, so don't let it go over 255! (e.g. supports 128 ints, more than enough?)
 // 1024 EEPROM = settings for 4 different bots types or 4 versions of config

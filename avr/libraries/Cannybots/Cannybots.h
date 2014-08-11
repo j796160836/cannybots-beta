@@ -101,6 +101,15 @@
 #include <CannybotsUtils.h>
 #include <CannybotsInt.h>
 
+#define CB_REGISTER_CONFIG(_p)    cb.registerConfigParameter(&_p, &settings._p);
+
+#define _CB_TEMPLATE_registerConfigParameter(_ctype, _cb_type) \
+void Cannybots::registerConfigParameter(cb_nv_id* _id, _ctype *v) { \
+cb_descriptor* desc =  CB_ALLOC_DESC(); \
+desc->cid_t.cidNV = _id; \
+desc->type = _cb_type; \
+desc->data = v; \
+configVars.add(desc); }
 
 class Cannybots
 {

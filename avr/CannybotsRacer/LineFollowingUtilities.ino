@@ -6,7 +6,6 @@
 // TODO: to be moved to a library
 
 
-bool isLineFollowingMode = true;
 unsigned long pidLastTime = millis();
 
 
@@ -266,6 +265,11 @@ void lf_updateLineFollowingMode(int _forceManualMode, int _d1, int _d2) {
   //CB_DBG("ForceManual=%d", _forceManualMode);
   forceManualMode = _forceManualMode;
 }
+void lf_updateTankControlMode(int _isTankControlMode, int _d1, int _d2) {
+  isTankControlMode = isTankControlMode;
+}
+
+
 
 void lf_emitConfig(int _d1, int _d2, int _d3) {
   cb.callMethod(&RACER_PID, getPID_P(), getPID_I(), getPID_D());

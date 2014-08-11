@@ -21,7 +21,9 @@ int speedA = 0, speedB = 0;
 int yAxisValue = 0;  // -255..255
 int xAxisValue = 0;  // -255..255
 
+bool isLineFollowingMode = true;
 bool forceManualMode = false;          // when true the user is forcing manual mode from the phone app/joypad
+bool isTankControlMode = false;               // when true the client has a left (xAxisValue) and right (yAxisValue) throttle, e.g. like tank tracks.
 
 // Lap Timing
 unsigned long currentStartLapTime = 0;
@@ -63,13 +65,18 @@ void  joystick_lineFollowingControlMode() {
 // This is called when the bot is in manual mode.
 // Use it to map the joystick X & Y axis (which both range from -255..255) to motor speeds (also -255..255)
 void joystick_manualControlMode() {
+  if (isTankControlMode) {
+    speedA =  xAxisValue;
+    speedB =  yAxisValue;
+  } else {
     speedA =  (yAxisValue + xAxisValue)/4; //-xAxisValue
     speedB =  (yAxisValue - xAxisValue)/4; //xAxisValue
+  }
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Lap Timing
 
-// this should be called at least once to inform the phone that the bot has started racing
+// this should be called at least once to inform the client (e.g. phone) that the bot has started racing
 void lap_started() {
   currentStartLapTime = millis();
   cb.callMethod(&LAPCOUNTER_GETREADY, currentStartLapTime); 
@@ -81,6 +88,10 @@ void lap_completed() {
   cb.callMethod(&LAPCOUNTER_LAPCOUNT, lapCount);
   currentStartLapTime = millis();
   lapCount++;
+}
+
+void lap_stopTiming() {
+  cb.callMethod(&LAPCOUNTER_STOP, lapCount);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////

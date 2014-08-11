@@ -688,7 +688,7 @@ void Cannybots::setConfigStorage(const char* magic, const uint16_t start, const 
 
 
 /*
- // TODO: if not on ARDUION build Message and send
+ // TODO: if not on ARDUIN build a 'Message' and send it OTA
  */
 #define _CB_CFG_OFFSET(_id) nvBaseAddress+_id->cid
 
@@ -752,13 +752,7 @@ void Cannybots::setConfigParameterValue(cb_nv_id* _id, bool* v) {
 #endif // __RFduino__
 #endif // ARDUINO
 
-#define _CB_TEMPLATE_registerConfigParameter(_ctype, _cb_type) \
-void Cannybots::registerConfigParameter(cb_nv_id* _id, _ctype *v) { \
-cb_descriptor* desc =  CB_ALLOC_DESC(); \
-desc->cid_t.cidNV = _id; \
-desc->type = _cb_type; \
-desc->data = v; \
-configVars.add(desc); }
+
 
 _CB_TEMPLATE_registerConfigParameter(bool,    CB_BYTE);
 _CB_TEMPLATE_registerConfigParameter(int8_t,  CB_INT8);
