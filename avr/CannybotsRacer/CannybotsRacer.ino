@@ -122,15 +122,15 @@ void print_debug() {
 //
 // Normal Arduino Setup & Main Loop
 void setup() {
-  lineFollowing_setup();
   delay(2000);
   cannybots_setup(); 
   cb.dumpConfig();
+  lineFollowing_setup();
 }
 
 void loop() {
   delay(100);
-  lineFollowing_loop();
   cb.update();
+  lineFollowing_loop();
 }
 

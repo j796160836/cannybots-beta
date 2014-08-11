@@ -87,13 +87,13 @@
 
     
     // TODO: crate convineice for Arduiono pins
-    [cb setConfigParameter_UINT8:&cfg_ir_pin_1 p1:24];  // A6    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_ir_pin_2 p1:26];  // A8    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_ir_pin_3 p1:29];  // A10    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_ir_pin_1 p1:24]; PAUSE_HACK; // A6
+    [cb setConfigParameter_UINT8:&cfg_ir_pin_2 p1:26]; PAUSE_HACK; // A8
+    [cb setConfigParameter_UINT8:&cfg_ir_pin_3 p1:29]; PAUSE_HACK; // A10
     
-    [cb setConfigParameter_UINT8:&cfg_ir_bias_1 p1:1];  // A6    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_ir_bias_2 p1:2];  // A8    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_ir_bias_3 p1:3];  // A10    PAUSE_HACK;
+    [cb setConfigParameter_UINT8:&cfg_ir_bias_1 p1:1]; PAUSE_HACK; // A6
+    [cb setConfigParameter_UINT8:&cfg_ir_bias_2 p1:2]; PAUSE_HACK; // A8
+    [cb setConfigParameter_UINT8:&cfg_ir_bias_3 p1:3]; PAUSE_HACK; // A10
     
 
     [cb setConfigParameter_UINT8:&cfg_motorDriver_type p1:0];    PAUSE_HACK;
