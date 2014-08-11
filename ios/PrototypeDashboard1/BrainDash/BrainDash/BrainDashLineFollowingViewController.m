@@ -9,7 +9,7 @@
 #import "BrainDashLineFollowingViewController.h"
 #import <CannybotsController.h>
 
-#import "CannybotsRacer.h"
+#import "CannybotsRacerGlu.h"
 
 @interface BrainDashLineFollowingViewController ()
 {

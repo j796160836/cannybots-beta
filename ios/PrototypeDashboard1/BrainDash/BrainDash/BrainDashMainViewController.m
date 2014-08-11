@@ -9,7 +9,7 @@
 #import "BrainDashMainViewController.h"
 
 #import <CannybotsController.h>
-#import "CannybotsRacer.h"
+#import "CannybotsRacerGlu.h"
 
 // add a Project reference to cocos2d-ios.xcodeproj, using the dialog box and not the drag drop!! (xcode bug)
 // (rstart xcode helps)
