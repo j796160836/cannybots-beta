@@ -5,6 +5,7 @@
 #include <Cannybots.h>
 
 void cannybotsRacerGlu_setup(cb_app_config* settings) {   
+  //TODO:Cannybots::getInstance().setConfigStorage(CFG_ID, CFG_BASE, LF_MAJOR_VERSION, LF_MINOR_VERSION, settings, sizeof(settings));
   Cannybots::getInstance().setConfigStorage(CFG_ID, CFG_BASE, sizeof(cb_app_config), LF_MAJOR_VERSION, LF_MINOR_VERSION);
   cannybotsRacerGlu_setupConfig(settings);
   Cannybots::getInstance().populateVariablesFromConfig();

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B010D3B519994858002DDBA3 /* CannybotsRacerGlu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B010D3B419994858002DDBA3 /* CannybotsRacerGlu.cpp */; };
 		B01EEBDF1948F94F00E6D3A4 /* Speed High Rot.png in Resources */ = {isa = PBXBuildFile; fileRef = B01EEBDD1948F94F00E6D3A4 /* Speed High Rot.png */; };
 		B01EEBE01948F94F00E6D3A4 /* Speed Low Rot.png in Resources */ = {isa = PBXBuildFile; fileRef = B01EEBDE1948F94F00E6D3A4 /* Speed Low Rot.png */; };
 		B0B067BD196D542B00ABC209 /* CannybotsController.mm in Sources */ = {isa = PBXBuildFile; fileRef = B0B067BC196D542B00ABC209 /* CannybotsController.mm */; };
@@ -108,6 +109,7 @@
 
 /* Begin PBXFileReference section */
 		B010D3AE1999411B002DDBA3 /* CannybotsRacerGlu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CannybotsRacerGlu.h; sourceTree = "<group>"; };
+		B010D3B419994858002DDBA3 /* CannybotsRacerGlu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CannybotsRacerGlu.cpp; sourceTree = "<group>"; };
 		B01EEBDD1948F94F00E6D3A4 /* Speed High Rot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Speed High Rot.png"; sourceTree = "<group>"; };
 		B01EEBDE1948F94F00E6D3A4 /* Speed Low Rot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Speed Low Rot.png"; sourceTree = "<group>"; };
 		B069D2C5197145E800F4378A /* CannyLapCounter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CannyLapCounter.h; path = ../../../avr/CannyLapCounter/CannyLapCounter.h; sourceTree = "<group>"; };
@@ -244,6 +246,7 @@
 		B010D3AC1999411B002DDBA3 /* CannybotsRacer */ = {
 			isa = PBXGroup;
 			children = (
+				B010D3B419994858002DDBA3 /* CannybotsRacerGlu.cpp */,
 				B010D3AE1999411B002DDBA3 /* CannybotsRacerGlu.h */,
 			);
 			name = CannybotsRacer;
@@ -704,6 +707,7 @@
 				B92C5A6118FEFD1D005EC882 /* UARTPeripheral.m in Sources */,
 				B92C59F718FEC8FE005EC882 /* BrainDashFlipsideViewController.m in Sources */,
 				B9A660151905AA35004869BF /* SneakyJoystickSkinnedBase.m in Sources */,
+				B010D3B519994858002DDBA3 /* CannybotsRacerGlu.cpp in Sources */,
 				B92C5A6218FEFD1D005EC882 /* CBUUID+StringExtraction.m in Sources */,
 				B92C59EE18FEC8FE005EC882 /* BrainDashAppDelegate.m in Sources */,
 				B9AD5E73193F66E800BC9631 /* BrainDashTuningViewController.m in Sources */,
@@ -845,8 +849,8 @@
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Wayne Keenan (XECW4HBRGW)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Wayne Keenan (XECW4HBRGW)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "BrainDash/BrainDash-Prefix.pch";
@@ -862,7 +866,7 @@
 					"$(PROJECT_DIR)/Libraries/",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "F97B3687-D646-4C51-B968-134B2D40B610";
+				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
@@ -874,8 +878,8 @@
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Wayne Keenan (QP5BLA9EF3)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Wayne Keenan (QP5BLA9EF3)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "BrainDash/BrainDash-Prefix.pch";
@@ -891,7 +895,7 @@
 					"$(PROJECT_DIR)/Libraries/",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "45B20BDB-2304-4392-AAB8-8CA867DB382C";
+				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};

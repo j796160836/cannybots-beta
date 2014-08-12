@@ -163,9 +163,15 @@ CB_CFG_ID(cfg_offLineMaxTime);
 CB_CFG_ID(cfg_info_printValsInterval);
 CB_CFG_ID(cfg_debugFlag);
 
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 void cannybotsRacerGlu_setup(cb_app_config* settings);  
 void cannybotsRacerGlu_setupConfig(cb_app_config* settings);
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

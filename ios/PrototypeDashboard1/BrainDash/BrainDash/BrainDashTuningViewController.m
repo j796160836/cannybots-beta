@@ -57,6 +57,7 @@
 }
 */
 
+
 - (void) viewDidAppear:(BOOL)animated {
 
     CannybotsController* cb = [CannybotsController sharedInstance];
@@ -95,7 +96,6 @@
              [self.debugView appendString:str?str:@"nil"];
          }
      }];
-    
     [cb callMethod:&RACER_CONFIG p1:0 p2:0 p3:0];
 
 }

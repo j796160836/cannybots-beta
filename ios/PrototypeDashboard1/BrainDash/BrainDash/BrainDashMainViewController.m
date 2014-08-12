@@ -270,9 +270,14 @@
 
 - (void) startLapTimer {
     NSLog(@"Lap time %f", time);
-    
+    NSTimer* timer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(updateTimer) userInfo:nil repeats:YES];
+
     
 }
+
+- (void) updateTimer {
+}
+
 
 - (void) viewDidAppear:(BOOL)animated {
     NSLog(@"viewDidAppear");

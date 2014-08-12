@@ -7,7 +7,9 @@
 #endif
 
 #ifdef ARDUINO
+#ifndef __RFduino__
 #include <EEPROMEx.h>
+#endif __RFduino__
 #include <Arduino.h>
 #ifdef USE_SPI
 #include <SPI.h>
@@ -644,7 +646,7 @@ void Cannybots::setConfigStorage(const char* magic, const uint16_t start, const 
     nvBaseAddress = start;
     CB_DBG("EE:@%d,l=%d", start, size);
 
-#ifdef ARDUINO
+#if defined(ARDUINO) && !defined(__RFduino__)
     EEPROM.setMemPool(nvBaseAddress, nvBaseAddress+size);
     // Set maximum allowed writes to maxAllowedWrites.
     // More writes will only give errors when _EEPROMEX_DEBUG is set
@@ -672,6 +674,7 @@ void Cannybots::setConfigStorage(const char* magic, const uint16_t start, const 
             EEPROM.writeByte(nvBaseAddress+i, 0);
         }
     }
+
 #endif
     
 }
@@ -684,6 +687,49 @@ void Cannybots::setConfigStorage(const char* magic, const uint16_t start, const 
     
 #ifdef __RFduino__
     // see:  https://github.com/RFduino/RFduino/tree/master/libraries/RFduinoNonBLE/examples/Flash/FlashInteger
+
+void Cannybots::getConfigParameterValue(cb_nv_id* _id, uint8_t* v) {
+}
+
+void Cannybots::setConfigParameterValue(cb_nv_id* _id, uint8_t* v) {
+}
+
+void Cannybots::getConfigParameterValue(cb_nv_id* _id, int8_t* v) {
+}
+
+void Cannybots::setConfigParameterValue(cb_nv_id* _id, int8_t* v) {
+}
+
+void Cannybots::getConfigParameterValue(cb_nv_id* _id, int16_t* v) {
+}
+
+void Cannybots::setConfigParameterValue(cb_nv_id* _id, int16_t* v) {
+}
+
+void Cannybots::getConfigParameterValue(cb_nv_id* _id, uint16_t* v) {
+}
+
+void Cannybots::setConfigParameterValue(cb_nv_id* _id, uint16_t* v) {
+}
+
+void Cannybots::getConfigParameterValue(cb_nv_id* _id, int32_t* v) {
+}
+
+void Cannybots::setConfigParameterValue(cb_nv_id* _id, int32_t* v) {
+}
+
+void Cannybots::getConfigParameterValue(cb_nv_id* _id, uint32_t* v) {
+}
+
+void Cannybots::setConfigParameterValue(cb_nv_id* _id, uint32_t* v) {
+}
+
+
+void Cannybots::getConfigParameterValue(cb_nv_id* _id, bool* v) {
+}
+
+void Cannybots::setConfigParameterValue(cb_nv_id* _id, bool* v) {
+}
 #else
 
 
@@ -767,6 +813,52 @@ void Cannybots::setConfigParameterValue(cb_nv_id* _id, bool* v) {
 }
 
 #endif // __RFduino__
+#else // not Arduio
+
+void Cannybots::getConfigParameterValue(cb_nv_id* _id, uint8_t* v) {
+}
+
+void Cannybots::setConfigParameterValue(cb_nv_id* _id, uint8_t* v) {
+}
+
+void Cannybots::getConfigParameterValue(cb_nv_id* _id, int8_t* v) {
+}
+
+void Cannybots::setConfigParameterValue(cb_nv_id* _id, int8_t* v) {
+}
+
+void Cannybots::getConfigParameterValue(cb_nv_id* _id, int16_t* v) {
+}
+
+void Cannybots::setConfigParameterValue(cb_nv_id* _id, int16_t* v) {
+}
+
+void Cannybots::getConfigParameterValue(cb_nv_id* _id, uint16_t* v) {
+}
+
+void Cannybots::setConfigParameterValue(cb_nv_id* _id, uint16_t* v) {
+}
+
+void Cannybots::getConfigParameterValue(cb_nv_id* _id, int32_t* v) {
+}
+
+void Cannybots::setConfigParameterValue(cb_nv_id* _id, int32_t* v) {
+}
+
+void Cannybots::getConfigParameterValue(cb_nv_id* _id, uint32_t* v) {
+}
+
+void Cannybots::setConfigParameterValue(cb_nv_id* _id, uint32_t* v) {
+}
+
+
+void Cannybots::getConfigParameterValue(cb_nv_id* _id, bool* v) {
+}
+
+void Cannybots::setConfigParameterValue(cb_nv_id* _id, bool* v) {
+}
+
+
 #endif // ARDUINO
 
 

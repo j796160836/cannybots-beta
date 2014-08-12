@@ -1,9 +1,8 @@
 
 #include <RFduinoBLE.h>
 #include <RFduinoGZLL.h>
-#include <NTUtils.h>
-#include <NTProtocol.h>
-#include <SimpleFIFO.h>
+
+#include <Cannybots.h>
 
 // TODO: include shared common line following header, once created.
 #define NT_CAT_APP_LINEFOLLOW NT_CAT_APP
@@ -73,14 +72,8 @@ void loop()
     if (buttonReading != buttonState) {
       buttonState = buttonReading;
       if (buttonState == HIGH) {
-        uint8_t msg[NT_MSG_SIZE] = {
-          NT_DEFAULT_MSG_HEADER(),
-          NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_MOVE, LINEFOLLOW_GO, 0),
-          NT_CREATE_CMD_NOP,
-          NT_CREATE_CMD_NOP,
-          NT_CREATE_CMD_NOP
-        };
-        RFduinoGZLL.sendToHost((const char*)msg, NT_MSG_SIZE);
+        
+        //RFduinoGZLL.sendToHost((const char*)msg, NT_MSG_SIZE);
       } else {
         
       }
@@ -112,16 +105,18 @@ void loop()
 
     //Serial.println("SendUpdate required");
 
-    uint8_t msg[NT_MSG_SIZE] = {
-      NT_DEFAULT_MSG_HEADER(),
-      NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_MOTOR_SPEED, 3, xAxisValue),
-      NT_CREATE_CMD1(NT_CAT_APP_LINEFOLLOW, NT_CMD_LINEFOLLOW_MOTOR_SPEED, 4, yAxisValue),
-      NT_CREATE_CMD_NOP,
-      NT_CREATE_CMD_NOP
+    uint8_t msg[CB_MAX_MSG_SIZE] = {
+        'C', 'B', 0,
+        Cannybots::CB_INT16_2, 5,  // RACER_JOYAXIS
+        2,
+        hiByteFromInt(xAxisValue),loByteFromInt(xAxisValue),
+        hiByteFromInt(yAxisValue),loByteFromInt(yAxisValue),
+        0,0,
+        0,0,  0,0,  0,0, 0,0
     };
-    NT_MSG_CALC_CRC(msg);
 
-    RFduinoGZLL.sendToHost((const char*)msg, NT_MSG_SIZE);
+
+    RFduinoGZLL.sendToHost((const char*)msg, sizeof(msg));
   }
 #if 1
   Serial.print("x=");

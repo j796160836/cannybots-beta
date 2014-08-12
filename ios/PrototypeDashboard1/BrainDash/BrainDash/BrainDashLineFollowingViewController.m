@@ -27,8 +27,13 @@
     return self;
 }
 
+cb_app_config cbr_settings;
+
 - (void)viewDidLoad
 {
+    
+    cannybotsRacerGlu_setupConfig(&cbr_settings);
+
     [super viewDidLoad];
 }
 

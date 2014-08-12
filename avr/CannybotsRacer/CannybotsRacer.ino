@@ -15,7 +15,7 @@ int IRvals[NUM_IR_SENSORS];
 
 // Speed
 // speeds are fullspeed back -255 .. 255 full speed forward 
-int cruiseSpeed = settings.cfg_cruiseSpeed_defaultSpeed;
+int cruiseSpeed = 0;
 int speedA = 0; // viewed from behind motor 'A' is on the left  and a +ve speed rotates the wheel in the forward direction (made to be true by config)
 int speedB = 0; // viewed from behind motor 'B' is on the right and a +ve speed rotates the wheel in the forward direction (made to be true by config)
 
@@ -48,6 +48,7 @@ int correction = 0;                                     // error after PID filte
 void pid_calculate() {
   Kp = settings.cfg_pid_p;
   Kd = settings.cfg_pid_d;
+  cruiseSpeed = settings.cfg_cruiseSpeed_defaultSpeed;
   
   // process IR readings via PID
   error_last = error;                                   // store previous error before new one is caluclated
@@ -56,7 +57,6 @@ void pid_calculate() {
   P_error = error * Kp / (float)settings.cfg_pid_divisor;                               // calculate proportional term
   D_error = (error - error_last) * Kd / (float)settings.cfg_pid_divisor;                // calculate differential term
   correction = P_error + D_error;
-  
   speedA = cruiseSpeed + correction;
   speedB = cruiseSpeed - correction;
 }
