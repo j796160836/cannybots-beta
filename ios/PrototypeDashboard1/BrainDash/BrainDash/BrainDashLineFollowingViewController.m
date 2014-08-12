@@ -41,8 +41,7 @@ cb_app_config cbr_settings;
 }
 
 - (void) viewWillDisappear:(BOOL)animated {
-}
-
+}   
 
 - (void)didReceiveMemoryWarning
 {
@@ -69,7 +68,7 @@ cb_app_config cbr_settings;
     //NSLog(@"Config Params: %@",configDescriptors);
 }
 
-#define PAUSE_HACK   [NSThread sleepForTimeInterval: 0.1];
+#define PAUSE_HACK   [NSThread sleepForTimeInterval: 0.2];
 
 - (IBAction)goLeft:(id)sender {
 
@@ -77,7 +76,7 @@ cb_app_config cbr_settings;
 
     //[cb setConfigParameter_UINT32:&cfg_type p1:0xFF00FF00]; PAUSE_HACK;
     [cb setConfigParameter_UINT16:&cfg_id p1:0x0707];    PAUSE_HACK;
-    [cb setConfigParameter_UINT16:&cfg_version p1:0xABCD];    PAUSE_HACK;
+    [cb setConfigParameter_UINT16:&cfg_version p1:0x0101];    PAUSE_HACK;
     //[cb setConfigParameter_UINT32:&cfg_authentication_pin p1:0x01020304]; PAUSE_HACK;
 
     
@@ -141,6 +140,13 @@ cb_app_config cbr_settings;
 }
 
 - (IBAction)goRight:(id)sender {
+    [self goLeft:sender];
+    
+    CannybotsController* cb = [CannybotsController sharedInstance];
+
+    [cb setConfigParameter_UINT16:&cfg_id p1:0x0123];    PAUSE_HACK;
+
+    [cb setConfigParameter_UINT8:&cfg_motorB_postiveSpeedisFwd p1:0];    PAUSE_HACK;
 }
 
 - (IBAction)stop:(id)sender {

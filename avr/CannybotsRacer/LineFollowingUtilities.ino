@@ -91,16 +91,16 @@ void lineFollowingUtilities_loop() {
       joystick_manualControlMode();
     }
   }
-  //
-  
+  printvalues();
+   
   //CB_DBG("isfwd: %d,%d", settings.cfg_motorA_postiveSpeedisFwd, settings.cfg_motorB_postiveSpeedisFwd);
   
   speedA = constrain( settings.cfg_motorA_postiveSpeedisFwd?speedA:-speedA, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
   speedB = constrain( settings.cfg_motorB_postiveSpeedisFwd?speedB:-speedB, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
 
+
   motor(speedA, speedB);
   //delay(5);
-  printvalues();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -212,8 +212,8 @@ void lf_updateMotorSpeeds(int _speedA, int _speedB, int _dummy) {
 }
 
 void lf_updateAxis(int xAxis, int yAxis, int _dummy) {  
-  xAxisValue = xAxis;  //joy X axis vale  = Direction  -255 to 255
-  yAxisValue = yAxis;  //joy y axis vale = Throttle    -255 to 255
+  xAxisValue = xAxis;  //joy X axis vale  e.g. Direction  -255 to 255
+  yAxisValue = yAxis;  //joy y axis vale  e.g. Throttle    -255 to 255
   CB_DBG("joy=%d,%d", xAxis,yAxis);
 }
 
@@ -240,7 +240,8 @@ void lf_updateForceManualMode(int _forceManualMode, int _d1, int _d2) {
 
 
 void lf_updateTankControlMode(int _isTankControlMode, int _d1, int _d2) {
-  isTankControlMode = isTankControlMode;
+  CB_DBG("TankMode=%d", _isTankControlMode);
+  isTankControlMode = _isTankControlMode;
 }
 
 void lf_emitConfig(int _d1, int _d2, int _d3) {
@@ -263,8 +264,9 @@ void lf_ping(int v1) {
 
 
 
-void lineFollowingUtilities_lapStarted(uint32_t time) {
+void lineFollowingUtilities_lapStarted(uint32_t time, uint16_t count) {
   cb.callMethod(&LAPCOUNTER_GETREADY, time);   
+  cb.callMethod(&LAPCOUNTER_LAPCOUNT, count);
 }
 
 void lineFollowingUtilities_lapComplete(uint32_t time, uint16_t count) {
@@ -272,7 +274,7 @@ void lineFollowingUtilities_lapComplete(uint32_t time, uint16_t count) {
   cb.callMethod(&LAPCOUNTER_LAPCOUNT, count);
 }
 
-void   lineFollowingUtilities_topLapCounting() {
+void   lineFollowingUtilities_stopLapCounting() {
   cb.callMethod(&LAPCOUNTER_STOP, lapCount);
 }
 

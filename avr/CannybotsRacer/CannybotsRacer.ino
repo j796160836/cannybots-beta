@@ -24,9 +24,9 @@ int speedB = 0; // viewed from behind motor 'B' is on the right and a +ve speed 
 int xAxisValue = 0;  // (left) -255 .. 255 (right)
 int yAxisValue = 0;  // (down) -255 .. 255 (up)
 
-bool isLineFollowingMode = true;       // set when the bot has detected it's on the line and thus being controlled by PID (always 'false' when forceManualMode is 'true') 
-bool forceManualMode     = false;          // when true the user is forcing manual mode from the phone app/joypad
-bool isTankControlMode   = false;        // when true the client has a left (xAxisValue) and right (yAxisValue) throttle, e.g. like tank ontrol for independant left/right track speed controll.
+volatile bool isLineFollowingMode = true;       // set when the bot has detected it's on the line and thus being controlled by PID (always 'false' when forceManualMode is 'true') 
+volatile bool forceManualMode     = false;          // when true the user is forcing manual mode from the phone app/joypad
+volatile bool isTankControlMode   = false;        // when true the client has a left (xAxisValue) and right (yAxisValue) throttle, e.g. like tank control for independant left/right track speed controll.
 
 // Lap Timing
 unsigned long currentStartLapTime = 0;
@@ -74,35 +74,40 @@ void  joystick_lineFollowingControlMode() {
 // Use it to map the joystick X & Y axis (which both range from -255..255) to motor speeds (also -255..255)
 void joystick_manualControlMode() {
   if (isTankControlMode) {
-    speedA =  xAxisValue/4;
-    speedB =  yAxisValue/4;
+    speedA = xAxisValue/4;
+    speedB = yAxisValue/4;
   } else {
     speedA =  (yAxisValue + xAxisValue)/4; 
     speedB =  (yAxisValue - xAxisValue)/4; 
   }
+
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Lap Timing
 
 // this should be called at least once to inform the client (e.g. phone) that the bot has started racing
 void lap_started() {
-  currentStartLapTime = millis();
-  lineFollowingUtilities_lapStarted(currentStartLapTime);
+  currentStartLapTime = loopNowTime;
+  lineFollowingUtilities_lapStarted(currentStartLapTime, lapCount);
+  lapCount++;
 }
 
 // call on lap complete, updates phone with current lap time & lap count, it then restarts the lap timer and incremetn the laptcount
 void lap_completed() {
-  lineFollowingUtilities_lapComplete(currentStartLapTime, lapCount);
-  currentStartLapTime = millis();
-  lapCount++;
+  lineFollowingUtilities_lapComplete(loopNowTime-currentStartLapTime, lapCount);
+  currentStartLapTime = loopNowTime;
 }
 
 // this should be called to tell the client (e.g. phone app) that lap timing and counting has finished
 void lap_stopTiming() {
-  lineFollowingUtilities_topLapCounting();
+  lineFollowingUtilities_stopLapCounting();
 }
 
 // Debugging
+
+  
+int testState = 0;
+  
 // this is called as often as 'settings.cfg_info_printValsInterval' specifies, in ms.
 void print_debug() {  
   CB_DBG(    "%lu(%lu): IR(%u,%u,%u),Kpd(%d,%d)/100,Sab(%d,%d), XY(%d,%d),MEM(%d)\n",
@@ -114,6 +119,15 @@ void print_debug() {
              xAxisValue, yAxisValue,
              cb.getFreeMemory()
         );
+   return;
+  switch (testState) {
+    case 1: lap_started();  break;
+    case 2: lap_completed(); lap_started(); break;
+    case 3: lap_completed(); lap_started(); break;
+    case 4: lap_completed(); break;
+    case 5: lap_stopTiming(); break;
+  }
+  testState = (testState +1 ) % 10; // 4 sec at end
 }
 
 
@@ -124,7 +138,9 @@ void setup() {
   lineFollowingUtilities_setup();
 }
 
+
 void loop() {
   lineFollowingUtilities_loop();
+  delay(500);
 }
 

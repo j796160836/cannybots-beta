@@ -262,7 +262,8 @@
     //_lapCounterTextField.text = [NSString stringWithFormat:@"%d", laps++];
     
     _lapTimeTextField.text = [NSString stringWithFormat:@"%0.2f", time];
-    
+    _bestLapTimeTextField.text = [NSString stringWithFormat:@"%0.2f", time];
+
     [lapTimer invalidate];
 }
 
@@ -276,10 +277,18 @@
 - (void) startLapTimer {
     NSLog(@"Lap time %f", time);
     lapTimerStartTime = CACurrentMediaTime();
+    [lapTimer invalidate];
+    lapTimer=nil;
     lapTimer = [NSTimer scheduledTimerWithTimeInterval:0.01 target:self selector:@selector(updateTimer) userInfo:nil repeats:YES];
-    
-    
 }
+
+- (void) lapStop:(int)lapCount {
+    NSLog(@"Lap stop %d", lapCount);
+    //_bestLapTimeTextField.text = [NSString stringWithFormat:@"%d", lapCount];
+    [lapTimer invalidate];
+    lapTimer=nil;
+}
+
 
 - (void) updateTimer {
     double currentLapTime = CACurrentMediaTime() - lapTimerStartTime;
@@ -300,20 +309,26 @@
         }
     }];
 
-    [cb registerHandler:&LAPCOUNTER_LAPTIME withBlockFor_INT16_1: ^(int16_t p1)
-     {
-         [self lapCompleted: p1/1000 ];
-     }];
-
     [cb registerHandler:&LAPCOUNTER_GETREADY withBlockFor_INT16_1: ^(int16_t p1)
      {
          [self startLapTimer ];
      }];
     
+    [cb registerHandler:&LAPCOUNTER_LAPTIME withBlockFor_INT16_1: ^(int16_t p1)
+     {
+         [self lapCompleted: p1/1000 ];
+     }];
+
     [cb registerHandler:&LAPCOUNTER_LAPCOUNT withBlockFor_INT16_1: ^(int16_t p1)
      {
          [self lapCount:p1];
      }];
+    
+    [cb registerHandler:&LAPCOUNTER_STOP withBlockFor_INT16_1: ^(int16_t p1)
+     {
+         [self lapStop:p1];
+     }];
+    
     [self reloadScene];
 }
 
