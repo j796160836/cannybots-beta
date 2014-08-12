@@ -280,7 +280,7 @@ void setup() {
 #endif // USE_SPI
 
   rfd_isp_setup();
-  //WATCHDOG_SETUP(7);
+  WATCHDOG_SETUP(7);
   DBG("RFd_PRXSTART!", 0);
 
   RFduinoBLE.customUUID = BLE_UUID;
@@ -294,7 +294,7 @@ void setup() {
 }
 
 void loop() {
-  //WATCHDOG_RELOAD();
+  WATCHDOG_RELOAD();
   //DBG("b,g,I=(%d,%d,%d)",ble_connected, gzll_connected, ISPConnected);
 
   ble_rfduino_manageRadios();
