@@ -4,14 +4,6 @@
 
 #include <Cannybots.h>
 
-// TODO: include shared common line following header, once created.
-#define NT_CAT_APP_LINEFOLLOW NT_CAT_APP
-#define NT_CMD_LINEFOLLOW_MOTOR_SPEED 4
-
-// for follow/dont follow
-#define NT_CMD_LINEFOLLOW_MOVE 1
-#define LINEFOLLOW_STOP 1
-#define LINEFOLLOW_GO 2
 
 // SEE: http://www.rfduino.com/wp-content/uploads/2014/03/rfduino.ble_.programming.reference.pdf
 // - RFduino_systemOff()
@@ -26,7 +18,7 @@ device_t role = DEVICE0;
 #define YAXIS_PIN 3
 #define BUTTON_PIN 4
 
-#define AXIS_DEADZONE 5
+#define AXIS_DEADZONE 10
 #define AXIS_MIN_DELTA 2
 
 
@@ -43,10 +35,11 @@ long debounceDelay = 50;
 
 int followMode = 0;
 
+unsigned long lastPing = millis();
+
 void setup()
 {
   Serial.begin(9600);
-
   pinMode(BUTTON_PIN, INPUT);
   RFduinoGZLL.begin(role);
 }
@@ -71,12 +64,18 @@ void loop()
   if ((millis() - lastDebounceTime) > debounceDelay) {
     if (buttonReading != buttonState) {
       buttonState = buttonReading;
-      if (buttonState == HIGH) {
-        
-        //RFduinoGZLL.sendToHost((const char*)msg, NT_MSG_SIZE);
-      } else {
-        
-      }
+      uint8_t msg[CB_MAX_MSG_SIZE] = {
+        'C', 'B', 0,
+        Cannybots::CB_INT16_2, 2 + 4, // RACER_LINEFOLLOWING_MODE
+        buttonState == HIGH ? 1 : 0,
+        0, 0,
+        0, 0,
+        0, 0,
+        0, 0,  0, 0,  0, 0, 0, 0
+      };
+
+      RFduinoGZLL.sendToHost((const char*)msg, CB_MAX_MSG_SIZE);
+
     }
   }
   lastButtonState = buttonReading;
@@ -103,34 +102,49 @@ void loop()
   if (sendUpdate) {
     sendUpdate = false;
 
-    //Serial.println("SendUpdate required");
+    Serial.println("SendUpdate required");
 
     uint8_t msg[CB_MAX_MSG_SIZE] = {
-        'C', 'B', 0,
-        Cannybots::CB_INT16_2, 5,  // RACER_JOYAXIS
-        2,
-        hiByteFromInt(xAxisValue),loByteFromInt(xAxisValue),
-        hiByteFromInt(yAxisValue),loByteFromInt(yAxisValue),
-        0,0,
-        0,0,  0,0,  0,0, 0,0
+      'C', 'B', 0,
+      Cannybots::CB_INT16_2, 2 + 5, // SYSCALLS_MAX+RACER_JOYAXIS
+      2,
+      hiByteFromInt(xAxisValue), loByteFromInt(xAxisValue),
+      hiByteFromInt(yAxisValue), loByteFromInt(yAxisValue),
+      0, 0,
+      0, 0,  0, 0,  0, 0, 0, 0
     };
-
-
-    RFduinoGZLL.sendToHost((const char*)msg, sizeof(msg));
-  }
 #if 1
-  Serial.print("x=");
-  Serial.print(xAxisValue, DEC);
-  Serial.print("\ty=");
-  Serial.print(yAxisValue, DEC);
-  Serial.print("\tbs=");
-  Serial.print(buttonState, DEC);
-  Serial.print("\tbr=");
-  Serial.print(buttonReading, DEC);
-  Serial.print("\tfollowMode=");
-  Serial.print(followMode, DEC);
-  Serial.println("");
+    Serial.print("x=");
+    Serial.print(xAxisValue, DEC);
+    Serial.print("\ty=");
+    Serial.print(yAxisValue, DEC);
+    Serial.print("\tbs=");
+    Serial.print(buttonState, DEC);
+    Serial.print("\tbr=");
+    Serial.print(buttonReading, DEC);
+    Serial.print("\tfollowMode=");
+    Serial.print(followMode, DEC);
+    Serial.println("");
 #endif
+    RFduinoGZLL.sendToHost((const char*)msg, CB_MAX_MSG_SIZE);
+  }
+
+
+  if (  (millis() - lastPing) > 200) {
+    uint8_t ping[CB_MAX_MSG_SIZE] = {
+      'C', 'B', 0,
+      Cannybots::CB_INT16_2, 2 + 9, // SYSCALLS_MAX+RACER_PING
+      0,
+      0, 0,
+      0, 0,
+      0, 0,
+      0, 0,  0, 0,  0, 0, 0, 0
+    };
+    //RFduinoGZLL.sendToHost("PING!");
+
+    RFduinoGZLL.sendToHost((const char*)ping, CB_MAX_MSG_SIZE);
+    lastPing=millis();
+  }
 }
 
 void RFduinoGZLL_onReceive(device_t device, int rssi, char *data, int len)

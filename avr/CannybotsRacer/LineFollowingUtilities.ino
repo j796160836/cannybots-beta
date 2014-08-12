@@ -3,25 +3,37 @@
 //
 // Common LineFollowing functoins
 
-// TODO: to be moved to a library
-
+// some stats & timers
 
 unsigned long pidLastTime = millis();
-
-
 unsigned long offTheLineTime = 0;
 unsigned long offLineLastTime = millis();
-
-// some counters
 volatile unsigned long lastCommandTime = millis();
 volatile unsigned long loopLastTime = millis();
 
 
-void lineFollowing_setup() {
+void lineFollowingUtilities_setup() {
+  Cannybots& cb = Cannybots::getInstance();
+  cb.registerHandler(&RACER_TANKCONTROL_MODE, lf_updateTankControlMode);
+  cb.registerHandler(&RACER_FORCEMANUAL_MODE, lf_updateForceManualMode);  
+  cb.registerHandler(&RACER_PID, lf_updatePID);
+  cb.registerHandler(&RACER_JOYAXIS, lf_updateAxis);
+  cb.registerHandler(&RACER_CONFIG, lf_emitConfig);
+  cb.registerHandler(&RACER_IRVALS, lf_emitIRValues);
+  cb.registerHandler(&RACER_IRBIAS, lf_updateBias);
+  cb.registerHandler(&RACER_PING, lf_ping);  
+  cannybotsRacerGlu_setup(&settings); 
+  cb.begin();
+  
   pinMode(settings.cfg_motorA_pin_1, OUTPUT);
+  digitalWrite(settings.cfg_motorA_pin_1, LOW);
   pinMode(settings.cfg_motorA_pin_2, OUTPUT);
+  digitalWrite(settings.cfg_motorA_pin_2, LOW);
   pinMode(settings.cfg_motorB_pin_1, OUTPUT);
+  digitalWrite(settings.cfg_motorB_pin_1, LOW);
   pinMode(settings.cfg_motorB_pin_2, OUTPUT);
+  digitalWrite(settings.cfg_motorB_pin_2, LOW);
+
   pinMode(STATUS_LED, OUTPUT);
   digitalWrite(STATUS_LED, HIGH);
 
@@ -30,19 +42,13 @@ void lineFollowing_setup() {
     digitalWrite(settings.cfg_motorDriver_driveModePin, HIGH); //to set controller to Phase/Enable mode
   }
   
-  Cannybots& cb = Cannybots::getInstance();
-  cb.registerHandler(&RACER_LINEFOLLOWING_MODE, lf_updateLineFollowingMode);
-  cb.registerHandler(&RACER_TANKCONTROL_MODE, lf_updateTankControlMode);
-  cb.registerHandler(&RACER_PID, lf_updatePID);
-  cb.registerHandler(&RACER_JOYAXIS, lf_updateAxis);
-  cb.registerHandler(&RACER_CONFIG, lf_emitConfig);
-  cb.registerHandler(&RACER_IRVALS, lf_emitIRValues);
-  cb.registerHandler(&RACER_IRBIAS, lf_updateBias);
-  cb.registerHandler(&RACER_PING, lf_ping);
+  
 }
 
 
-void lineFollowing_loop() {
+void lineFollowingUtilities_loop() {
+    cb.update();
+
     // do some stats...  
   loopNowTime = millis();
   loopDeltaTime = loopNowTime - loopLastTime;
@@ -95,7 +101,6 @@ void lineFollowing_loop() {
   motor(speedA, speedB);
   //delay(5);
   printvalues();
-
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -197,12 +202,6 @@ void lf_report_followingMode(bool isLineMode) {
   }
 }
 
-
-// default getter/setters
-
-
-
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -218,13 +217,14 @@ void lf_updateAxis(int xAxis, int yAxis, int _dummy) {
   CB_DBG("joy=%d,%d", xAxis,yAxis);
 }
 
-
+//TODO: this can now be replace with tke configParameter calls
 void lf_updatePID(int _Kp, int _Ki, int _Kd) {
   //CB_DBG("PID=%d,%d,%d", _Kp, _Ki, _Kd);
   cb.setConfigParameterValue(&cfg_pid_p, &_Kp);
   cb.setConfigParameterValue(&cfg_pid_d, &_Kd);
 }
 
+//TODO: this can now be replace with tke configParameter calls
 void lf_updateBias (int b1, int b2, int b3) {
   //CB_DBG("Bias=%d,%d,%d", b1, b2, b3);
   cb.setConfigParameterValue(&cfg_ir_bias_1, &b1);
@@ -232,10 +232,13 @@ void lf_updateBias (int b1, int b2, int b3) {
   cb.setConfigParameterValue(&cfg_ir_bias_3, &b3);
 }
 
-void lf_updateLineFollowingMode(int _forceManualMode, int _d1, int _d2) {
-  //CB_DBG("ForceManual=%d", _forceManualMode);
-  //forceManualMode = _forceManualMode;
+
+void lf_updateForceManualMode(int _forceManualMode, int _d1, int _d2) {
+  CB_DBG("ForceManual=%d", _forceManualMode);
+  forceManualMode = _forceManualMode;
 }
+
+
 void lf_updateTankControlMode(int _isTankControlMode, int _d1, int _d2) {
   isTankControlMode = isTankControlMode;
 }
@@ -259,6 +262,19 @@ void lf_ping(int v1) {
 }
 
 
+
+void lineFollowingUtilities_lapStarted(uint32_t time) {
+  cb.callMethod(&LAPCOUNTER_GETREADY, time);   
+}
+
+void lineFollowingUtilities_lapComplete(uint32_t time, uint16_t count) {
+  cb.callMethod(&LAPCOUNTER_LAPTIME, time);
+  cb.callMethod(&LAPCOUNTER_LAPCOUNT, count);
+}
+
+void   lineFollowingUtilities_topLapCounting() {
+  cb.callMethod(&LAPCOUNTER_STOP, lapCount);
+}
 
 
 /* Debugging bits'n'pieces:

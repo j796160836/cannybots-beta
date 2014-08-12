@@ -1,8 +1,8 @@
-#ifndef _CANNYBOTSRACER_H
-#define _CANNYBOTSRACER_H
+#ifndef _CANNYBOTSRACERGLU_H
+#define _CANNYBOTSRACERGLU_H
 #include <CannybotsTypes.h>
 
-// This file is shared with Arduino sketches and the client platforms such as: iOS, Android, Python etc.
+// This file is shared with Arduino sketche and the client platforms such as: iOS, Android, Python etc.
 
 #define CFG_ID             "CBLF"
 #define CFG_BASE           0
@@ -34,6 +34,8 @@ CB_ID(7, RACER_CONFIG, "config");
 CB_ID(8, RACER_IRVALS, "IRvals");
 CB_ID(9, RACER_PING, "ping");
 CB_ID(10, RACER_TANKCONTROL_MODE, "isTankControlMode");
+CB_ID(11, RACER_FORCEMANUAL_MODE, "forceManualMode");
+
 //CB_ID(10, RACER_MOVE, "move");
 //CB_ID(11, RACER_TEST, "test");
 
@@ -59,19 +61,19 @@ CB_ID(32, LAPCOUNTER_STOP,     "lapStop");
 //
 // Configuration  (stored in EEPROM)
 
-// The struct members needs a prefix because these end up as global static constants and 'stringinfied' versions of variable names are used in the iOS/Android scripting side as-is
+// The struct members needs a prefix for namespacing; these end up as global static constants and 'stringinfied' versions of variable names are used in the iOS/Android scripting side as-is
 // A C/C++ structs order will not be changed by the compiler so the member offset of a cfg value lower down the list will have a unique higher address (no unions!)
 // the offset is stored in a 8bit variable, so don't let it go over 255! (e.g. supports 128 ints, more than enough?)
 // 1024 EEPROM = settings for 4 different bots types or 4 versions of config
 typedef struct __attribute__((packed)) {
-  // standard 16 byte header - must be preset in this order
-  uint32_t  cfg_bot_type;                      // 0   -  4 bytes intended to be ASCII (human readable, e.g. 0xCB1F0001  = CannyBots LineFollowing # 0001)
+  // standard 16 byte header - must be present in this order
+  uint32_t  cfg_type;                          // 0   -  4 bytes intended to be ASCII (human readable, e.g. 0xCB1F0001  = CannyBots LineFollowing # 0001)
+  uint16_t  cfg_id;                            // 6   -  user defined 32bit identifier
   uint16_t  cfg_version;                       // 4   -  major/minor version
-  uint16_t  cfg_bot_id;                        // 6   -  user defined 32bit identifier
   uint32_t  cfg_authentication_pin;            // 8   -  32 bit / 8 digit pin used for authentication 
   uint32_t  _offsetPadding;                    // 12  -  reserved space for future use, allows us to add up to 4 bytes without upsetting user offsets.
 
-  // user defeind config:
+  // user defined config:
   
   bool      cfg_battery_hasSense;              // 16
   uint8_t   cfg_battery_pin_sense;             // 17
@@ -121,9 +123,10 @@ typedef struct __attribute__((packed)) {
   
 } cb_app_config;  // len = 67
 
-CB_CFG_ID(cfg_bot_type);
+CB_CFG_ID(cfg_type);
+CB_CFG_ID(cfg_id);
 CB_CFG_ID(cfg_version);
-CB_CFG_ID(cfg_bot_id);
+CB_CFG_ID(cfg_authentication_pin);
 CB_CFG_ID(cfg_battery_hasSense);
 CB_CFG_ID(cfg_battery_pin_sense);
 CB_CFG_ID(cfg_ir_max);

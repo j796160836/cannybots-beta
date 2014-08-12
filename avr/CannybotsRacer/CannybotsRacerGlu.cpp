@@ -14,9 +14,10 @@ void cannybotsRacerGlu_setup(cb_app_config* settings) {
 // Stored Settings  (EEPROM/Flash)
 // these registrations are in a function without reference to 'local' storage so we can call this from Arduino, iOS, Android etc 
 void cannybotsRacerGlu_setupConfig(cb_app_config* settings) {
-  CB_REGISTER_CONFIG(cfg_bot_type);
+  CB_REGISTER_CONFIG(cfg_type);
+  CB_REGISTER_CONFIG(cfg_id);
   CB_REGISTER_CONFIG(cfg_version);
-  CB_REGISTER_CONFIG(cfg_bot_id);
+  CB_REGISTER_CONFIG(cfg_authentication_pin);
   CB_REGISTER_CONFIG(cfg_battery_hasSense);
   CB_REGISTER_CONFIG(cfg_battery_pin_sense);
   CB_REGISTER_CONFIG(cfg_ir_max);

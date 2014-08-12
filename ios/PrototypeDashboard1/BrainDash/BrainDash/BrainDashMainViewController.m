@@ -26,7 +26,8 @@
 @interface BrainDashMainViewController () {
     CannybotsController* cb;
     CCNode* myGame;
-    
+    NSTimer* lapTimer;
+    double lapTimerStartTime;
     bool joystickMode;
     int leftMotorSpeed, rightMotorSpeed;
 }
@@ -91,6 +92,8 @@
     cb = [CannybotsController sharedInstance];
 
     joystickMode = true;
+    
+    [self startLapTimer];
     
 }
 
@@ -252,13 +255,15 @@
 }
 
 
-- (void) recordLapTime:(float)time {
+- (void) lapCompleted:(float)time {
     NSLog(@"Lap time %f", time);
     
    // int laps = _lapCounterTextField.text.integerValue;
     //_lapCounterTextField.text = [NSString stringWithFormat:@"%d", laps++];
     
     _lapTimeTextField.text = [NSString stringWithFormat:@"%0.2f", time];
+    
+    [lapTimer invalidate];
 }
 
 
@@ -270,12 +275,16 @@
 
 - (void) startLapTimer {
     NSLog(@"Lap time %f", time);
-    NSTimer* timer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(updateTimer) userInfo:nil repeats:YES];
-
+    lapTimerStartTime = CACurrentMediaTime();
+    lapTimer = [NSTimer scheduledTimerWithTimeInterval:0.01 target:self selector:@selector(updateTimer) userInfo:nil repeats:YES];
+    
     
 }
 
 - (void) updateTimer {
+    double currentLapTime = CACurrentMediaTime() - lapTimerStartTime;
+    _lapTimeTextField.text = [NSString stringWithFormat:@"%0.2f", currentLapTime];
+
 }
 
 
@@ -293,7 +302,7 @@
 
     [cb registerHandler:&LAPCOUNTER_LAPTIME withBlockFor_INT16_1: ^(int16_t p1)
      {
-         [self recordLapTime: p1/1000 ];
+         [self lapCompleted: p1/1000 ];
      }];
 
     [cb registerHandler:&LAPCOUNTER_GETREADY withBlockFor_INT16_1: ^(int16_t p1)

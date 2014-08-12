@@ -9,12 +9,13 @@ cb_app_config settings;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// App State
+// Bot State
+
 // IR sensors values dark=0..~1000 =light, updated automatically.
 int IRvals[NUM_IR_SENSORS];      
 
 // Speed
-// speeds are fullspeed back -255 .. 255 full speed forward 
+// speeds are fullspeed back -255 .. full speed forward 255
 int cruiseSpeed = 0;
 int speedA = 0; // viewed from behind motor 'A' is on the left  and a +ve speed rotates the wheel in the forward direction (made to be true by config)
 int speedB = 0; // viewed from behind motor 'B' is on the right and a +ve speed rotates the wheel in the forward direction (made to be true by config)
@@ -24,8 +25,8 @@ int xAxisValue = 0;  // (left) -255 .. 255 (right)
 int yAxisValue = 0;  // (down) -255 .. 255 (up)
 
 bool isLineFollowingMode = true;       // set when the bot has detected it's on the line and thus being controlled by PID (always 'false' when forceManualMode is 'true') 
-bool forceManualMode = false;          // when true the user is forcing manual mode from the phone app/joypad
-bool isTankControlMode = false;        // when true the client has a left (xAxisValue) and right (yAxisValue) throttle, e.g. like tank ontrol for independant left/right track speed controll.
+bool forceManualMode     = false;          // when true the user is forcing manual mode from the phone app/joypad
+bool isTankControlMode   = false;        // when true the client has a left (xAxisValue) and right (yAxisValue) throttle, e.g. like tank ontrol for independant left/right track speed controll.
 
 // Lap Timing
 unsigned long currentStartLapTime = 0;
@@ -46,6 +47,7 @@ int error_last = 0;                                     // to calculate D_error 
 int correction = 0;                                     // error after PID filter
 
 void pid_calculate() {
+  // get the values from config (these might be updated in the background by the user), or, override them here.
   Kp = settings.cfg_pid_p;
   Kd = settings.cfg_pid_d;
   cruiseSpeed = settings.cfg_cruiseSpeed_defaultSpeed;
@@ -85,26 +87,24 @@ void joystick_manualControlMode() {
 // this should be called at least once to inform the client (e.g. phone) that the bot has started racing
 void lap_started() {
   currentStartLapTime = millis();
-  cb.callMethod(&LAPCOUNTER_GETREADY, currentStartLapTime); 
+  lineFollowingUtilities_lapStarted(currentStartLapTime);
 }
 
 // call on lap complete, updates phone with current lap time & lap count, it then restarts the lap timer and incremetn the laptcount
 void lap_completed() {
-  cb.callMethod(&LAPCOUNTER_LAPTIME, millis()-currentStartLapTime);
-  cb.callMethod(&LAPCOUNTER_LAPCOUNT, lapCount);
+  lineFollowingUtilities_lapComplete(currentStartLapTime, lapCount);
   currentStartLapTime = millis();
   lapCount++;
 }
 
-// this should be called to tell the phone that lap timing and counting has finished
+// this should be called to tell the client (e.g. phone app) that lap timing and counting has finished
 void lap_stopTiming() {
-  cb.callMethod(&LAPCOUNTER_STOP, lapCount);
+  lineFollowingUtilities_topLapCounting();
 }
 
 // Debugging
-
 // this is called as often as 'settings.cfg_info_printValsInterval' specifies, in ms.
-void print_debug() {
+void print_debug() {  
   CB_DBG(    "%lu(%lu): IR(%u,%u,%u),Kpd(%d,%d)/100,Sab(%d,%d), XY(%d,%d),MEM(%d)\n",
              loopNowTime,
              loopDeltaTime,
@@ -121,14 +121,10 @@ void print_debug() {
 //
 // Normal Arduino Setup & Main Loop
 void setup() {
-  cannybotsRacerGlu_setup(&settings); 
-  cb.begin();
-
-  lineFollowing_setup();
+  lineFollowingUtilities_setup();
 }
 
 void loop() {
-  cb.update();
-  lineFollowing_loop();
+  lineFollowingUtilities_loop();
 }
 

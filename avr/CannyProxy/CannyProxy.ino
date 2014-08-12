@@ -5,6 +5,7 @@
 //#define USE_SPI 1
 #define USE_SPI_PROGRAMMER 1
 
+#define GZLL_TIMEOUT 5000
 
 #if  defined(USE_SPI) || defined(USE_SPI_PROGRAMMER)
 #include <SPI.h>
@@ -21,15 +22,15 @@
 #define BLE_ADVERTISEMENT_DATA   "CB_LFB_001"   
 // Note: BLE_ADVERTISEMENT_DATA must be < 16 bytes.
 
-#define BLE_TX_POWER_LEVEL  -20
-#define GZLL_TX_POWER_LEVEL -20
-// x one of;  (low) -20, -16, -12, -8, -4, 0, +4 (high)
+#define BLE_TX_POWER_LEVEL  0
+#define GZLL_TX_POWER_LEVEL 0
+// x one of;  (low) -20, -16, -12, -8, -4, 0, +4 (high & default)
 // RFduino default is +4
 
 
 // TODO: append devideID to advertising data
 
-#define TOGGLE_MILLIS 1000
+#define TOGGLE_MILLIS 1500
 
 #define Q_MAX_ENTRIES 12
 #define Q_ENTRY_SIZE 20
@@ -37,7 +38,7 @@
 #define UART_SOURCE Serial
 #define SERIAL_BUF_SIZE 32
 
-#define NT_MSG_SIZE 20
+#define CB_MSG_SIZE 20
 
 #ifdef USE_SPI
 #define TX_PIN 1
@@ -120,9 +121,10 @@ void process_uart2ble_q() {
             foundStart=true;
             serialBufPtr=0;
         }
-        if (serialBufPtr>=NT_MSG_SIZE) {
+        if (serialBufPtr>=CB_MSG_SIZE) {
             foundStart = false;
-            RFduinoBLE.send((const char*)serialBuffer, NT_MSG_SIZE);
+            // TODO: check for ID message (use it to set BLE adv data and also turn off ISP mode)
+            RFduinoBLE.send((const char*)serialBuffer, CB_MSG_SIZE);
             serialBufPtr=0;
         }
     }
@@ -134,12 +136,10 @@ void process_uart2ble_q() {
 boolean volatile ble_connected = false;
 boolean volatile gzll_connected = false;
 
-
-
 // GZLL
 volatile bool ISPConnected = false;
 
-volatile static unsigned long lastGZLLPacketTime = millis();
+volatile static unsigned long lastGZLLPacketTime = 0;
 
 void RFduinoGZLL_onReceive(device_t device, int rssi, char *data, int len)
 {
@@ -155,7 +155,6 @@ void RFduinoGZLL_onReceive(device_t device, int rssi, char *data, int len)
     enqueue(data, len);
   }
   // TODO: fake pairing. check the device is the same as before...
-  // TODO: timout connection and if no packet is receve > TIMOUT then go back to BLE/GZll flipping
   // MAYBE-TODO: check uart2ble here as Gazelle can only piggy back client device requests
   //RFduinoGZLL.sendToDevice(device, "OK");
 }
@@ -183,28 +182,30 @@ void RFduinoBLE_onReceive(char *data, int len) {
 
 // BLE & GZLL
 
+volatile byte   state  = 0;
+volatile unsigned long lastRadioToggleTime = millis();
+
 void  ble_rfduino_manageRadios() {
+  unsigned long timeNow   = millis();
 
-  static byte   state  = 0;
-  static unsigned long lastTime = millis();
-  unsigned long timeDelta = ( millis() - lastTime );
-
-  if ( (millis() - lastGZLLPacketTime ) > 5000 ) {
+  if ( (timeNow - lastGZLLPacketTime ) > GZLL_TIMEOUT ) {
       if (gzll_connected) {
-        gzll_connected= ISPConnected = false;            
-        state=0;
-        lastTime =  millis();
-        timeDelta = 0;
+        //gzll_connected = ISPConnected = false;            
+        //state=0;
       }
   }
 
-  if (ble_connected || gzll_connected) {
+  if (ble_connected) {
+   return;
+  }
+  
+ if (gzll_connected) {
     return;
   }
 
-  if (timeDelta > TOGGLE_MILLIS) {
+  if ( (timeNow - lastRadioToggleTime) > TOGGLE_MILLIS) {
     state++;
-    lastTime =  millis();
+    lastRadioToggleTime =  timeNow;
   }
 
   if ( 0 == state) {
@@ -223,7 +224,7 @@ void  ble_rfduino_manageRadios() {
 
   } else if (2 == state  ) {
     state = 3;
-    while (!RFduinoBLE.radioActive);
+    //while (!RFduinoBLE.radioActive);
     while (RFduinoBLE.radioActive);
     RFduinoBLE.end();
     while (RFduinoBLE.radioActive);
@@ -281,6 +282,7 @@ void setup() {
 
 
   rfd_isp_setup();
+  delay(2000);
   WATCHDOG_SETUP(7);
   DBG("",0);
   DBG("RFd_Setup",0);
@@ -295,6 +297,7 @@ void loop() {
   if (ISPConnected) {
     rfd_isp_loop();
     return;
+    //TODO: set ISPConnected after a inactivity delay (or 'bootup' message from A* on Serial/SPI)
   }
   process_ble2uart_q();
   process_uart2ble_q();

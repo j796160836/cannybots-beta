@@ -433,7 +433,7 @@ void Cannybots::processMessage(Message* msg ) {
     if ( (msg->payload[0] != 'C'  ||  (msg->payload[1] != 'B' ) ) ) {
         //CB_DBG("Non CB message", 0);
         msg->payload[ (msg->size)-1]=0;
-        //CB_DBG("PM:%s", msg->payload);
+        CB_DBG("PM:%s", msg->payload);
         return;
     }
     // TODO: check CRC, payload length and if this is a contination

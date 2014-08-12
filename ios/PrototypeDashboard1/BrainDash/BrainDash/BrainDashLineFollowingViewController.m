@@ -75,12 +75,10 @@ cb_app_config cbr_settings;
 
     CannybotsController* cb = [CannybotsController sharedInstance];
 
-    //[cb setConfigParameter_UINT32:&cfg_bot_type p1:0xFF00FF00]; PAUSE_HACK;
-
+    //[cb setConfigParameter_UINT32:&cfg_type p1:0xFF00FF00]; PAUSE_HACK;
+    [cb setConfigParameter_UINT16:&cfg_id p1:0x0707];    PAUSE_HACK;
     [cb setConfigParameter_UINT16:&cfg_version p1:0xABCD];    PAUSE_HACK;
-
-    
-    [cb setConfigParameter_UINT16:&cfg_bot_id p1:0x0707];    PAUSE_HACK;
+    //[cb setConfigParameter_UINT32:&cfg_authentication_pin p1:0x01020304]; PAUSE_HACK;
 
     
     [cb setConfigParameter_UINT8:&cfg_battery_hasSense p1:0];    PAUSE_HACK;
@@ -136,7 +134,7 @@ cb_app_config cbr_settings;
     [cb setConfigParameter_UINT8:&cfg_cruiseSpeed_manualMaxSpeed p1:255];    PAUSE_HACK;
     
     [cb setConfigParameter_INT16:&cfg_offLineMaxTime   p1:200];    PAUSE_HACK;
-    [cb setConfigParameter_UINT16:&cfg_info_printValsInterval p1:100];    PAUSE_HACK;
+    [cb setConfigParameter_UINT16:&cfg_info_printValsInterval p1:1000];    PAUSE_HACK;
     
     [cb setConfigParameter_BOOL:&cfg_debugFlag p1:false];    PAUSE_HACK;
 
