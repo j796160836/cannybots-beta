@@ -66,12 +66,12 @@ void loop()
       buttonState = buttonReading;
       uint8_t msg[CB_MAX_MSG_SIZE] = {
         'C', 'B', 0,
-        Cannybots::CB_INT16_2, 2 + 4, // RACER_LINEFOLLOWING_MODE
-        buttonState == HIGH ? 1 : 0,
+        Cannybots::CB_INT16_2, 2 + 11, // RACER_LINEFOLLOWING_MODE
+        1,
+        0, buttonState == HIGH ? 1 : 0,
         0, 0,
         0, 0,
-        0, 0,
-        0, 0,  0, 0,  0, 0, 0, 0
+        0, 0,  0, 0,  0, 0, 0,0
       };
 
       RFduinoGZLL.sendToHost((const char*)msg, CB_MAX_MSG_SIZE);

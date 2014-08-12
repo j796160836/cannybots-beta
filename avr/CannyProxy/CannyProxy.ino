@@ -5,6 +5,7 @@
 //#define USE_SPI 1
 #define USE_SPI_PROGRAMMER 1
 
+#define TOGGLE_MILLIS 2000
 #define GZLL_TIMEOUT 5000
 
 #if  defined(USE_SPI) || defined(USE_SPI_PROGRAMMER)
@@ -22,15 +23,14 @@
 #define BLE_ADVERTISEMENT_DATA   "CB_LFB_001"
 // Note: BLE_ADVERTISEMENT_DATA must be < 16 bytes.
 
-#define BLE_TX_POWER_LEVEL  0
-#define GZLL_TX_POWER_LEVEL 0
+#define BLE_TX_POWER_LEVEL  -20
+#define GZLL_TX_POWER_LEVEL -20
 // x one of;  (low) -20, -16, -12, -8, -4, 0, +4 (high & default)
 // RFduino default is +4
 
 
 // TODO: append devideID to advertising data
 
-#define TOGGLE_MILLIS 1000
 
 #define Q_MAX_ENTRIES 12
 #define Q_ENTRY_SIZE 20
@@ -162,17 +162,17 @@ void RFduinoGZLL_onReceive(device_t device, int rssi, char *data, int len)
 
 // BLE
 void RFduinoBLE_onAdvertisement(bool start) {
-  DBG("RFd_BLE_A=%d", start);
+  //DBG("RFd_BLE_A=%d", start);
 }
 
 void RFduinoBLE_onConnect() {
   ble_connected = true;
-  DBG("RFd_BLE_CON", 0);
+  //DBG("RFd_BLE_CON", 0);
 }
 
 void RFduinoBLE_onDisconnect() {
   ble_connected = false;
-  DBG("RFd_BLE_DIS", 0);
+  //DBG("RFd_BLE_DIS", 0);
 }
 
 void RFduinoBLE_onReceive(char *data, int len) {
@@ -205,66 +205,37 @@ void  ble_rfduino_manageRadios() {
   }
   //DBG("SBG=(%d,%d,%d)", state, ble_connected, gzll_connected);
 
-
-  // Simple FSM:
-  switch (state) {
-    case 0:
-      DBG("RFd_RDIO_OFF", 0);
-
-      RFduinoGZLL.end();
-      RFduinoBLE.end();
-      state=1;
-      break;
-
-    case 1:    // NOP - 'wait' state whilst BLE is active, will remain here whilst BLE/GZLL connected or <TOGGLE_MILLIS
-      //DBG("RFd_NORDIO", 0);
-      break;  
-
-    case 2:
-      DBG("RFd_BLE_UP", 0);
-
-      RFduinoBLE.customUUID = BLE_UUID;
-      RFduinoBLE.deviceName = BLE_LOCALNAME;
-      RFduinoBLE.advertisementData = BLE_ADVERTISEMENT_DATA;
-      //RFduinoBLE.advertisementInterval(millis);
-
-      RFduinoBLE.txPowerLevel = BLE_TX_POWER_LEVEL;
-      RFduinoBLE.begin();
-      state=3;
-      break;
-      
-    case 3:    // NOP - 'wait' state whilst BLE is active,  will remain here whilst BLE/GZLL is connected or <TOGGLE_MILLIS
-      //DBG("RFd_BLE_ON", 0);
-      break;  
-      
-    case 4:
-      DBG("RFd_GZL_UP", 0);
-      while (RFduinoBLE.radioActive);
-      RFduinoBLE.end();
-      while (RFduinoBLE.radioActive);
-      
-      RFduinoGZLL.txPowerLevel = GZLL_TX_POWER_LEVEL;
-      RFduinoGZLL.begin(HOST);
-      state=5;
-
-    case 5:    // NOP - 'wait' state whilst BLE is active,  will remain here whilst BLE/GZLL is connected or <TOGGLE_MILLIS
-      //DBG("RFd_GZL_ON", 0);
-      break;           
-          
-    default:
-      //DBG("RFd_GZL_?%d", state);
-      state = 0;    // go back to the start state.
-      break;
-  }
-
-  // calculate next state  
+  // move to a next state based on a timeout
   if ( (timeNow - lastRadioToggleTime) > TOGGLE_MILLIS) {
     lastRadioToggleTime =  timeNow;
     state++;
     //DBG("NewState=%d", state);
   }
-}
 
+  // Simple FSM:
+  if ( 0 == state) {
+    DBG("RFd_BLE_ON", 0);
+    RFduinoBLE.begin();
+    state++;
+  } else if (2 == state  ) {
+    DBG("RFd_BLE_OFF", 0);
+    while (RFduinoBLE.radioActive);
+    RFduinoBLE.end();
+    state++;
+  } else if (4 == state) {
+    DBG("RFd_GZL_ON", 0);
+    while (RFduinoBLE.radioActive);
+    RFduinoGZLL.begin(HOST);
+    state++;
+  } else if (6 == state) {
+    DBG("RFd_GZL_OFF", 0);
+    RFduinoGZLL.end();
+    state++;
+  } else if (state >= 8) {
+    state = 0;
+  }
+
+}
 
 
 /////////////////////////////////////////////////////////
@@ -309,12 +280,21 @@ void setup() {
 #endif // USE_SPI
 
   rfd_isp_setup();
-  WATCHDOG_SETUP(7);
-  DBG("RFd_UP!", 0);
+  //WATCHDOG_SETUP(7);
+  DBG("RFd_PRXSTART!", 0);
+
+  RFduinoBLE.customUUID = BLE_UUID;
+  RFduinoBLE.deviceName = BLE_LOCALNAME;
+  RFduinoBLE.advertisementData = BLE_ADVERTISEMENT_DATA;
+  //RFduinoBLE.advertisementInterval(millis);
+
+  RFduinoBLE.txPowerLevel  = BLE_TX_POWER_LEVEL;
+  RFduinoGZLL.txPowerLevel = GZLL_TX_POWER_LEVEL;
+
 }
 
 void loop() {
-  WATCHDOG_RELOAD();
+  //WATCHDOG_RELOAD();
   //DBG("b,g,I=(%d,%d,%d)",ble_connected, gzll_connected, ISPConnected);
 
   ble_rfduino_manageRadios();
