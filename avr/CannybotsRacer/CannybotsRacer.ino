@@ -110,7 +110,8 @@ int testState = 0;
   
 // this is called as often as 'settings.cfg_info_printValsInterval' specifies, in ms.
 void print_debug() {  
-  CB_DBG(    "%lu(%lu): IR(%u,%u,%u),Kpd(%d,%d)/100,Sab(%d,%d), XY(%d,%d),MEM(%d)\n",
+  //TODO: fix mem leak in CB_DBG2REMOTE
+  CB_DBG(    "%lu(%lu): IR(%u,%u,%u),Kpd(%d,%d)/100,Sab(%d,%d), XY(%d,%d),MEM(%d)",
              loopNowTime,
              loopDeltaTime,
              IRvals[0], IRvals[1], IRvals[2],
@@ -127,7 +128,7 @@ void print_debug() {
     case 4: lap_completed(); break;
     case 5: lap_stopTiming(); break;
   }
-  testState = (testState +1 ) % 10; // 4 sec at end
+  testState = (testState +1 ) % 10; // do nothing for 4 'intervals' at end
 }
 
 
@@ -141,6 +142,5 @@ void setup() {
 
 void loop() {
   lineFollowingUtilities_loop();
-  delay(500);
 }
 

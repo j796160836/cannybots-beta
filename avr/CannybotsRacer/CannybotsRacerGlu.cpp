@@ -9,6 +9,11 @@ void cannybotsRacerGlu_setup(cb_app_config* settings) {
   Cannybots::getInstance().setConfigStorage(CFG_ID, CFG_BASE, sizeof(cb_app_config), LF_MAJOR_VERSION, LF_MINOR_VERSION);
   cannybotsRacerGlu_setupConfig(settings);
   Cannybots::getInstance().populateVariablesFromConfig();
+  
+  // set some sane defaults
+  if (settings->cfg_info_printValsInterval<200) {
+    settings->cfg_info_printValsInterval=200;
+  }
 }
 
 // Stored Settings  (EEPROM/Flash)

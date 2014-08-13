@@ -23,6 +23,11 @@
 #define BLE_LOCALNAME            "Cannybots"
 #endif
 
+// Valid Bluetooth names are a maximum of 248 bytes using UTF-8 encoding...
+// real world 20 is probably nearer the 'useful' limit
+#define BLE_LOCALNAME_MAX 20
+#define BLE_ADVERTISEMENT_DATA_MAX 15
+
 #ifndef BLE_ADVERTISEMENT_DATA
 #define BLE_ADVERTISEMENT_DATA   "CB_DEF_001"
 #endif
@@ -78,6 +83,25 @@
 
 
 
+// predefined system messages
+
+#define _CB_SYSCALL_NOP                  0
+#define _CB_SYSCALL_GET_BOT_ID           1
+#define _CB_SYSCALL_GET_BOT_TYPE         2
+#define _CB_SYSCALL_GET_CFG_VERSION      3
+#define _CB_SYSCALL_GET_CFG_LIST         4
+#define _CB_SYSCALL_GET_CFG_PARAM        5
+#define _CB_SYSCALL_SET_CFG_PARAM        6
+#define _CB_SYSCALL_CFG_PARAM_META       7
+#define _CB_SYSCALL_BLEPROXY_STARTUP     8          // send from the A* to RFduino on boot.   sent from the RFduino to the A* on boot
+#define _CB_SYSCALL_BLEPROXY_PING        9          // send from the A* to RFduino and sent from the RFduino to the A* every X secoonds ()
+#define _CB_SYSCALL_BLEPROXY_SET_TYPE    10          // 1  taken fromthe 4 non-volaile (e..g EEPROD) config settings on the bot
+#define _CB_SYSCALL_BLEPROXY_SET_ID_VER  11         // 2&3
+#define _CB_SYSCALL_BLEPROXY_SET_AUTH    12         // 4
+#define _CB_SYSCALL_BLEPROXY_SET_TX_PWR  13
+#define _CB_SYSCALL_BLEPROXY_SLEEP       14
+#define _CB_SYSCALL_BLEPROXY_CLIENT_CONNECT       15    // p2 = client type:  0=unknown, 1=BLE, 2=GZLL
+#define _CB_SYSCALL_BLEPROXY_CLIENT_DISCONNECT    16
 
 
 #endif

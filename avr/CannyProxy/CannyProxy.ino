@@ -1,6 +1,11 @@
 #include <RFduinoBLE.h>
 #include <RFduinoGZLL.h>
 #include <stdint.h>
+#include <Cannybots.h>
+
+
+#define MAJOR_VERSION 1
+#define MINOR_VERSION 0
 
 //#define USE_SPI 1
 #define USE_SPI_PROGRAMMER 1
@@ -38,7 +43,6 @@
 #define UART_SOURCE Serial
 #define SERIAL_BUF_SIZE 32
 
-#define CB_MSG_SIZE 20
 
 #ifdef USE_SPI
 #define TX_PIN 1
@@ -52,11 +56,12 @@
 #endif
 
 
-static char dbg_buffer[20] = {'>', '>'};
+//TODO: incorporate proxy debug into cannybots lib
+static char _proxy_dbg_buffer[20] = {'>', '>'};
 #ifdef USE_SPI
-#define DBG(FMT, ...) snprintf(dbg_buffer+2, 18, FMT, __VA_ARGS__); Serial.write((uint8_t*)dbg_buffer,20);Serial.println("");Serial.flush();
+#define DBG(FMT, ...) snprintf(_proxy_dbg_buffer+2, 18, FMT, __VA_ARGS__); Serial.write((uint8_t*)_proxy_dbg_buffer,20);Serial.println("");Serial.flush();
 #else
-#define DBG(FMT, ...) snprintf(dbg_buffer+2, 18, FMT, __VA_ARGS__); writeUART((uint8_t*)dbg_buffer,20);
+#define DBG(FMT, ...) snprintf(_proxy_dbg_buffer+2, 18, FMT, __VA_ARGS__); writeUART((uint8_t*)_proxy_dbg_buffer,20);
 #endif // USE_SPI
 
 
@@ -84,14 +89,12 @@ void enqueue(char *data, int len) {
 /////////////////////////////////////////////////////////
 // Serial
 
-uint8_t serialBuffer[SERIAL_BUF_SIZE + 1];
-int serialBufPtr = 0;
-bool foundStart = false;
-char c = 0, lastChar = 0;
-
+//TODO: with a bit of 'role' state the Cannybots lib could support both sides of this BLE proxy (see: Cannybots::sendMessage(Message*))
+void sendMessage2localDevice(Message* msg) {
+  writeUART(msg->payload, msg->size);
+}
 
 void writeUART(const uint8_t* data, uint16_t len) {
-
 
 #ifdef USE_SPI
   digitalWrite(SS, LOW);    // SS is pin 10
@@ -112,6 +115,11 @@ void writeUART(const uint8_t* data, uint16_t len) {
 }
 
 void process_uart2ble_q() {
+  static uint8_t serialBuffer[SERIAL_BUF_SIZE + 1];
+  static int serialBufPtr = 0;
+  static bool foundStart = false;
+  static char c = 0, lastChar = 0;
+
   while (UART_SOURCE.available() > 0) {
     lastChar = c;
     c =  UART_SOURCE.read();
@@ -121,13 +129,70 @@ void process_uart2ble_q() {
       foundStart = true;
       serialBufPtr = 0;
     }
-    if (serialBufPtr >= CB_MSG_SIZE) {
-      foundStart = false;
-      // TODO: check for ID message (use it to set BLE adv data and also turn off ISP mode)
-      RFduinoBLE.send((const char*)serialBuffer, CB_MSG_SIZE);
+    if (serialBufPtr >= CB_MAX_MSG_SIZE) {
       serialBufPtr = 0;
+      foundStart = false;
+      if ( ! processMessage(serialBuffer, CB_MAX_MSG_SIZE) ) {
+        RFduinoBLE.send((const char*)serialBuffer, CB_MAX_MSG_SIZE);
+      }
     }
   }
+}
+
+// handle messages that are target at this proxy, return true if processed so that downstream code will not foward to client.
+bool processMessage(const uint8_t* buf, uint16_t len) {
+  bool messageProcessed = false;
+  // TODO: maybe make use of cannybots lib (DRY)
+  if (  ( buf[0] == 'C' ) && ( buf[1] == 'B' ) && ( buf[CB_MSG_OFFSET_CMD] == _CBID_CMD_SYS_CALL ) ) {
+
+    // first 2 bytes of data payload is U16 syscall sub-command
+    uint8_t cmd = buf[CB_MSG_OFFSET_DATA+1];
+    uint16_t id=0;
+    uint8_t  verMaj=0, verMin =0;
+    static char advString[BLE_ADVERTISEMENT_DATA_MAX];
+    static char nameString[BLE_LOCALNAME_MAX];
+    
+    switch (cmd) {
+
+      case _CB_SYSCALL_BLEPROXY_STARTUP:
+        DBG("RCVSTART", cmd);
+        messageProcessed = true;
+        break;
+
+      case _CB_SYSCALL_BLEPROXY_SET_ID_VER:
+        id     = (buf[CB_MSG_OFFSET_DATA+2]<<8) + buf[CB_MSG_OFFSET_DATA+3];
+        verMaj = buf[CB_MSG_OFFSET_DATA+4];
+        verMin = buf[CB_MSG_OFFSET_DATA+5];
+
+        snprintf(advString, BLE_ADVERTISEMENT_DATA_MAX, "ID(%x)", id);
+        snprintf(nameString, BLE_LOCALNAME_MAX, "Cannybot[%x][%d.%d]", id,verMaj, verMin);
+
+        DBG("RCVSETVI=%x,%d.%d", id,verMin,verMaj);
+        DBG("A=%s", advString);
+        DBG("N=%s", nameString);
+        RFduinoBLE.advertisementData=advString;
+        RFduinoBLE.deviceName = nameString;
+
+        messageProcessed = true;
+        break;
+
+      case _CB_SYSCALL_BLEPROXY_PING:
+        DBG("RCVPING", cmd);
+        messageProcessed = true;
+        break;
+      case _CB_SYSCALL_BLEPROXY_SET_TYPE:
+      case _CB_SYSCALL_BLEPROXY_SET_AUTH:
+      case _CB_SYSCALL_BLEPROXY_SET_TX_PWR:
+      case _CB_SYSCALL_BLEPROXY_SLEEP:
+      default:
+        DBG("?SYSCALL:%d", cmd);
+        messageProcessed = true;
+        break;
+
+    }
+  }
+
+  return messageProcessed;
 }
 
 /////////////////////////////////////////////////////////
@@ -253,6 +318,45 @@ void process_ble2uart_q() {
 
 
 /////////////////////////////////////////////////////////
+// Syscalls
+
+
+void sendSyscall_Startup() {
+  Message* msg = new Message();
+  Cannybots::createMessage(msg, &_CB_SYS_CALL, _CB_SYSCALL_BLEPROXY_STARTUP, MAJOR_VERSION, MINOR_VERSION);
+  sendMessage2localDevice(msg);
+  delete msg;
+}
+
+void sendSyscall_Ping() {
+  Message* msg = new Message();
+  Cannybots::createMessage(msg, &_CB_SYS_CALL, _CB_SYSCALL_BLEPROXY_PING);
+  sendMessage2localDevice(msg);
+  delete msg;
+}
+
+
+void sendSyscall_ClientConnect(int type) {
+  Message* msg = new Message();
+  Cannybots::createMessage(msg, &_CB_SYS_CALL, _CB_SYSCALL_BLEPROXY_CLIENT_CONNECT, type);
+  sendMessage2localDevice(msg);
+  delete msg;
+}
+
+void sendSyscall_ClientDisconnect() {
+  Message* msg = new Message();
+  Cannybots::createMessage(msg, &_CB_SYS_CALL, _CB_SYSCALL_BLEPROXY_CLIENT_DISCONNECT);
+  sendMessage2localDevice(msg);
+  delete msg;
+}
+
+
+
+
+
+
+
+/////////////////////////////////////////////////////////
 // Standard arduino entry points.
 
 void setup() {
@@ -291,6 +395,7 @@ void setup() {
   RFduinoBLE.txPowerLevel  = BLE_TX_POWER_LEVEL;
   RFduinoGZLL.txPowerLevel = GZLL_TX_POWER_LEVEL;
 
+  sendSyscall_Startup();
 }
 
 void loop() {

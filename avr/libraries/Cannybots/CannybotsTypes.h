@@ -93,20 +93,16 @@ extern "C" {
 }
 #endif
 
+#define _CBID_CMD_SYS_CALL 0
+#define _CBID_CMD_SYS_LOG 1
 
 // system functions
 // total cant be > CB_MAX_SYS_DESCRIPTORS
-CB_ID(0-CB_MAX_SYS_DESCRIPTORS, _CB_SYS_CALL, "syscall");       // multi-purpose system call, first uint8_t param is function select, following bytes will depend on func.
-CB_ID(1-CB_MAX_SYS_DESCRIPTORS, _CB_SYS_LOG, "log");            // log a message (may be truncated to 20 bytes)
+CB_ID(_CBID_CMD_SYS_CALL-CB_MAX_SYS_DESCRIPTORS, _CB_SYS_CALL, "syscall");       // multi-purpose system call, first uint8_t param is function select, following bytes will depend on func.
+CB_ID(_CBID_CMD_SYS_LOG -CB_MAX_SYS_DESCRIPTORS, _CB_SYS_LOG, "log");            // log a message (may be truncated to 20 bytes)
 
-#define _CB_SYSCALL_NOP                  0
-#define _CB_SYSCALL_GET_BOT_ID           1
-#define _CB_SYSCALL_GET_BOT_TYPE         2
-#define _CB_SYSCALL_GET_CFG_VERSION      3
-#define _CB_SYSCALL_GET_CFG_LIST         4
-#define _CB_SYSCALL_GET_CFG_PARAM        5
-#define _CB_SYSCALL_SET_CFG_PARAM        6
-#define _CB_SYSCALL_CFG_PARAM_META       7
+
+
 
 
 #endif

@@ -234,12 +234,12 @@ public:
     
     // Message Creation Helpers
     // TODO generalise, and make use of para count
-    void createMessage(Message* msg, cb_id* cid, int16_t p1, int16_t p2, int16_t p3) ;
-    void createMessage(Message* msg, cb_id* cid, int16_t p1, int16_t p2);
-    void createMessage(Message* msg, cb_id* cid, int16_t p1);
-    void createMessage(Message* msg, cb_id* cid, const char* p1)    ;
+    static void createMessage(Message* msg, cb_id* cid, int16_t p1, int16_t p2, int16_t p3) ;
+    static void createMessage(Message* msg, cb_id* cid, int16_t p1, int16_t p2);
+    static void createMessage(Message* msg, cb_id* cid, int16_t p1);
+    static void createMessage(Message* msg, cb_id* cid, const char* p1)    ;
     
-    void createMessage(Message* msg, cb_id* cid, int16_t p1, int16_t p2, int16_t p3, uint32_t ui32);
+    static void createMessage(Message* msg, cb_id* cid, int16_t p1, int16_t p2, int16_t p3, uint32_t ui32);
 
     
     // Remote invocation entry point
@@ -307,7 +307,13 @@ public:
     cb_descriptor* getDescriptorForConfigParameter(uint8_t cid);
 
     void dumpConfig();
-
+    
+    void send2Proxy_startup();
+    void send2Proxy_settings();
+    void send2Proxy_auth(uint32_t auth) ;
+    void send2Proxy_txPower(int16_t power);
+    void send2Proxy_ping() ;
+    void send2Proxy_sleep() ;
 private:
     static Cannybots instance; // Guaranteed to be destroyed. (yeah, when the power goes lol)
 
@@ -340,6 +346,7 @@ private:
     bool         debug;
     
 
+    void cbdelay(uint16_t t);
     
 #ifdef ARDUINO
     void readSerial(HardwareSerial &ser);

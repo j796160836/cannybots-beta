@@ -250,6 +250,7 @@ void Cannybots::begin() {
 #endif // Arduino
     
 #ifdef __RFduino__
+    // set some default, that will be ovrridden at runtime (bot boot)...
     RFduinoBLE.customUUID = BLE_UUID;
     RFduinoBLE.deviceName = BLE_LOCALNAME;
     RFduinoBLE.advertisementData = BLE_ADVERTISEMENT_DATA;
@@ -257,8 +258,9 @@ void Cannybots::begin() {
     
 #endif
     
-    
     registerSysCalls();
+    send2Proxy_startup();
+    send2Proxy_settings();
 }
 
 
@@ -1007,11 +1009,72 @@ void Cannybots::dumpConfig() {
 }
 
 
+void Cannybots::send2Proxy_startup() {
+    Message* msg = new Message();
+    createMessage(msg, &_CB_SYS_CALL, _CB_SYSCALL_BLEPROXY_STARTUP); // * (desc->data)
+    sendMessage(msg);
+    delete msg;
+}
+
+void Cannybots::send2Proxy_ping() {
+    Message* msg = new Message();
+    createMessage(msg, &_CB_SYS_CALL, _CB_SYSCALL_BLEPROXY_PING); // * (desc->data)
+    sendMessage(msg);
+    delete msg;
+}
+
+void Cannybots::send2Proxy_auth(uint32_t auth) {
+    Message* msg = new Message();
+    createMessage(msg, &_CB_SYS_CALL, _CB_SYSCALL_BLEPROXY_SET_AUTH, auth);
+    sendMessage(msg);
+    delete msg;
+}
+void Cannybots::send2Proxy_txPower(int16_t power) {
+    Message* msg = new Message();
+    createMessage(msg, &_CB_SYS_CALL, _CB_SYSCALL_BLEPROXY_SET_TX_PWR, power);
+    sendMessage(msg);
+    delete msg;
+}
+void Cannybots::send2Proxy_sleep() {
+    Message* msg = new Message();
+    createMessage(msg, &_CB_SYS_CALL, _CB_SYSCALL_BLEPROXY_SLEEP);
+    sendMessage(msg);
+    delete msg;
+}
+
+void Cannybots::send2Proxy_settings() {
+    cb_descriptor* typeDesc =  getConfigParameterListItem(0);
+    cb_descriptor* idDesc   =  getConfigParameterListItem(1);
+    cb_descriptor* verDesc  =  getConfigParameterListItem(2);
+
+    uint32_t  type    =0;
+    uint16_t  ident   =0;
+    uint16_t  version =0;
+    if (idDesc)
+        getConfigParameterValue(idDesc->cid_t.cidNV, &ident);
+    if (verDesc)
+        getConfigParameterValue(verDesc->cid_t.cidNV, &version);
+    
+    Message* msg = new Message();
+    createMessage(msg, &_CB_SYS_CALL, _CB_SYSCALL_BLEPROXY_SET_ID_VER, ident, version);
+    sendMessage(msg);
+    delete msg;
+}
+
+
+void Cannybots::cbdelay(uint16_t t) {
+#ifdef ARDUINO
+    delay(t);
+#endif
+    
+}
+
 // the syscal handler for methods that need to run on the bot
 // the (non-Arduino) handler isn't defined, it may just be simpler to use the native lanuage to process the syscalls directly (e.g. Objective c++)
 
 // TODO: change parameter p3 to a UINT32
 static void _cb_syscall_impl_bot(int16_t p1, int16_t p2, int16_t p3) {
+    Cannybots& cb = Cannybots::getInstance();
     switch (p1) {
         case (_CB_SYSCALL_GET_CFG_LIST): {
             Cannybots& cb = Cannybots::getInstance();
@@ -1019,17 +1082,34 @@ static void _cb_syscall_impl_bot(int16_t p1, int16_t p2, int16_t p3) {
             break;
         }
         case (_CB_SYSCALL_SET_CFG_PARAM): {
-            Cannybots& cb = Cannybots::getInstance();
             CB_DBG("Set param: %d = %d", p2, p3);
             cb.setConfigParameter(p2, p3);
             break;
         }
+        case (_CB_SYSCALL_BLEPROXY_STARTUP):
+            CB_DBG("PXY_START:%d.%d",p2,p3); // hi,low proxy version
+            // referech the settings..
+            cb.send2Proxy_settings();
+            break;
+        case (_CB_SYSCALL_BLEPROXY_PING):
+            CB_DBG("PXY_PING",0);
+            break;
+        case (_CB_SYSCALL_BLEPROXY_SLEEP):
+            break;
+        case (_CB_SYSCALL_BLEPROXY_CLIENT_CONNECT):
+            CB_DBG("PXY_CON:%d,%d",p2,p3);
+            break;
+        case (_CB_SYSCALL_BLEPROXY_CLIENT_DISCONNECT):
+            CB_DBG("PXY_DISCON",0);
+            break;
+
         default: {
             CB_DBG("?sc%d", p1);
             break;
         }
     }
 }
+
 
 void Cannybots::registerSysCalls() {
 #ifdef ARDUINO
