@@ -87,6 +87,7 @@ void lineFollowingUtilities_loop() {
     if ( (millis() - cb.getLastInboundCommandTime()) > MANUAL_MODE_RADIOSILENCE_TIMEOUT) {
       // no command has been received in the last X millis, err on the side of caution and stop!
       speedA = speedB =  0;
+      xAxisValue = yAxisValue = 0;
     } else {
       joystick_manualControlMode();
     }
