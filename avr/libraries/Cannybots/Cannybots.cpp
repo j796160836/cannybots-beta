@@ -1045,7 +1045,7 @@ void Cannybots::send2Proxy_sleep() {
 }
 
 void Cannybots::send2Proxy_settings() {
-    dumpConfig();
+    //dumpConfig();
     cb_descriptor* typeDesc =  getConfigParameterListItem(0);
     cb_descriptor* idDesc   =  getConfigParameterListItem(1);
     cb_descriptor* verDesc  =  getConfigParameterListItem(2);

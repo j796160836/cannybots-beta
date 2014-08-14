@@ -18,7 +18,7 @@ device_t role = DEVICE0;
 #define YAXIS_PIN 3
 #define BUTTON_PIN 4
 
-#define AXIS_DEADZONE 10
+#define AXIS_DEADZONE 25
 #define AXIS_MIN_DELTA 2
 
 
@@ -48,6 +48,7 @@ bool sendUpdate = false;
 
 void loop()
 {
+  delay(100);
   sendUpdate = false;
   int buttonReading = digitalRead(BUTTON_PIN);
   xAxisValue = analogRead(XAXIS_PIN);
@@ -80,15 +81,37 @@ void loop()
   }
   lastButtonState = buttonReading;
 
-  if ( ( abs(xAxisValue) < AXIS_DEADZONE) && ( abs(yAxisValue) < AXIS_DEADZONE) ) {
-    xAxisValue = yAxisValue = 0;
-    if (xAxisLastValue != 0 && yAxisLastValue != 0) {
+  // Detect X deadzone
+  if ( abs(xAxisValue) < AXIS_DEADZONE)  {
+    xAxisValue = 0; 
+    /*if (xAxisLastValue != 0) {
       sendUpdate = true;
-    }
-  } else {
-
-
+    } else {*/
+       // after the immediate Axis centering send a throttled 0,0 every 200 ms
+       static unsigned long lastSendXZeroTime = millis();
+       if (millis()-lastSendXZeroTime > 500) {
+        sendUpdate = true;
+        lastSendXZeroTime = millis();
+       }
+ 
+    //}
   }
+  if ( abs(yAxisValue) < AXIS_DEADZONE ) {
+    yAxisValue = 0;
+    /*if (yAxisLastValue != 0) {
+      sendUpdate = true;
+    } else {*/
+       // after the immediate Axis centering send a throttled 0,0 every 200 ms
+       static unsigned long lastSendYZeroTime = millis();
+       if (millis()-lastSendYZeroTime > 500) {
+        sendUpdate = true;
+        lastSendYZeroTime = millis();
+       }
+ 
+    //}
+  }
+  
+  
   if ( abs(xAxisLastValue - xAxisValue) > AXIS_MIN_DELTA) {
     sendUpdate = true;
   }

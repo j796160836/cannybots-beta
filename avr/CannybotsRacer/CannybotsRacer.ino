@@ -137,6 +137,8 @@ void print_debug() {
 // Normal Arduino Setup & Main Loop
 void setup() {
   lineFollowingUtilities_setup();
+  //cb.dumpConfig();
+  CB_DBG("A*START!",0);
 }
 
 
