@@ -96,11 +96,21 @@ void lineFollowingUtilities_loop() {
    
   //CB_DBG("isfwd: %d,%d", settings.cfg_motorA_postiveSpeedisFwd, settings.cfg_motorB_postiveSpeedisFwd);
   
-  speedA = constrain( settings.cfg_motorA_postiveSpeedisFwd?speedA:-speedA, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
-  speedB = constrain( settings.cfg_motorB_postiveSpeedisFwd?speedB:-speedB, -settings.cfg_motorDriver_maxSpeed, settings.cfg_motorDriver_maxSpeed);
+  //speedA = settings.cfg_motorA_postiveSpeedisFwd==1?speedA:-speedA; 
+  /*if (settings.cfg_motorA_postiveSpeedisFwd == 1) {
+      speedA = speedA;
+  } else {
+     speedA = -speedA;
+  }
+  if (settings.cfg_motorB_postiveSpeedisFwd == 1) {
+      speedB = speedB;
+  } else {
+     speedB = -speedB;
+  }*/
+  //printvalues();
 
 
-  motor(speedA, speedB);
+  motor(speedA, -speedB);
   //delay(5);
 }
 

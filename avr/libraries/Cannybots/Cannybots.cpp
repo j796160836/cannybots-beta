@@ -894,6 +894,25 @@ void Cannybots::populateVariablesFromConfig() {
     }
 }
 
+void Cannybots::populateConfigFromVariables() {
+    cb_descriptor *desc=NULL;
+    for(int i = 0; i < configVars.size(); i++){
+        desc = configVars.get(i);
+        switch (desc->type) {
+            case CB_BYTE:   setConfigParameterValue(desc->cid_t.cidNV, (uint8_t*) (desc->data)); break;
+            case CB_UINT8:  setConfigParameterValue(desc->cid_t.cidNV, (uint8_t*) (desc->data)); break;
+            case CB_INT8:   setConfigParameterValue(desc->cid_t.cidNV, (int8_t*)  (desc->data)); break;
+            case CB_UINT16: setConfigParameterValue(desc->cid_t.cidNV, (uint16_t*)(desc->data)); break;
+            case CB_INT16:  setConfigParameterValue(desc->cid_t.cidNV, (int16_t*) (desc->data)); break;
+            case CB_UINT32: setConfigParameterValue(desc->cid_t.cidNV, (uint32_t*)(desc->data)); break;
+            case CB_INT32:  setConfigParameterValue(desc->cid_t.cidNV, (int32_t*) (desc->data)); break;
+                
+            default:
+                CB_DBG("?cfgT:%d", desc->type);
+                break;
+        }
+    }
+}
 
 uint16_t Cannybots::getConfigParameterListSize() {
     return configVars.size();

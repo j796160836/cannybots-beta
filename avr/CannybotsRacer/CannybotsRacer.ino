@@ -7,6 +7,28 @@
 Cannybots& cb = Cannybots::getInstance();
 cb_app_config settings;
 
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Normal Arduino Setup & Main Loop
+void setup() {
+  lineFollowingUtilities_setup();
+  //cb.dumpConfig();
+  CB_DBG("A*START!",0);
+  
+  settings.cfg_offLineMaxTime=0;
+  settings.cfg_motorA_postiveSpeedisFwd=0;
+  settings.cfg_motorB_postiveSpeedisFwd=0;
+  settings.cfg_motorDriver_maxSpeed=255;
+}
+
+
+void loop() {
+  lineFollowingUtilities_loop();
+}
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Bot State
@@ -59,8 +81,8 @@ void pid_calculate() {
   P_error = error * Kp / (float)settings.cfg_pid_divisor;                               // calculate proportional term
   D_error = (error - error_last) * Kd / (float)settings.cfg_pid_divisor;                // calculate differential term
   correction = P_error + D_error;
-  speedA = cruiseSpeed + correction;
-  speedB = cruiseSpeed - correction;
+  speedA = cruiseSpeed - correction;
+  speedB = cruiseSpeed + correction;
 }
 
 // This is called when the bot is on the line
@@ -111,14 +133,14 @@ int testState = 0;
 // this is called as often as 'settings.cfg_info_printValsInterval' specifies, in ms.
 void print_debug() {  
   //TODO: fix mem leak in CB_DBG2REMOTE
-  CB_DBG(    "%lu(%lu): IR(%u,%u,%u),Kpd(%d,%d)/100,Sab(%d,%d), XY(%d,%d),MEM(%d)",
+  CB_DBG(    "%lu(%lu): IR(%u,%u,%u),Kpd(%d,%d)/100,Sab(%d,%d), XY(%d,%d),MEM(%d), %d,%d",
              loopNowTime,
              loopDeltaTime,
              IRvals[0], IRvals[1], IRvals[2],
              Kp*100, Kd*100, 
              speedA, speedB,
              xAxisValue, yAxisValue,
-             cb.getFreeMemory()
+             cb.getFreeMemory(), settings.cfg_motorA_postiveSpeedisFwd,settings.cfg_motorB_postiveSpeedisFwd
         );
    return;
   switch (testState) {
@@ -131,18 +153,4 @@ void print_debug() {
   testState = (testState +1 ) % 10; // do nothing for 4 'intervals' at end
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//
-// Normal Arduino Setup & Main Loop
-void setup() {
-  lineFollowingUtilities_setup();
-  //cb.dumpConfig();
-  CB_DBG("A*START!",0);
-}
-
-
-void loop() {
-  lineFollowingUtilities_loop();
-}
 

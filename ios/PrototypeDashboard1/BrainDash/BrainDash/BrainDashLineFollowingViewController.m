@@ -146,6 +146,7 @@ cb_app_config cbr_settings;
 
     [cb setConfigParameter_UINT16:&cfg_id p1:0x0123];    PAUSE_HACK;
 
+    [cb setConfigParameter_UINT8:&cfg_motorA_postiveSpeedisFwd p1:0];    PAUSE_HACK;
     [cb setConfigParameter_UINT8:&cfg_motorB_postiveSpeedisFwd p1:0];    PAUSE_HACK;
 }
 

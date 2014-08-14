@@ -304,6 +304,7 @@ public:
 
 
     void populateVariablesFromConfig();
+    void populateConfigFromVariables();
 
     void            getConfigParameterListFromRemote();
     uint16_t        getConfigParameterListSize();
