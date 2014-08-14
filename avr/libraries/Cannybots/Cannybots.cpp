@@ -1095,15 +1095,21 @@ static void _cb_syscall_impl_bot(int16_t p1, int16_t p2, int16_t p3) {
             cb.send2Proxy_settings();
             break;
         case (_CB_SYSCALL_BLEPROXY_PING):
+            // TODO: syscall proxy ping
             CB_DBG("PXY_PING",0);
             break;
         case (_CB_SYSCALL_BLEPROXY_SLEEP):
+            // TODO: syscall proxy sleep
             break;
         case (_CB_SYSCALL_BLEPROXY_CLIENT_CONNECT):
             CB_DBG("PXY_CON:%d,%d",p2,p3);
+            // TODO: syscall proxy client connect
+
             break;
         case (_CB_SYSCALL_BLEPROXY_CLIENT_DISCONNECT):
             CB_DBG("PXY_DISCON",0);
+            // TODO: syscall proxy client disconnect
+
             break;
 
         default: {

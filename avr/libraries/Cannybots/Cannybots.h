@@ -226,7 +226,15 @@ public:
     void addInboundMessage(Message* msg)  { inboundMsgFIFO.enqueue(msg);  }
     
     // TODO: make sending immediately a configuration option
-    void addOutboundMessage(Message* msg) { outboundMsgFIFO.enqueue(msg); }
+    void addOutboundMessage(Message* msg) {
+#if 0 //def ARDUINO
+        sendMessage(msg);
+        delete msg;
+#else
+        outboundMsgFIFO.enqueue(msg);
+#endif
+        
+    }
     
     
     void sendMessage(Message* msg);

@@ -92,6 +92,10 @@
     
     //Connect
     _currentPeripheral = [[UARTPeripheral alloc] initWithPeripheral:peripheral delegate:self];
+    
+    
+    //TODO: set CBConnectPeripheralOptionNotifyOnDisconnectionKey to false and set this application plist to specify the <code>bluetooth-central</code> background mode
+    
     [_cm connectPeripheral:peripheral options:@{CBConnectPeripheralOptionNotifyOnDisconnectionKey: [NSNumber numberWithBool:YES]}];
     
 }
@@ -136,6 +140,7 @@
     NSLog(@"Did discover peripheral %@  UUID=%@", peripheral.name, peripheral.UUID);
     
     NSLog(@"!!!!!!!!!!!!!! change this fucntion to get ALL devices .... BrainSpeakBLE.didDiscoverPeripheral");
+    NSLog(@"ADV data: %@", advertisementData);
     [_cm stopScan];
     
     [self connectPeripheral:peripheral];

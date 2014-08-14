@@ -28,8 +28,8 @@
 #define BLE_ADVERTISEMENT_DATA   "CB_LFB_001"
 // Note: BLE_ADVERTISEMENT_DATA must be < 16 bytes.
 
-#define BLE_TX_POWER_LEVEL  -20
-#define GZLL_TX_POWER_LEVEL -20
+#define BLE_TX_POWER_LEVEL  4
+#define GZLL_TX_POWER_LEVEL 4
 // x one of;  (low) -20, -16, -12, -8, -4, 0, +4 (high & default)
 // RFduino default is +4
 
@@ -169,8 +169,8 @@ bool processMessage(const uint8_t* buf, uint16_t len) {
         verMaj = buf[CB_MSG_OFFSET_DATA + 4];
         verMin = buf[CB_MSG_OFFSET_DATA + 5];
 
-        snprintf(advString, BLE_ADVERTISEMENT_DATA_MAX, "ID(%x)", id);
-        snprintf(nameString, BLE_LOCALNAME_MAX, "Cannybot[%x][%d.%d]", id, verMaj, verMin);
+        snprintf(advString, BLE_ADVERTISEMENT_DATA_MAX, "%x", id);  // on iOS shows up in kCBAdvDataManufacturerData 
+        snprintf(nameString, BLE_LOCALNAME_MAX, "Cannybot[%04d][%d.%d]", id, verMaj, verMin);
 
         DBG("RCVSETVI=%x,%d.%d", id, verMin, verMaj);
         DBG("A=%s", advString);
