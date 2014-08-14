@@ -65,6 +65,11 @@ static char _proxy_dbg_buffer[20] = {'>', '>'};
 #endif // USE_SPI
 
 
+volatile uint8_t sendClientConnect  = 0;     // 0=false, 1 = BLE, 2 =GZLL
+volatile bool sendClientDisconnect = false;
+
+
+
 
 /////////////////////////////////////////////////////////
 // Queues
@@ -89,7 +94,7 @@ void enqueue(char *data, int len) {
 /////////////////////////////////////////////////////////
 // Serial
 
-//TODO: with a bit of 'role' state the Cannybots lib could support both sides of this BLE proxy (see: Cannybots::sendMessage(Message*))
+//TODO: with 'role' state the Cannybots lib it could support both sides of this BLE proxy (see: Cannybots::sendMessage(Message*))
 void sendMessage2localDevice(Message* msg) {
   writeUART(msg->payload, msg->size);
 }
@@ -146,12 +151,12 @@ bool processMessage(const uint8_t* buf, uint16_t len) {
   if (  ( buf[0] == 'C' ) && ( buf[1] == 'B' ) && ( buf[CB_MSG_OFFSET_CMD] == _CBID_CMD_SYS_CALL ) ) {
 
     // first 2 bytes of data payload is U16 syscall sub-command
-    uint8_t cmd = buf[CB_MSG_OFFSET_DATA+1];
-    uint16_t id=0;
-    uint8_t  verMaj=0, verMin =0;
+    uint8_t cmd = buf[CB_MSG_OFFSET_DATA + 1];
+    uint16_t id = 0;
+    uint8_t  verMaj = 0, verMin = 0;
     static char advString[BLE_ADVERTISEMENT_DATA_MAX];
     static char nameString[BLE_LOCALNAME_MAX];
-    
+
     switch (cmd) {
 
       case _CB_SYSCALL_BLEPROXY_STARTUP:
@@ -160,17 +165,17 @@ bool processMessage(const uint8_t* buf, uint16_t len) {
         break;
 
       case _CB_SYSCALL_BLEPROXY_SET_ID_VER:
-        id     = (buf[CB_MSG_OFFSET_DATA+2]<<8) + buf[CB_MSG_OFFSET_DATA+3];
-        verMaj = buf[CB_MSG_OFFSET_DATA+4];
-        verMin = buf[CB_MSG_OFFSET_DATA+5];
+        id     = (buf[CB_MSG_OFFSET_DATA + 2] << 8) + buf[CB_MSG_OFFSET_DATA + 3];
+        verMaj = buf[CB_MSG_OFFSET_DATA + 4];
+        verMin = buf[CB_MSG_OFFSET_DATA + 5];
 
         snprintf(advString, BLE_ADVERTISEMENT_DATA_MAX, "ID(%x)", id);
-        snprintf(nameString, BLE_LOCALNAME_MAX, "Cannybot[%x][%d.%d]", id,verMaj, verMin);
+        snprintf(nameString, BLE_LOCALNAME_MAX, "Cannybot[%x][%d.%d]", id, verMaj, verMin);
 
-        DBG("RCVSETVI=%x,%d.%d", id,verMin,verMaj);
+        DBG("RCVSETVI=%x,%d.%d", id, verMin, verMaj);
         DBG("A=%s", advString);
         DBG("N=%s", nameString);
-        RFduinoBLE.advertisementData=advString;
+        RFduinoBLE.advertisementData = advString;
         RFduinoBLE.deviceName = nameString;
 
         messageProcessed = true;
@@ -232,11 +237,13 @@ void RFduinoBLE_onAdvertisement(bool start) {
 
 void RFduinoBLE_onConnect() {
   ble_connected = true;
+  sendClientConnect = 1;
   //DBG("RFd_BLE_CON", 0);
 }
 
 void RFduinoBLE_onDisconnect() {
   ble_connected = false;
+  sendClientDisconnect = true;
   //DBG("RFd_BLE_DIS", 0);
 }
 
@@ -257,7 +264,11 @@ void  ble_rfduino_manageRadios() {
   // have to use ABS because of the asyncronous delivery of radio packets and unsigned longs
   // e.g. the GZLL packet may arrive 'sooner' that the value of 'timeNow'
   if ( timeNow  > GZLLPacketTimeout ) {
+    if (gzll_connected) {
+      sendClientDisconnect = true;
+    }
     gzll_connected = ISPConnected = false;
+
     //DBG("GZTN=%ld", timeNow);
     //DBG("GZTO=%ld", GZLLPacketTimeout);
   }
@@ -337,6 +348,9 @@ void sendSyscall_Ping() {
 
 
 void sendSyscall_ClientConnect(int type) {
+  if (!sendClientConnect)
+    return;
+  sendClientConnect = 0;
   Message* msg = new Message();
   Cannybots::createMessage(msg, &_CB_SYS_CALL, _CB_SYSCALL_BLEPROXY_CLIENT_CONNECT, type);
   sendMessage2localDevice(msg);
@@ -344,6 +358,9 @@ void sendSyscall_ClientConnect(int type) {
 }
 
 void sendSyscall_ClientDisconnect() {
+  if (!sendClientDisconnect)
+    return;
+  sendClientDisconnect = 0;
   Message* msg = new Message();
   Cannybots::createMessage(msg, &_CB_SYS_CALL, _CB_SYSCALL_BLEPROXY_CLIENT_DISCONNECT);
   sendMessage2localDevice(msg);
@@ -352,6 +369,7 @@ void sendSyscall_ClientDisconnect() {
 
 
 
+//TODO: notify a* of client connect & disconencts, e.g. use sendSyscall_ClientConnect and sendSyscall_ClientDisonnect above in the /main loop/ (+ones hot guards)
 
 
 
@@ -411,4 +429,11 @@ void loop() {
   }
   process_ble2uart_q();
   process_uart2ble_q();
+
+  if (sendClientConnect)
+    sendSyscall_ClientConnect(sendClientConnect);
+
+  if (sendClientDisconnect)
+    sendSyscall_ClientDisconnect();
+
 }
