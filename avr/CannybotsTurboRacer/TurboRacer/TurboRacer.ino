@@ -295,9 +295,11 @@ void readSerial() {
     c = Serial1.read();
     if ( ('>' == c) && ('>' == lastChar) ) {
       if (JOYPAD_ID == Serial1.read()) {
-        xAxisValue    = (Serial1.read() - 127) * 2;
-        yAxisValue    = (Serial1.read() - 127) * 2;
+        xAxisValue    = Serial1.read();
+        yAxisValue    = Serial1.read();
         buttonPressed = Serial1.read();
+        xAxisValue = map(xAxisValue, 0, 255, -255, 255);
+        yAxisValue = map(yAxisValue, 0, 255, -255, 255);
       } else {
         // ignore the data
         Serial1.read();
