@@ -1,27 +1,31 @@
 #include <RFduinoGZLL.h>
+
 #define TX_PIN 5
 #define RX_PIN 6
+#define BUF_LEN 6
+
 device_t role = HOST;
+uint8_t buffer[BUF_LEN] = {'>', '>'};
+volatile bool send = false;
 
 void setup() {
   Serial.begin(9600, RX_PIN, TX_PIN);        // UART Baud is limited to 9600 when the BLE stack is on.
   RFduinoGZLL.begin(role);
 }
 
-uint8_t buffer[5] = {0};
-volatile bool send = false;
-
 void loop() {
   if (send) {
-    Serial.write(buffer, 5);
-    //Serial.flush();
+    Serial.write(buffer, BUF_LEN);
+    Serial.flush();
     send=false;
   }
-  delay(50);
 }
 
 void RFduinoGZLL_onReceive(device_t device, int rssi, char *data, int len)
 {
-  memcpy(buffer,data,min(5,len));
-  send=true;
+  if (len >= 3) {
+    buffer[2] = device & 0xFF;  // device_t is an enum 0-7 for DEVICE[0..7] and 8 = HOST, defined in libRFduinoGZLL.h
+    memcpy(buffer+3,data,3);
+    send=true;
+  }
 }

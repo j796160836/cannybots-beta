@@ -22,6 +22,7 @@
 // Flashy Lights
 #define STATUS_LED 13
 
+#define JOYPAD_ID 0
 
 ////// Processing constants
 
@@ -165,11 +166,6 @@ void joypadManualControlMode() {
   speedA =  (yAxisValue + xAxisValue) / 4;
   speedB =  (yAxisValue - xAxisValue) / 4;
 
-  if (buttonPressed)
-    forceManualMode = 1;
-  else
-    forceManualMode = 0;
-
 }
 
 
@@ -213,6 +209,11 @@ void updateLineFollowingStatus() {
     isLineFollowingMode = 1;
   }
 
+  if (buttonPressed)
+    forceManualMode = 1;
+  else
+    forceManualMode = 0;
+ 
   if (forceManualMode) {
     isLineFollowingMode = 0;
   }
@@ -246,21 +247,29 @@ void printVals() {
 }
 
 // Serial Input
-// We're expecting mesages of 5 bytes in the form:  >>XYB
+// We're expecting mesages of 6 bytes in the form:  >>IXYB
 // Where;
 // >> = start marker, as-is
+// I = joypad ID  (only 0-7 for GZZL joypad)
 // X = unsinged byte for xAxis:          0 .. 255 mapped to -254 .. 254
 // Y = unsinged byte for yAxis:          0 .. 255 mapped to -254 .. 254
 // B = unsinged byte for button pressed: 0 = no, 1 = yes
 void readSerial() {
   static int c = 0, lastChar = 0;
-  while (Serial1.available() >= 5) {
+  while (Serial1.available() >= 6) {
     lastChar = c;
     c = Serial1.read();
     if ( ('>' == c) && ('>' == lastChar) ) {
-      xAxisValue    = (Serial1.read() - 127) * 2;
-      yAxisValue    = (Serial1.read() - 127) * 2;
-      buttonPressed = Serial1.read();
+      if (JOYPAD_ID == Serial1.read()) {
+        xAxisValue    = (Serial1.read() - 127) * 2;
+        yAxisValue    = (Serial1.read() - 127) * 2;
+        buttonPressed = Serial1.read();
+      } else {
+        // ignore the data
+        Serial1.read();
+        Serial1.read();
+        Serial1.read();
+      }
       lastChar = c = 0;
       joypadLastTime = timeNow;                      // record the time we last received a joypad command.
     }

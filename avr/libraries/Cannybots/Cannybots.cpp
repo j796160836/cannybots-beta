@@ -325,12 +325,13 @@ ISR (SPI_STC_vect)
 
 #else
 void Cannybots::readSerial(HardwareSerial &ser) {
-    while (ser.available()>0) {
+    while (ser.available()>=20) {
         lastChar = c;
         c =  ser.read();
         //Serial.print(" ");
         //Serial.print(c, HEX);
         
+        //TODO:  change serail to read fixed number of bytes and do CRC
         if (foundStart && (serialBufPtr<SERIAL_BUF_SIZE)) {
             serialBuffer[serialBufPtr++] = c;
         } else if ( ('>' == c) && ('>' == lastChar) ) {
