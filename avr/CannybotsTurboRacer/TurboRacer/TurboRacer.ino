@@ -258,7 +258,7 @@ void printVals() {
   if (millis() - lastPrint < 100) {
     return;
   }
-  lastPrint = millis();
+  lastPrint = timeNow;
 
   Serial.print(timeNow);
   Serial.print(":IR=(");
