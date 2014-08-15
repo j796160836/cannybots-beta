@@ -267,16 +267,16 @@ void printVals() {
   Serial.print(IRvals[1], DEC);
   Serial.print(",");
   Serial.print(IRvals[2], DEC);
-  Serial.print("),Speed(A,B)=(");
-  Serial.print(speedA, DEC);
-  Serial.print(",");
-  Serial.print(speedB, DEC);
   Serial.print("),Joy(X,Y,Button)=(");
   Serial.print(xAxisValue, DEC);
   Serial.print(",");
   Serial.print(yAxisValue, DEC);
   Serial.print(",");
   Serial.print(buttonPressed, DEC);
+  Serial.print("),Speed(A,B)=(");
+  Serial.print(speedA, DEC);
+  Serial.print(",");
+  Serial.print(speedB, DEC);
   Serial.println(")");
 }
 
