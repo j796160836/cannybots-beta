@@ -17,7 +17,7 @@
 /////////////////////////////////////////////////////////
 // Config
 
-#define TOGGLE_MILLIS 500
+#define TOGGLE_MILLIS 1500
 #define GZLL_CONNECTION_TIMEOUT 2000
 
 // BLE Data
@@ -30,7 +30,7 @@
 #define BLE_TX_POWER_LEVEL  0
 #define GZLL_TX_POWER_LEVEL 0
 
-#if 0
+#if 1
 #define TX_PIN 5
 #define RX_PIN 6
 #else
@@ -66,8 +66,7 @@ void setup() {
   RFduinoBLE.advertisementData = bleName;
   //RFduinoBLE.advertisementInterval(millis);
   
-  //WATCHDOG_SETUP(7);
-
+  WATCHDOG_SETUP(7);
 }
 
 volatile unsigned long timeNow = millis();
@@ -76,7 +75,7 @@ volatile unsigned long gzllConnectionTimeout = 0;
 
 void loop() {
   timeNow   = millis();
-  //WATCHDOG_RELOAD();
+  WATCHDOG_RELOAD();
   
    if ( gzllConnected && (timeNow  > gzllConnectionTimeout)) {
       gzllConnected = false;
@@ -84,7 +83,7 @@ void loop() {
 
   if (!bleConnected && !gzllConnected) {
     if (millis() > nextRadioToggleTime) {
-      Serial.println("toggle");
+      //Serial.println("toggle");
       nextRadioToggleTime = millis() + TOGGLE_MILLIS;
 
       if (startGZLL) {
@@ -103,7 +102,7 @@ void loop() {
 
   if (send) {
     Serial.write(buffer, BUF_LEN);
-    Serial.flush();
+    //Serial.flush();
     send = false;
   }
 }
@@ -131,8 +130,8 @@ void RFduinoBLE_onDisconnect() {
 
 void RFduinoBLE_onReceive(char *data, int len) {
   if (len >= 3) {
-    buffer[2] = data[0]; // phoen send 4 bytes:  ID, X, Y, B
-    memcpy(buffer + 3, data, 3);
+    buffer[2] = data[0]; // phone send 4 bytes:  ID, X, Y, B
+    memcpy(buffer + 3, data+1, 3);
     send = true;
   }
 }

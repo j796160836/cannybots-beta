@@ -31,14 +31,14 @@ void setup()
 void loop()
 {
   bool buttonPressed = digitalRead(BUTTON_PIN)  & 0xFF;
-  uint8_t xAxis = 255-(analogRead(XAXIS_PIN)>>2) ;          // scale from 0..1023 to 0-255 so data fits in a byte
-  uint8_t yAxis = 255-(analogRead(YAXIS_PIN)>>2) ;
+  uint8_t xAxis = map(analogRead(XAXIS_PIN), 0,1023,255,0) ;          // scale from 0..1023 to 0-255 so data fits in a byte
+  uint8_t yAxis = map(analogRead(YAXIS_PIN), 0,1023,255,0) ;
   
   snprintf(msg, MSG_LEN, "%c%c%c", xAxis, yAxis, buttonPressed );
   
   RFduinoGZLL.sendToHost((const char*)msg, MSG_LEN-1);      // don't bother sending the NULL byte at the end
   Serial.write((uint8_t*)msg, MSG_LEN);
-  delay(5);
+  delay(50);
 }
 
 
