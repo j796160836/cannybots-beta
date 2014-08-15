@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Cannybots LineFollowing Robot
+// CannyBots LineFollowing Robot
 //
 // Authors:  Wayne Keenan & Anish Mampetta
 //
 // License: http://opensource.org/licenses/MIT
 //
-// Version:   1.0  -  14.08.2014  -  Inital Version  (Wayne Keenan & Anish Mampetta)
+// Version:   1.0  -  14.08.2014  -  Inital Version  (wayne@cannybots.com, mampetta@cannybots.com)
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
