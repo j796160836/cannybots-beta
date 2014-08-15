@@ -51,7 +51,8 @@ volatile bool startGZLL = true;
 volatile bool bleConnected = false;
 volatile bool gzllConnected = false;
 unsigned long nextRadioToggleTime = millis();
-
+volatile unsigned long timeNow = millis();
+volatile unsigned long gzllConnectionTimeout = 0;
 char bleName[BLE_ADVERTISEMENT_DATA_MAX] = {0};
 
 void setup() {
@@ -68,10 +69,6 @@ void setup() {
   
   WATCHDOG_SETUP(7);
 }
-
-volatile unsigned long timeNow = millis();
-volatile unsigned long gzllConnectionTimeout = 0;
-
 
 void loop() {
   timeNow   = millis();

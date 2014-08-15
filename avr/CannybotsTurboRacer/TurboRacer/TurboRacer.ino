@@ -47,7 +47,11 @@
 #define PID_SAMPLE_TIME              0
 #define PID_SCALE                 10.0
 
-#define JOYPAD_ID                    0
+#define JOYPAD_ID                   10
+// Anish Joypad     =  0
+// Waynes barebones =  1
+// Default iOS app  = 10
+// Wayne iPhone App = 11
 #define JOYPAD_AXIS_DEADZONE        20
 #define JOYPAD_CONNECTION_TIMEOUT  200
 
@@ -142,7 +146,7 @@ void loop() {
      // in manual mode
     joypadManualControlMode();
   }
-  motorSpeed(speedA*-1, speedB*1);
+  motorSpeed(speedA*1, speedB*1);
   printVals();
 }
 
