@@ -18,6 +18,7 @@
 #define MSG_LEN 4
 
 device_t role = DEVICE0;
+
 char msg[MSG_LEN] = {0};  // 4 bytes  = 3 bytes data 1 byte NULL terminator
 
 void setup()
