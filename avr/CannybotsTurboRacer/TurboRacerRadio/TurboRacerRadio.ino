@@ -7,10 +7,13 @@
 // License: http://opensource.org/licenses/MIT
 //
 // Version 1.0   -  14.08.2014  -  Inital Version 
+// Version 1.1   -  15.08.2014  -  Add BLE         (Wayne Keenan)
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
+
 #include <RFduinoGZLL.h>
+#include <RFduinoBLE.h>
 
 #define TX_PIN 5
 #define RX_PIN 6
