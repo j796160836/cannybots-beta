@@ -142,7 +142,7 @@ void loop() {
      // in manual mode
     joypadManualControlMode();
   }
-  motorSpeed(speedA, speedB);
+  motorSpeed(speedA*-1, speedB*1);
   printVals();
 }
 
