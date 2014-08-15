@@ -6,7 +6,7 @@
 //
 // License: http://opensource.org/licenses/MIT
 //
-// Version:   1.0  -  14.08.2014  -  Inital Version  (Wayne Keenan)
+// Version:   1.0  -  14.08.2014  -  Inital Version  (Wayne Keenan & Anish Mampetta)
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -47,7 +47,7 @@
 #define PID_SAMPLE_TIME              0
 #define PID_SCALE                 10.0
 
-#define JOYPAD_ID 1
+#define JOYPAD_ID                    1
 #define JOYPAD_AXIS_DEADZONE        20
 #define JOYPAD_CONNECTION_TIMEOUT  200
 
@@ -72,12 +72,12 @@ bool     buttonPressed = 0;              // 0 = not pressed, 1 = pressed
 ////// Process / Algorithms
 
 // PID
-int Kp         = PID_P;
+int Kp         = PID_P;            
 int Kd         = PID_D;
 int P_error    = 0;
 int D_error    = 0;
 int error      = 0;
-int error_last = 0;                                     // to calculate D_error = error - error_last
+int error_last = 0;                                 // to calculate D_error = error - error_last
 int correction = 0;
 
 
@@ -109,8 +109,9 @@ int speedB = 0;             // viewed from behind motor 'B' is on the right
 // Arduino functions
 
 void setup() {
+  // Serial setup
   Serial.begin(9600);            // USB serial port (debugging)
-  Serial1.begin(9600);           // Data from the RFDuino is read from here
+  Serial1.begin(9600);           // Data from the RFDuino is read from here (RFduino can't go faster than 9600 in BLE mode)
 
   // Motor pins
   pinMode(MOTOR_A1_PIN, OUTPUT);
@@ -119,6 +120,7 @@ void setup() {
   pinMode(MOTOR_B2_PIN, OUTPUT);
   pinMode(MOTOR_MODE_PIN, OUTPUT);
   digitalWrite(MOTOR_MODE_PIN, HIGH);   //to set controller to Phase/Enable mode
+  motorSpeed(0,0);
 
   // Headlights...
   pinMode(STATUS_LED_PIN, OUTPUT);
