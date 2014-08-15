@@ -1,36 +1,59 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Cannybots LineFollowing Robot
+//
+// Authors:  Wayne Keenan & Anish Mampetta
+//
+// License: http://opensource.org/licenses/MIT
+//
+// Version:   1.0  -  14.08.2014  -  Inital Version  (Wayne Keenan)
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Bot constants
 
 ////// Hardware Constants
 
 // Infrared
-#define NUM_IR_SENSORS 3
-#define IR1 A6
-#define IR2 A8
-#define IR3 A11
-#define IR1_BIAS 0
-#define IR2_BIAS 0
-#define IR3_BIAS 0
+#define IR_NUM_SENSORS               3
+#define IR1_PIN                     A6
+#define IR2_PIN                     A8
+#define IR3_PIN                    A11
 
 // Motor Pins
-#define pinA1 3
-#define pinA2 5
-#define pinB1 6
-#define pinB2 9
-#define pinMODE 2
+#define MOTOR_A1_PIN                 3
+#define MOTOR_A2_PIN                 5
+#define MOTOR_B1_PIN                 6
+#define MOTOR_B2_PIN                 9 
+#define MOTOR_MODE_PIN               2
 
 // Flashy Lights
-#define STATUS_LED 13
-
-#define JOYPAD_ID 0
+#define STATUS_LED_PIN              13
 
 ////// Processing constants
 
-#define WHITE_THRESHOLD                    700
-#define OFF_LINE_MAX_TIME                    0
-#define PID_SAMPLE_TIME                      0
-#define JOYPAD_AXIS_DEADZONE                20
-#define MANUAL_MODE_RADIOSILENCE_TIMEOUT   200
+#define IR1_BIAS                     0
+#define IR2_BIAS                     0
+#define IR3_BIAS                     0
+#define IR_WHITE_THRESHOLD         700
+
+#define MOTOR_MAX_SPEED            255
+#define MOTOR_CRUISE_SPEED         120
+
+#define OFF_LINE_MAX_TIME            0
+
+#define PID_P                        5
+#define PID_D                        1
+#define PID_SAMPLE_TIME              0
+#define PID_SCALE                 10.0
+
+#define JOYPAD_ID 1
+#define JOYPAD_AXIS_DEADZONE        20
+#define JOYPAD_CONNECTION_TIMEOUT  200
+
+#define JOYPAD_LINEFOLLOW_MODE_SCALE 3
+#define JOYPAD_MANUAL_MODE_SCALE     4
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 /// Bot Variables
@@ -38,7 +61,7 @@
 ////// Inputs
 
 // IR Sensors
-int IRvals[NUM_IR_SENSORS] = {0};
+int IRvals[IR_NUM_SENSORS] = {0};
 
 // Joypad
 int16_t  xAxisValue    = 0;              // (left) -255 .. 255 (right)
@@ -48,11 +71,12 @@ bool     buttonPressed = 0;              // 0 = not pressed, 1 = pressed
 
 ////// Process / Algorithms
 
-int Kp = 3;
-int Ki = 0;
-int Kd = 1;
-int P_error = 0, D_error = 0;
-int error = 0;
+// PID
+int Kp         = PID_P;
+int Kd         = PID_D;
+int P_error    = 0;
+int D_error    = 0;
+int error      = 0;
 int error_last = 0;                                     // to calculate D_error = error - error_last
 int correction = 0;
 
@@ -61,17 +85,21 @@ int correction = 0;
 bool isLineFollowingMode = false;
 bool forceManualMode     = false;
 
-// Timers (in milli seconds 1/1000 of a second)
+// Timers in milli-seconds (1/1000 of a second)
 
 unsigned long timeNow = millis();                    // the time at the start of the loop()
 unsigned long pidLastTime = millis();                // when the PID was calculated last
 unsigned long joypadLastTime = millis();             // the time the bot last received a joypad command
-unsigned long offLineLastTime = millis();            // lasst time the bot came off the line
+unsigned long offLineLastTime = millis();            // last time the bot came off the line
 unsigned long offTheLineTime = 0;                    // how long has the bot been off the line, total since last leaving the line
 
 ////// Outputs
+
 // speeds are  -255 (fullspeed back) ..  255 (full speed forward)
-int cruiseSpeed = 120;      // default cruise speed when linw following
+
+int cruiseSpeed = MOTOR_CRUISE_SPEED;      // default cruise speed when line following
+
+// The current requested/calculated motor speeds
 int speedA = 0;             // viewed from behind motor 'A' is on the left
 int speedB = 0;             // viewed from behind motor 'B' is on the right
 
@@ -84,17 +112,17 @@ void setup() {
   Serial.begin(9600);            // USB serial port (debugging)
   Serial1.begin(9600);           // Data from the RFDuino is read from here
 
-  // Motor pind
-  pinMode(pinA1, OUTPUT);
-  pinMode(pinA2, OUTPUT);
-  pinMode(pinB1, OUTPUT);
-  pinMode(pinB2, OUTPUT);
-  pinMode(pinMODE, OUTPUT);
-  digitalWrite(pinMODE, HIGH);   //to set controller to Phase/Enable mode
+  // Motor pins
+  pinMode(MOTOR_A1_PIN, OUTPUT);
+  pinMode(MOTOR_A2_PIN, OUTPUT);
+  pinMode(MOTOR_B1_PIN, OUTPUT);
+  pinMode(MOTOR_B2_PIN, OUTPUT);
+  pinMode(MOTOR_MODE_PIN, OUTPUT);
+  digitalWrite(MOTOR_MODE_PIN, HIGH);   //to set controller to Phase/Enable mode
 
   // Headlights...
-  pinMode(STATUS_LED, OUTPUT);
-  digitalWrite(STATUS_LED, HIGH);
+  pinMode(STATUS_LED_PIN, OUTPUT);
+  digitalWrite(STATUS_LED_PIN, HIGH);
 }
 
 
@@ -108,7 +136,8 @@ void loop() {
   if (isLineFollowingMode) {
     calculatePID();
     joypadLineFollowingControlMode();
-  } else {     // in manual mode
+  } else {    
+     // in manual mode
     joypadManualControlMode();
   }
   motorSpeed(speedA, speedB);
@@ -119,18 +148,19 @@ void loop() {
 // PID
 
 void calculatePID() {
-  // Calculate PID on a regular time basis, return if called too soo
+  // Calculate PID on a regular time basis
   if ((timeNow - pidLastTime) < PID_SAMPLE_TIME ) {
+    // return if called too soon
     return;
   }
   pidLastTime = timeNow;
 
   // process IR readings via PID
   error_last = error;                                   // store previous error before new one is caluclated
-  error = IRvals[0] - IRvals[2];                        // TODO: change to lineFOllowingLib.getIRreading(IR_SENSORID);
+  error = IRvals[0] - IRvals[2];                        
 
-  P_error = error * Kp / 10.0;                               // calculate proportional term
-  D_error = (error - error_last) * Kd / 10.0;                // calculate differential term
+  P_error = error * Kp / PID_SCALE;                          // calculate proportional term
+  D_error = (error - error_last) * Kd / PID_SCALE;           // calculate differential term
   correction = P_error + D_error;
   speedA = cruiseSpeed + correction;
   speedB = cruiseSpeed - correction;
@@ -138,34 +168,36 @@ void calculatePID() {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-// Joystick Handling
+// Joypad Handling
 
 // This is called when the bot is on the line
 // speedA and speedB will have already been set by pid_calculate() before this is run
 void  joypadLineFollowingControlMode() {
-  speedA = speedA + (yAxisValue / 3); //superpose yAxis with PID output speed
-  speedB = speedB + (yAxisValue / 3);
+  speedA = speedA + (yAxisValue / JOYPAD_LINEFOLLOW_MODE_SCALE); //superpose yAxis with PID output speed
+  speedB = speedB + (yAxisValue / JOYPAD_LINEFOLLOW_MODE_SCALE);
 }
 
 // This is called when the bot is in manual mode.
-// Use it to map the joystick X & Y axis (which both range from -255..255) to motor speeds (also -255..255)
+// Use it to map the joypad X & Y axis (which both range from -255..255) to motor speeds (also -255..255)
 
 void joypadManualControlMode() {
-  // check if we have recent joystick input
-  if ( (timeNow - joypadLastTime) > MANUAL_MODE_RADIOSILENCE_TIMEOUT) {
+  // check if we have recently received joypad input
+  if ( (timeNow - joypadLastTime) > JOYPAD_CONNECTION_TIMEOUT) {
     // no command has been received in the last X millis, err on the side of caution and stop!
-    speedA = speedB =  0;
-    xAxisValue = yAxisValue = 0;
-    return;
-  }
-  if ( abs(xAxisValue) < JOYPAD_AXIS_DEADZONE)
+    speedA = 0;
+    speedB =  0;
     xAxisValue = 0;
-  if ( abs(yAxisValue) < JOYPAD_AXIS_DEADZONE)
     yAxisValue = 0;
+  } else {
+    // If the xis readings are small set them to 0
+    if ( abs(xAxisValue) < JOYPAD_AXIS_DEADZONE)
+      xAxisValue = 0;
+    if ( abs(yAxisValue) < JOYPAD_AXIS_DEADZONE)
+      yAxisValue = 0;
 
-  speedA =  (yAxisValue + xAxisValue) / 4;
-  speedB =  (yAxisValue - xAxisValue) / 4;
-
+    speedA =  (yAxisValue + xAxisValue) / JOYPAD_MANUAL_MODE_SCALE;
+    speedB =  (yAxisValue - xAxisValue) / JOYPAD_MANUAL_MODE_SCALE;
+  }
 }
 
 
@@ -174,9 +206,9 @@ void joypadManualControlMode() {
 // Inputs
 
 void readIRSensors() {
-  IRvals[0] = analogRead(IR1) + IR1_BIAS; //left looking from behind
-  IRvals[1] = analogRead(IR2) + IR2_BIAS; //centre
-  IRvals[2] = analogRead(IR3) + IR3_BIAS; //right
+  IRvals[0] = analogRead(IR1_PIN) + IR1_BIAS; //left looking from behind
+  IRvals[1] = analogRead(IR2_PIN) + IR2_BIAS; //centre
+  IRvals[2] = analogRead(IR3_PIN) + IR3_BIAS; //right
 }
 
 
@@ -184,12 +216,12 @@ void readIRSensors() {
 // Outputs
 
 void motorSpeed(int _speedA, int _speedB) {
-  _speedA = constrain(_speedA, -255, 255);
-  _speedB = constrain(_speedB, -255, 255);
-  digitalWrite(pinA1, _speedA >= 0 ? HIGH : LOW) ;
-  analogWrite (pinA2, abs(_speedA));
-  digitalWrite(pinB1, _speedB >= 0 ? HIGH : LOW);
-  analogWrite (pinB2, abs(_speedB));
+  _speedA = constrain(_speedA, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
+  _speedB = constrain(_speedB, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
+  digitalWrite(MOTOR_A1_PIN, _speedA >= 0 ? HIGH : LOW) ;
+  analogWrite (MOTOR_A2_PIN, abs(_speedA));
+  digitalWrite(MOTOR_B1_PIN, _speedB >= 0 ? HIGH : LOW);
+  analogWrite (MOTOR_B2_PIN, abs(_speedB));
 }
 
 
@@ -197,7 +229,7 @@ void motorSpeed(int _speedA, int _speedB) {
 // Utilities
 
 void updateLineFollowingStatus() {
-  if ((IRvals[1] <= WHITE_THRESHOLD )) {
+  if ((IRvals[1] <= IR_WHITE_THRESHOLD )) {
     offTheLineTime += timeNow - offLineLastTime;
     offLineLastTime = timeNow;
 
@@ -247,13 +279,13 @@ void printVals() {
 }
 
 // Serial Input
-// We're expecting mesages of 6 bytes in the form:  >>IXYB
+// We're expecting messages of 6 bytes in the form:  >>IXYB
 // Where;
 // >> = start marker, as-is
-// I = joypad ID  (only 0-7 for GZZL joypad)
-// X = unsinged byte for xAxis:          0 .. 255 mapped to -254 .. 254
-// Y = unsinged byte for yAxis:          0 .. 255 mapped to -254 .. 254
-// B = unsinged byte for button pressed: 0 = no, 1 = yes
+// I = joypad ID  (0-7 for GZLL joypad ID's)
+// X = unsigned byte for xAxis:          0 .. 255 mapped to -254 .. 254
+// Y = unsigned byte for yAxis:          0 .. 255 mapped to -254 .. 254
+// B = unsigned byte for button pressed: 0 = no, 1 = yes
 void readSerial() {
   static int c = 0, lastChar = 0;
   while (Serial1.available() >= 6) {
