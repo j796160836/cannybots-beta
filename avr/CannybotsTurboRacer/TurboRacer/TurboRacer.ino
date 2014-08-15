@@ -47,7 +47,7 @@
 #define PID_SAMPLE_TIME              0
 #define PID_SCALE                 10.0
 
-#define JOYPAD_ID                    1
+#define JOYPAD_ID                    0
 #define JOYPAD_AXIS_DEADZONE        20
 #define JOYPAD_CONNECTION_TIMEOUT  200
 
