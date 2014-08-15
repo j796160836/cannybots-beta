@@ -8,8 +8,9 @@
 
 #import "BrainDashMainViewController.h"
 
-#import <CannybotsController.h>
-#import "CannybotsRacerGlu.h"
+//#import <CannybotsController.h>
+//#import "CannybotsRacerGlu.h"
+#import "BrainSpeakBLE.h"
 
 // add a Project reference to cocos2d-ios.xcodeproj, using the dialog box and not the drag drop!! (xcode bug)
 // (rstart xcode helps)
@@ -24,7 +25,8 @@
 
 
 @interface BrainDashMainViewController () {
-    CannybotsController* cb;
+    //CannybotsController* cb;
+    BrainSpeakBLE* bsle;
     CCNode* myGame;
     NSTimer* lapTimer;
     double lapTimerStartTime;
@@ -89,8 +91,8 @@
         [director runWithScene:scene];
     
     
-    cb = [CannybotsController sharedInstance];
-
+    //cb = [CannybotsController sharedInstance];
+    bsle     = [BrainSpeakBLE sharedInstance];
     joystickMode = true;
     
     [self startLapTimer];
@@ -111,7 +113,7 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
-    cb=nil;
+    //cb=nil;
 }
 
 #pragma mark - Flipside View
@@ -219,12 +221,12 @@
 
 - (IBAction)leftSpeedChanged:(UISlider*)sender {
     leftMotorSpeed=(int)(sender.value);
-    [cb callMethod:&RACER_JOYAXIS p1:leftMotorSpeed p2:rightMotorSpeed];
+    //[cb callMethod:&RACER_JOYAXIS p1:leftMotorSpeed p2:rightMotorSpeed];
     
 }
 - (IBAction)rightSpeedChanged:(UISlider*)sender {
     rightMotorSpeed=(int)(sender.value);
-    [cb callMethod:&RACER_JOYAXIS p1:leftMotorSpeed p2:rightMotorSpeed];
+    //[cb callMethod:&RACER_JOYAXIS p1:leftMotorSpeed p2:rightMotorSpeed];
 }
 
 
@@ -236,17 +238,17 @@
         _leftSpeedSlider.hidden=true;
         _rightSpeedSlider.hidden=true;
         //[cb callMethod:&RACER_LINEFOLLOWING_MODE p1:1];
-        [cb callMethod:&RACER_TANKCONTROL_MODE p1:0 ];
+        //[cb callMethod:&RACER_TANKCONTROL_MODE p1:0 ];
 
     } else if ( 1 == sender.selectedSegmentIndex) {
-        [cb callMethod:&RACER_LINEFOLLOWING_MODE p1:0 ];
+        //[cb callMethod:&RACER_LINEFOLLOWING_MODE p1:0 ];
     } else if ( 2 == sender.selectedSegmentIndex) {
         joystickMode=false;
         _joypadView.hidden=true;
         _leftSpeedSlider.hidden=false;
         _rightSpeedSlider.hidden=false;
         
-        [cb callMethod:&RACER_TANKCONTROL_MODE p1:1 ];
+        //[cb callMethod:&RACER_TANKCONTROL_MODE p1:1 ];
     }
     
 }
@@ -299,6 +301,7 @@
 
 - (void) viewDidAppear:(BOOL)animated {
     NSLog(@"viewDidAppear");
+    /*
     [cb registerHandler:&RACER_LINEFOLLOWING_MODE withBlockFor_INT16_3: ^(int16_t p1, int16_t p2, int16_t p3)
     {
         if (joystickMode) {
@@ -328,13 +331,13 @@
      {
          [self lapStop:p1];
      }];
-    
+    */
     [self reloadScene];
 }
 
 
 - (void) viewWillDisappear:(BOOL)animated {
-    [cb deregisterHandler:&RACER_LINEFOLLOWING_MODE];
+    //[cb deregisterHandler:&RACER_LINEFOLLOWING_MODE];
 }
 
 
