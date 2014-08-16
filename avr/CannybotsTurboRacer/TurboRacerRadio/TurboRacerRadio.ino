@@ -130,8 +130,7 @@ void RFduinoBLE_onDisconnect() {
 
 void RFduinoBLE_onReceive(char *data, int len) {
   if (len >= 3) {
-    buffer[2] = data[0]; // phone send 4 bytes:  ID, X, Y, B
-    memcpy(buffer + 3, data + 1, 3);
+    memcpy(buffer + 2, data, min(20,len));
     send = true;
   }
 }

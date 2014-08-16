@@ -13,7 +13,7 @@
 #import "BrainSpeakBLE.h"
 
 
-@interface BrainDashMainViewController : UIViewController <CCDirectorDelegate, CannybotsReceiver>
+@interface BrainDashMainViewController : UIViewController <CCDirectorDelegate>
 
 @property (weak, nonatomic) IBOutlet UIView *joypadView;
 @property (weak, nonatomic) IBOutlet UIView *gestureView;

@@ -156,10 +156,12 @@
         if(peripheral.services){
             NSLog(@"Did connect to existing peripheral %@", peripheral.name);
             [_currentPeripheral peripheral:peripheral didDiscoverServices:nil]; //already discovered services, DO NOT re-discover. Just pass along the peripheral.
+            
         }
         
         else{
             NSLog(@"Did connect peripheral %@", peripheral.name);
+            //[_currentPeripheral setDesiredConnectionLatency:CBPeripheralManagerConnectionLatencyLow forCentral:central];
             [_currentPeripheral didConnect];
         }
     }
@@ -275,9 +277,7 @@
 // called by the UART
 - (void) didReceiveData:(NSData*)newData{
     
-    NSString* hexString = [newData hexRepresentationWithSpaces:YES];
-    NSLog(@"BSBLE Received: %@", hexString);
-    
+    NSString* hexString = [newData hexRepresentationWithSpaces:YES];    
     [self.cbdelegate didReceiveData:newData];
     
 }

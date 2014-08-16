@@ -71,7 +71,7 @@ cb_app_config cbr_settings;
 #define PAUSE_HACK   [NSThread sleepForTimeInterval: 0.2];
 
 - (IBAction)goLeft:(id)sender {
-
+    return;
     CannybotsController* cb = [CannybotsController sharedInstance];
 
     //[cb setConfigParameter_UINT32:&cfg_type p1:0xFF00FF00]; PAUSE_HACK;
@@ -140,6 +140,7 @@ cb_app_config cbr_settings;
 }
 
 - (IBAction)goRight:(id)sender {
+    return;
     [self goLeft:sender];
     
     CannybotsController* cb = [CannybotsController sharedInstance];

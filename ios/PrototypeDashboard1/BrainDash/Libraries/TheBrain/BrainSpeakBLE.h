@@ -16,7 +16,8 @@
 
 #define BLE_CONN_RETRY_DELAY 1.0f
 
-
+// thruput limted to 2000 bytes per sec
+// http://lists.apple.com/archives/bluetooth-dev/2013/Jan/msg00069.html
 
 @interface BrainSpeakBLE : NSObject <UARTPeripheralDelegate, CBCentralManagerDelegate>
 

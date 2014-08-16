@@ -93,8 +93,8 @@
     
     
     //cb = [CannybotsController sharedInstance];
-    bsle     = [BrainSpeakBLE sharedInstance];
-    bsle.cbdelegate = self;
+    //bsle     = [BrainSpeakBLE sharedInstance];
+    //bsle.cbdelegate = self;
 
     joystickMode = true;
     
@@ -342,13 +342,6 @@
 - (void) viewWillDisappear:(BOOL)animated {
     //[cb deregisterHandler:&RACER_LINEFOLLOWING_MODE];
 }
-- (void) didReceiveData:(NSData *)data {
-    //@synchronized(self) {
-        //long      len = [data length];
-        //uint8_t * buf = (uint8_t*)[data bytes];
-        
-        NSString* hexString = [data hexRepresentationWithSpaces:YES];
-        NSLog(@"Received: %@", hexString);
-}
+
 
 @end

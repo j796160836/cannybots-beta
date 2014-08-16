@@ -79,37 +79,39 @@ bool readBool(const char* data) {
 // Writing data
 
 void writeData(const char* name, int8_t value) {
-  char msg[20] = {0};
+  char msg[20+1] = {0};
   snprintf(msg, sizeof(msg), ">>%c%5.5s%c% .10d  ", BOT_ID, name, 'b', value);
   Serial1.write(msg, sizeof(msg));
 }
 
 void writeData(const char* name, uint8_t value) {
-  char msg[20] = {0};
+  char msg[20+1] = {0};
   snprintf(msg, sizeof(msg), ">>%c%5.5s%c% .10d  ", BOT_ID, name, 'B', value);
   Serial1.write(msg, sizeof(msg));
 }
 
 void writeData(const char* name, uint16_t value) {
-  char msg[20] = {0};
+  char msg[20+1] = {0};
   snprintf(msg, sizeof(msg), ">>%c%5.5s%c% .10d  ", BOT_ID, name, 'D', value);
   Serial1.write(msg, sizeof(msg));
 }
 
 void writeData(const char* name, int16_t value) {
-  char msg[20] = {0};
+  char msg[20+1] = {0};
   snprintf(msg, sizeof(msg), ">>%c%5.5s%c% .10d  ", BOT_ID, name, 'd', value);
+  //Serial.write(msg, sizeof(msg));
+  //Serial.println();
   Serial1.write(msg, sizeof(msg));
 }
 
 void writeData(const char* name, int32_t value) {
-  char msg[20] = {0};
+  char msg[20+1] = {0};
   snprintf(msg, sizeof(msg), ">>%c%5.5s%c% .6ld  ", BOT_ID, name, 'L', value);
   Serial1.write(msg, sizeof(msg));
 }
 
 void writeData(const char* name, uint32_t value) {
-  char msg[20] = {0};
+  char msg[20+1] = {0};
   snprintf(msg, sizeof(msg), ">>%c%5.5s%c% .6lu  ", BOT_ID, name, 'l', value);
   Serial1.write(msg, sizeof(msg));
 }

@@ -86,6 +86,8 @@
     NSLog(@"Starting service discovery for %s", [_peripheral.name UTF8String]);
     [_peripheral discoverServices:@[self.class.uartServiceUUID, self.class.deviceInformationServiceUUID]];
     
+    
+    
 }
 
 
@@ -105,9 +107,11 @@
     //Send data to peripheral
     if ((self.txCharacteristic.properties & CBCharacteristicPropertyWriteWithoutResponse) != 0){
         [self.peripheral writeValue:data forCharacteristic:self.txCharacteristic type:CBCharacteristicWriteWithoutResponse];
+        //NSLog(@"write no response");
     }
     else if ((self.txCharacteristic.properties & CBCharacteristicPropertyWrite) != 0){
         [self.peripheral writeValue:data forCharacteristic:self.txCharacteristic type:CBCharacteristicWriteWithResponse];
+        NSLog(@"write with response");
     }
     else{
         NSLog(@"No write property on TX characteristic, %d.", (int)self.txCharacteristic.properties);

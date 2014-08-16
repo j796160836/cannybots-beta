@@ -60,8 +60,6 @@
 #define JOYPAD_AXIS_DEADZONE        20
 #define JOYPAD_CONNECTION_TIMEOUT  200
 
-#define JOYPAD_LINEFOLLOW_MODE_SCALE 3
-#define JOYPAD_MANUAL_MODE_SCALE     4
 
 // Interval timer constants (milliseconds)
 #define PRINT_DEBUG_INTERVAL      1000
@@ -120,6 +118,11 @@ int speedB = 0;             // viewed from behind motor 'B' is on the right
 unsigned long currentStartLapTime = 0;
 int  lapCount=0;
 
+// Requested actions state
+
+bool sendConfig = false;
+bool sendIR     = false;
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Arduino functions
 
@@ -147,6 +150,7 @@ void loop() {
   timeNow = millis();
 
   readSerial();
+  perfromRequestedActions();
   readIRSensors();
   updateLineFollowingStatus();
 
@@ -192,8 +196,8 @@ void calculatePID() {
 // This is called when the bot is on the line
 // speedA and speedB will have already been set by pid_calculate() before this is run
 void  joypadLineFollowingControlMode() {
-  speedA = speedA + (yAxisValue / JOYPAD_LINEFOLLOW_MODE_SCALE); //superpose yAxis with PID output speed
-  speedB = speedB + (yAxisValue / JOYPAD_LINEFOLLOW_MODE_SCALE);
+  speedA = speedA + (yAxisValue / 3); //superpose yAxis with PID output speed
+  speedB = speedB + (yAxisValue / 3);
 }
 
 // This is called when the bot is in manual mode.
@@ -214,8 +218,8 @@ void joypadManualControlMode() {
     if ( abs(yAxisValue) < JOYPAD_AXIS_DEADZONE)
       yAxisValue = 0;
 
-    speedA =  (yAxisValue + xAxisValue) / JOYPAD_MANUAL_MODE_SCALE;
-    speedB =  (yAxisValue - xAxisValue) / JOYPAD_MANUAL_MODE_SCALE;
+    speedA =  (yAxisValue + xAxisValue) / 4;
+    speedB =  (yAxisValue - xAxisValue) / 4;
   }
 }
 
@@ -290,6 +294,10 @@ void printVals() {
   Serial.print(yAxisValue, DEC);
   Serial.print(",");
   Serial.print(buttonPressed, DEC);
+  Serial.print("),PID(P,D)=(");
+  Serial.print(Kp, DEC);
+  Serial.print(",");
+  Serial.print(Kd, DEC);
   Serial.print("),Speed(A,B)=(");
   Serial.print(speedA, DEC);
   Serial.print(",");
@@ -328,6 +336,9 @@ void lap_stopTiming() {
 //// Sending variable update out
 
 void sendSensorReadings() {
+  if (!sendIR) {
+    return;
+  }
   static unsigned long irSendLastTime = millis();
   if ( (timeNow - irSendLastTime) < IR_SEND_INTERVAL) {
     return;
@@ -356,10 +367,23 @@ void updateVariable(const char* name, const char* data) {
     Kp = readInt(data);
   } else if (variableNameMatches(name, "PID_D")) {
     Kd = readInt(data);
-  } else {
+  } else if (variableNameMatches(name, "GETCF")) {
+    sendConfig = true;
+  }else if (variableNameMatches(name, "SNDIR")) {
+    sendIR = readInt(data);;
+  } else {  
     // unrecognised variable name, ignore.
   }
 }
 
-
+// Logic that has been requested by the joypad/phone, trigger by settings a flag variable in 'updateVariable'
+void perfromRequestedActions() {
+  
+   if (sendConfig) {
+      writeData("PID_P", Kp);
+      delay (150);
+      writeData("PID_D", Kd);
+      sendConfig=false;
+   } 
+}
 

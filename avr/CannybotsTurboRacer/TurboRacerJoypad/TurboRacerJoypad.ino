@@ -36,11 +36,14 @@ void loop()
   int16_t yAxis = map(analogRead(YAXIS_PIN), 0,1023, 255, -255) ;
   
   snprintf(msg, sizeof(msg), "%c%5.5s%c% .10d  ", role, "JOY_X", 'd', xAxis);
-  //RFduinoGZLL.sendToHost((const char*)msg, MSG_LEN-1);      // don't bother sending the NULL byte at the end
+  delay(5);
+  RFduinoGZLL.sendToHost((const char*)msg, MSG_LEN-1);      // don't bother sending the NULL byte at the end
   snprintf(msg, sizeof(msg), "%c%5.5s%c% .10d  ", role, "JOY_Y", 'd', yAxis);
+  delay(5);
   RFduinoGZLL.sendToHost((const char*)msg, MSG_LEN-1);      // don't bother sending the NULL byte at the end
   snprintf(msg, sizeof(msg), "%c%5.5s%c% .10d  ", role, "JOYB1", 'd', buttonPressed);
-  //RFduinoGZLL.sendToHost((const char*)msg, MSG_LEN-1);      // don't bother sending the NULL byte at the end
+  delay(5);
+  RFduinoGZLL.sendToHost((const char*)msg, MSG_LEN-1);      // don't bother sending the NULL byte at the end
 
   Serial.write((uint8_t*)msg, MSG_LEN);
   Serial.println();
