@@ -9,10 +9,13 @@
 // Version:   1.0  -  14.08.2014  -  Inital Version  (wayne@cannybots.com, mampetta@cannybots.com)
 // Version:   1.1  -  15.08.2014  -  Tidied naming                  (wayne@cannybots.com)
 // Version:   1.2  -  16.08.2014  -  Added sending serial messages  (wayne@cannybots.com)
+// Version:   1.3  -  16.08.2014  -  Added sending/receving key/value pairs  (wayne@cannybots.com)
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Bot constants
+
+#define BOT_ID                     128
 
 ////// Hardware Constants
 
@@ -49,7 +52,7 @@
 #define PID_SAMPLE_TIME              0
 #define PID_SCALE                 10.0
 
-#define JOYPAD_ID                   10
+#define JOYPAD_ID                    0
 // Anish Joypad     =  0
 // Waynes barebones =  1
 // Default iOS app  = 10
@@ -113,7 +116,9 @@ int cruiseSpeed = MOTOR_CRUISE_SPEED;      // default cruise speed when line fol
 int speedA = 0;             // viewed from behind motor 'A' is on the left
 int speedB = 0;             // viewed from behind motor 'B' is on the right
 
-
+// Lap Timing
+unsigned long currentStartLapTime = 0;
+int  lapCount=0;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Arduino functions
@@ -293,9 +298,35 @@ void printVals() {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
+// Lap Timing
+
+// this should be called at least once to inform the client (e.g. phone) that the bot has started racing
+void lap_started() {
+  currentStartLapTime = timeNow;
+  writeData("LSTRT",  currentStartLapTime);
+  writeData("LAPS", lapCount);
+  lapCount++;
+}
+
+// call on lap complete, updates phone with current lap time & lap count, it then restarts the lap timer and incremetn the laptcount
+void lap_completed() {
+  writeData("LTIME",  timeNow-currentStartLapTime);
+  writeData("LAPS", lapCount);
+  currentStartLapTime = timeNow;
+}
+
+// this should be called to tell the client (e.g. phone app) that lap timing and counting has finished
+void lap_stopTiming() {
+  writeData("LEND",  true);
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
 // Message Handling
 
-//// Sending out
+//// Sending variable update out
+
 void sendSensorReadings() {
   static unsigned long irSendLastTime = millis();
   if ( (timeNow - irSendLastTime) < IR_SEND_INTERVAL) {
@@ -303,82 +334,32 @@ void sendSensorReadings() {
   } else {
     irSendLastTime = timeNow;
   };
-
   writeData("IR_1", IRvals[0]);
   writeData("IR_2", IRvals[1]);
   writeData("IR_3", IRvals[2]);
 }
 
+// Receiving variable updates
 
+// Helper macro(s)
+#define variableNameMatches(a,b) (strncmp(a,b,5)==0)
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
-// Serial Comms
+void updateVariable(const char* name, const char* data) {
 
-// Serial Input
-// We're expecting messages of 6 bytes in the form:  >>IXYB
-// Where;
-// >> = start marker, as-is
-// I = joypad ID  (0-7 for GZLL joypad ID's)
-// X = unsigned byte for xAxis:          0 .. 255 mapped to -254 .. 254
-// Y = unsigned byte for yAxis:          0 .. 255 mapped to -254 .. 254
-// B = unsigned byte for button pressed: 0 = no, 1 = yes
-void readSerial() {
-  static int c = 0, lastChar = 0;
-  while (Serial1.available() >= 6) {
-    lastChar = c;
-    c = Serial1.read();
-    if ( ('>' == c) && ('>' == lastChar) ) {
-      if (JOYPAD_ID == Serial1.read()) {
-        xAxisValue    = Serial1.read();
-        yAxisValue    = Serial1.read();
-        buttonPressed = Serial1.read();
-        xAxisValue = map(xAxisValue, 0, 255, -255, 255);
-        yAxisValue = map(yAxisValue, 0, 255, -255, 255);
-      } else {
-        // ignore the data
-        Serial1.read();
-        Serial1.read();
-        Serial1.read();
-      }
-      lastChar = c = 0;
-      joypadLastTime = timeNow;                      // record the time we last received a joypad command.
-    }
+  if (variableNameMatches(name, "JOY_X")) {
+    xAxisValue = readInt(data);
+  } else if (variableNameMatches(name, "JOY_Y")) {
+    yAxisValue = readInt(data);
+  } else if (variableNameMatches(name, "JOYB1")) {
+    buttonPressed = readBool(data);
+  } else if (variableNameMatches(name, "PID_P")) {
+    Kp = readInt(data);
+  } else if (variableNameMatches(name, "PID_D")) {
+    Kd = readInt(data);
+  } else {
+    // unrecognised variable name, ignore.
   }
 }
 
-void writeData(const char* name, int8_t value) {
-  char msg[20] = {0};
-  snprintf(msg, sizeof(msg), ">>%5.5s%c% .10d   ", name, 'b', value);
-  Serial1.write(msg, sizeof(msg));
-}
 
-void writeData(const char* name, uint8_t value) {
-  char msg[20] = {0};
-  snprintf(msg, sizeof(msg), ">>%5.5s%c% .10d   ", name, 'B', value);
-  Serial1.write(msg, sizeof(msg));
-}
-
-void writeData(const char* name, uint16_t value) {
-  char msg[20] = {0};
-  snprintf(msg, sizeof(msg), ">>%5.5s%c% .10d   ", name, 'D', value);
-  Serial1.write(msg, sizeof(msg));
-}
-
-void writeData(const char* name, int16_t value) {
-  char msg[20] = {0};
-  snprintf(msg, sizeof(msg), ">>%5.5s%c% .10d   ", name, 'd', value);
-  Serial1.write(msg, sizeof(msg));
-}
-
-void writeData(const char* name, int32_t value) {
-  char msg[20] = {0};
-  snprintf(msg, sizeof(msg), ">>%5.5s%c% .6ld   ", name, 'L', value);
-  Serial1.write(msg, sizeof(msg));
-}
-
-void writeData(const char* name, uint32_t value) {
-  char msg[20] = {0};
-  snprintf(msg, sizeof(msg), ">>%5.5s%c% .6lu   ", name, 'l', value);
-  Serial1.write(msg, sizeof(msg));
-}
 

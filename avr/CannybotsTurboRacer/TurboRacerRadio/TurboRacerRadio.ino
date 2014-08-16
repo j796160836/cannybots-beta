@@ -39,14 +39,15 @@
 #define RX_PIN 0
 #endif
 
-#define BUF_LEN 6
+#define SERIAL2RADIO_MESSAGE_SIZE 20
+#define RADIO2SERIAL_MESSAGE_SIZE 22
 
 #define WATCHDOG_SETUP(seconds) NRF_WDT->CRV = 32768 * seconds; NRF_WDT->TASKS_START = 1;
 #define WATCHDOG_RELOAD() NRF_WDT->RR[0] = WDT_RR_RR_Reload;
 
 
 device_t role = HOST;
-uint8_t buffer[BUF_LEN] = {'>', '>'};
+uint8_t buffer[RADIO2SERIAL_MESSAGE_SIZE] = {'>', '>'};
 volatile bool send = false;
 volatile bool startGZLL = true;
 volatile bool bleConnected = false;
@@ -99,7 +100,7 @@ void loop() {
   }
 
   if (send) {
-    Serial.write(buffer, BUF_LEN);
+    Serial.write(buffer, RADIO2SERIAL_MESSAGE_SIZE);
     //Serial.flush();
     send = false;
   }
@@ -113,8 +114,7 @@ void RFduinoGZLL_onReceive(device_t device, int rssi, char *data, int len)
   gzllConnectionTimeout = timeNow + GZLL_CONNECTION_TIMEOUT;
 
   if (len >= 3) {
-    buffer[2] = device & 0xFF;  // device_t is an enum 0-7 for DEVICE[0..7] and 8 = HOST, defined in libRFduinoGZLL.h
-    memcpy(buffer + 3, data, 3);
+    memcpy(buffer + 2, data, min(20,len));
     send = true;
   }
 }
@@ -142,21 +142,21 @@ void RFduinoBLE_onReceive(char *data, int len) {
 // Where;
 // >> = start marker, as-is
 // 20 bytes of data to forward
-#define MESSAGE_SIZE 20
+#define SERIAL2RADIO_MESSAGE_SIZE 20
 void processSerial2Radio() {
   if (!bleConnected && !gzllConnected) 
     return;
-  char msg[MESSAGE_SIZE];
+  char msg[SERIAL2RADIO_MESSAGE_SIZE];
   static int c = 0, lastChar = 0;
-  while (Serial.available() >= MESSAGE_SIZE) {
+  while (Serial.available() >= SERIAL2RADIO_MESSAGE_SIZE) {
     lastChar = c;
     c = Serial.read();
     if ( ('>' == c) && ('>' == lastChar) ) {
-      for (int i = 0; i < MESSAGE_SIZE; i++) {
+      for (int i = 0; i < SERIAL2RADIO_MESSAGE_SIZE; i++) {
         msg[i] = Serial.read();
       }
       if (bleConnected) {
-        RFduinoBLE.send((const char*)msg, MESSAGE_SIZE);
+        RFduinoBLE.send((const char*)msg, SERIAL2RADIO_MESSAGE_SIZE);
       } else if (gzllConnected) {
         // Drop message for now, the Gazell based joypad is 'dumb', it has no outputs.
         // TODO: GZLL can only 'piggyback' on DEVICE to (this) HOST, so we would need to store and forward
