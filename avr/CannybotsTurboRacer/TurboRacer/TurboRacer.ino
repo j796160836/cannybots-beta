@@ -7,6 +7,8 @@
 // License: http://opensource.org/licenses/MIT
 //
 // Version:   1.0  -  14.08.2014  -  Inital Version  (wayne@cannybots.com, mampetta@cannybots.com)
+// Version:   1.1  -  15.08.2014  -  Tidied naming                  (wayne@cannybots.com)
+// Version:   1.2  -  16.08.2014  -  Added sending serial messages  (wayne@cannybots.com)
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -24,7 +26,7 @@
 #define MOTOR_A1_PIN                 3
 #define MOTOR_A2_PIN                 5
 #define MOTOR_B1_PIN                 6
-#define MOTOR_B2_PIN                 9 
+#define MOTOR_B2_PIN                 9
 #define MOTOR_MODE_PIN               2
 
 // Flashy Lights
@@ -58,6 +60,10 @@
 #define JOYPAD_LINEFOLLOW_MODE_SCALE 3
 #define JOYPAD_MANUAL_MODE_SCALE     4
 
+// Interval timer constants (milliseconds)
+#define PRINT_DEBUG_INTERVAL      1000
+
+#define IR_SEND_INTERVAL           100
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 /// Bot Variables
@@ -76,7 +82,7 @@ bool     buttonPressed = 0;              // 0 = not pressed, 1 = pressed
 ////// Process / Algorithms
 
 // PID
-int Kp         = PID_P;            
+int Kp         = PID_P;
 int Kd         = PID_D;
 int P_error    = 0;
 int D_error    = 0;
@@ -124,7 +130,7 @@ void setup() {
   pinMode(MOTOR_B2_PIN, OUTPUT);
   pinMode(MOTOR_MODE_PIN, OUTPUT);
   digitalWrite(MOTOR_MODE_PIN, HIGH);   //to set controller to Phase/Enable mode
-  motorSpeed(0,0);
+  motorSpeed(0, 0);
 
   // Headlights...
   pinMode(STATUS_LED_PIN, OUTPUT);
@@ -142,11 +148,13 @@ void loop() {
   if (isLineFollowingMode) {
     calculatePID();
     joypadLineFollowingControlMode();
-  } else {    
-     // in manual mode
+  } else {
+    // in manual mode
     joypadManualControlMode();
   }
-  motorSpeed(speedA*1, speedB*1);
+  motorSpeed(speedA * 1, speedB * 1);
+  sendSensorReadings();
+
   printVals();
 }
 
@@ -163,7 +171,7 @@ void calculatePID() {
 
   // process IR readings via PID
   error_last = error;                                   // store previous error before new one is caluclated
-  error = IRvals[0] - IRvals[2];                        
+  error = IRvals[0] - IRvals[2];
 
   P_error = error * Kp / PID_SCALE;                          // calculate proportional term
   D_error = (error - error_last) * Kd / PID_SCALE;           // calculate differential term
@@ -251,7 +259,7 @@ void updateLineFollowingStatus() {
     forceManualMode = 1;
   else
     forceManualMode = 0;
- 
+
   if (forceManualMode) {
     isLineFollowingMode = 0;
   }
@@ -259,7 +267,7 @@ void updateLineFollowingStatus() {
 
 void printVals() {
   static unsigned long lastPrint = millis();
-  if (millis() - lastPrint < 100) {
+  if (millis() - lastPrint < PRINT_DEBUG_INTERVAL) {
     return;
   }
   lastPrint = timeNow;
@@ -283,6 +291,28 @@ void printVals() {
   Serial.print(speedB, DEC);
   Serial.println(")");
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Message Handling
+
+//// Sending out
+void sendSensorReadings() {
+  static unsigned long irSendLastTime = millis();
+  if ( (timeNow - irSendLastTime) < IR_SEND_INTERVAL) {
+    return;
+  } else {
+    irSendLastTime = timeNow;
+  };
+
+  writeData("IR_1", IRvals[0]);
+  writeData("IR_2", IRvals[1]);
+  writeData("IR_3", IRvals[2]);
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Serial Comms
 
 // Serial Input
 // We're expecting messages of 6 bytes in the form:  >>IXYB
@@ -314,5 +344,41 @@ void readSerial() {
       joypadLastTime = timeNow;                      // record the time we last received a joypad command.
     }
   }
+}
+
+void writeData(const char* name, int8_t value) {
+  char msg[20] = {0};
+  snprintf(msg, sizeof(msg), ">>%5.5s%c% .10d   ", name, 'b', value);
+  Serial1.write(msg, sizeof(msg));
+}
+
+void writeData(const char* name, uint8_t value) {
+  char msg[20] = {0};
+  snprintf(msg, sizeof(msg), ">>%5.5s%c% .10d   ", name, 'B', value);
+  Serial1.write(msg, sizeof(msg));
+}
+
+void writeData(const char* name, uint16_t value) {
+  char msg[20] = {0};
+  snprintf(msg, sizeof(msg), ">>%5.5s%c% .10d   ", name, 'D', value);
+  Serial1.write(msg, sizeof(msg));
+}
+
+void writeData(const char* name, int16_t value) {
+  char msg[20] = {0};
+  snprintf(msg, sizeof(msg), ">>%5.5s%c% .10d   ", name, 'd', value);
+  Serial1.write(msg, sizeof(msg));
+}
+
+void writeData(const char* name, int32_t value) {
+  char msg[20] = {0};
+  snprintf(msg, sizeof(msg), ">>%5.5s%c% .6ld   ", name, 'L', value);
+  Serial1.write(msg, sizeof(msg));
+}
+
+void writeData(const char* name, uint32_t value) {
+  char msg[20] = {0};
+  snprintf(msg, sizeof(msg), ">>%5.5s%c% .6lu   ", name, 'l', value);
+  Serial1.write(msg, sizeof(msg));
 }
 

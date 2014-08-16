@@ -7,7 +7,8 @@
 // License: http://opensource.org/licenses/MIT
 //
 // Version 1.0   -  14.08.2014  -  Inital Version
-// Version 1.1   -  15.08.2014  -  Add BLE         (wayne@cannybots.com)
+// Version 1.1   -  15.08.2014  -  Added BLE            (wayne@cannybots.com)
+// Version 1.2   -  16.08.2014  -  Added Serial2Radio    (wayne@cannybots.com)
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -66,17 +67,17 @@ void setup() {
   RFduinoBLE.deviceName        = bleName;
   RFduinoBLE.advertisementData = bleName;
   //RFduinoBLE.advertisementInterval(millis);
-  
+
   WATCHDOG_SETUP(7);
 }
 
 void loop() {
   timeNow   = millis();
   WATCHDOG_RELOAD();
-  
-   if ( gzllConnected && (timeNow  > gzllConnectionTimeout)) {
-      gzllConnected = false;
-   }
+
+  if ( gzllConnected && (timeNow  > gzllConnectionTimeout)) {
+    gzllConnected = false;
+  }
 
   if (!bleConnected && !gzllConnected) {
     if (millis() > nextRadioToggleTime) {
@@ -102,13 +103,15 @@ void loop() {
     //Serial.flush();
     send = false;
   }
+
+  processSerial2Radio();
 }
 
 void RFduinoGZLL_onReceive(device_t device, int rssi, char *data, int len)
 {
   gzllConnected = true;
   gzllConnectionTimeout = timeNow + GZLL_CONNECTION_TIMEOUT;
-  
+
   if (len >= 3) {
     buffer[2] = device & 0xFF;  // device_t is an enum 0-7 for DEVICE[0..7] and 8 = HOST, defined in libRFduinoGZLL.h
     memcpy(buffer + 3, data, 3);
@@ -128,8 +131,40 @@ void RFduinoBLE_onDisconnect() {
 void RFduinoBLE_onReceive(char *data, int len) {
   if (len >= 3) {
     buffer[2] = data[0]; // phone send 4 bytes:  ID, X, Y, B
-    memcpy(buffer + 3, data+1, 3);
+    memcpy(buffer + 3, data + 1, 3);
     send = true;
   }
 }
 
+
+// Serial Input
+// We're expecting messages of 20 bytes in the form:  >>IXYB
+// Where;
+// >> = start marker, as-is
+// 20 bytes of data to forward
+#define MESSAGE_SIZE 20
+void processSerial2Radio() {
+  if (!bleConnected && !gzllConnected) 
+    return;
+  char msg[MESSAGE_SIZE];
+  static int c = 0, lastChar = 0;
+  while (Serial.available() >= MESSAGE_SIZE) {
+    lastChar = c;
+    c = Serial.read();
+    if ( ('>' == c) && ('>' == lastChar) ) {
+      for (int i = 0; i < MESSAGE_SIZE; i++) {
+        msg[i] = Serial.read();
+      }
+      if (bleConnected) {
+        RFduinoBLE.send((const char*)msg, MESSAGE_SIZE);
+      } else if (gzllConnected) {
+        // Drop message for now, the Gazell based joypad is 'dumb', it has no outputs.
+        // TODO: GZLL can only 'piggyback' on DEVICE to (this) HOST, so we would need to store and forward
+      } else {
+        // Drop, no point caching data.
+      }
+
+      lastChar = c = 0;
+    }
+  }
+}

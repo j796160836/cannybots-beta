@@ -274,6 +274,10 @@
 
 // called by the UART
 - (void) didReceiveData:(NSData*)newData{
+    
+    NSString* hexString = [newData hexRepresentationWithSpaces:YES];
+    NSLog(@"BSBLE Received: %@", hexString);
+    
     [self.cbdelegate didReceiveData:newData];
     
 }

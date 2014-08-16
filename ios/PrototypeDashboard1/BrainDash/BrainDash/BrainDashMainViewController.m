@@ -12,6 +12,7 @@
 //#import "CannybotsRacerGlu.h"
 #import "BrainSpeakBLE.h"
 
+
 // add a Project reference to cocos2d-ios.xcodeproj, using the dialog box and not the drag drop!! (xcode bug)
 // (rstart xcode helps)
 // modify your Build Settings. Set Always Search User Paths to YES, and add the Cocos2D source directory to the User Header Search Paths (as a recursive path)
@@ -93,6 +94,8 @@
     
     //cb = [CannybotsController sharedInstance];
     bsle     = [BrainSpeakBLE sharedInstance];
+    bsle.cbdelegate = self;
+
     joystickMode = true;
     
     [self startLapTimer];
@@ -339,6 +342,13 @@
 - (void) viewWillDisappear:(BOOL)animated {
     //[cb deregisterHandler:&RACER_LINEFOLLOWING_MODE];
 }
-
+- (void) didReceiveData:(NSData *)data {
+    //@synchronized(self) {
+        //long      len = [data length];
+        //uint8_t * buf = (uint8_t*)[data bytes];
+        
+        NSString* hexString = [data hexRepresentationWithSpaces:YES];
+        NSLog(@"Received: %@", hexString);
+}
 
 @end

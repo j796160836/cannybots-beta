@@ -9,8 +9,11 @@
 
 #import "HelloWorldScene.h"
 #import <cocos2d.h>
+#import "NSData+hex.h"
+#import "BrainSpeakBLE.h"
 
-@interface BrainDashMainViewController : UIViewController <CCDirectorDelegate>
+
+@interface BrainDashMainViewController : UIViewController <CCDirectorDelegate, CannybotsReceiver>
 
 @property (weak, nonatomic) IBOutlet UIView *joypadView;
 @property (weak, nonatomic) IBOutlet UIView *gestureView;
