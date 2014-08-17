@@ -8,6 +8,7 @@
 //
 // Version:   1.0   -  14.08.2014  -  Inital Version 
 // Version:   1.1   -  16.08.2014  -  Use key/type/value pairs
+// Version:   1.2   -  17.08.2014  -  Use binary encoding for message variables
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -32,22 +33,13 @@ void setup()
 void loop()
 {
   bool buttonPressed = digitalRead(BUTTON_PIN)  & 0xFF;
-  int16_t xAxis = map(analogRead(XAXIS_PIN), 0,1023, 255, -255) ;          // scale from 0..1023 to 0-255 so data fits in a byte
+  int16_t xAxis = map(analogRead(XAXIS_PIN), 0,1023, 255, -255) ;          
   int16_t yAxis = map(analogRead(YAXIS_PIN), 0,1023, 255, -255) ;
   
-  snprintf(msg, sizeof(msg), "%c%5.5s%c% .10d  ", role, "JOY_X", 'd', xAxis);
-  delay(5);
-  RFduinoGZLL.sendToHost((const char*)msg, MSG_LEN-1);      // don't bother sending the NULL byte at the end
-  snprintf(msg, sizeof(msg), "%c%5.5s%c% .10d  ", role, "JOY_Y", 'd', yAxis);
-  delay(5);
-  RFduinoGZLL.sendToHost((const char*)msg, MSG_LEN-1);      // don't bother sending the NULL byte at the end
-  snprintf(msg, sizeof(msg), "%c%5.5s%c% .10d  ", role, "JOYB1", 'd', buttonPressed);
-  delay(5);
-  RFduinoGZLL.sendToHost((const char*)msg, MSG_LEN-1);      // don't bother sending the NULL byte at the end
-
-  Serial.write((uint8_t*)msg, MSG_LEN);
+  snprintf(msg, sizeof(msg), "%c%5.5s%c%c%c%c%c%c", role, "JOY01", highByte(xAxis), lowByte(xAxis), highByte(yAxis), lowByte(yAxis), highByte(buttonPressed), lowByte(buttonPressed));
+  RFduinoGZLL.sendToHost((const char*)msg, 12);      
+  Serial.write((uint8_t*)msg, 12);
   Serial.println();
-
   delay(50);
 }
 

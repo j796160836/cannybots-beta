@@ -10,6 +10,7 @@
 // Version:   1.1  -  15.08.2014  -  Tidied naming                  (wayne@cannybots.com)
 // Version:   1.2  -  16.08.2014  -  Added sending serial messages  (wayne@cannybots.com)
 // Version:   1.3  -  16.08.2014  -  Added sending/receving key/value pairs  (wayne@cannybots.com)
+// Version:   1.4  -  17.08.2014  -  Use binary encoding for message variables
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -355,25 +356,30 @@ void sendSensorReadings() {
 // Helper macro(s)
 #define variableNameMatches(a,b) (strncmp(a,b,5)==0)
 
-void updateVariable(const char* name, const char* data) {
+// read in the serial data, return number of bytes consumed.
+int updateVariable(const char* name) {
 
-  if (variableNameMatches(name, "JOY_X")) {
-    xAxisValue = readInt(data);
-  } else if (variableNameMatches(name, "JOY_Y")) {
-    yAxisValue = readInt(data);
-  } else if (variableNameMatches(name, "JOYB1")) {
-    buttonPressed = readBool(data);
+  if (variableNameMatches(name, "JOY01")) {
+    xAxisValue    = readInt();
+    yAxisValue    = readInt();
+    buttonPressed = readInt();
+    return 6;
   } else if (variableNameMatches(name, "PID_P")) {
-    Kp = readInt(data);
+    Kp = readInt();
+    return 2;
   } else if (variableNameMatches(name, "PID_D")) {
-    Kd = readInt(data);
+    Kd = readInt();
+    return 2;
   } else if (variableNameMatches(name, "GETCF")) {
     sendConfig = true;
+    return 0;
   }else if (variableNameMatches(name, "SNDIR")) {
-    sendIR = readInt(data);;
+    sendIR = readInt();
+    return 2;
   } else {  
     // unrecognised variable name, ignore.
   }
+  return 0;
 }
 
 // Logic that has been requested by the joypad/phone, trigger by settings a flag variable in 'updateVariable'
