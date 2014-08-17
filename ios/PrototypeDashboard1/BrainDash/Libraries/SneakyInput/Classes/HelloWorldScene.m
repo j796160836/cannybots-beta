@@ -81,15 +81,25 @@ int throttle = 0;
 -(void)keepAlive:(float)delta {
 }
 
+#define lowByte(v)   ((unsigned char) (v))
+#define highByte(v)  ((unsigned char) (((unsigned int) (v)) >> 8))
+
+
 -(void)tick:(float)delta {
     dir      = 255*leftJoystick.velocity.x;
     throttle = 255*leftJoystick.velocity.y;
     // deadzone check
     dir      =      abs(dir) < 10  ? 0 : dir;
     throttle = abs(throttle) < 10  ? 0 : throttle;
-    CannybotsController* cb = [CannybotsController sharedInstance];
-    [cb writeInt:dir forVariable:@"JOY_X"];
-    [cb writeInt:throttle forVariable:@"JOY_Y"];
+   // CannybotsController* cb = [CannybotsController sharedInstance];
+    char msg[21] = {0};
+    snprintf(msg, sizeof(msg), "%c%5.5s%c%c%c%c%c%c", 0, "JOY01", highByte(dir), lowByte(dir), highByte(throttle), lowByte(throttle), highByte(0), lowByte(0));
+    NSData *data = [NSData dataWithBytesNoCopy:msg length:20 freeWhenDone:NO];
+    BrainSpeakBLE*  bsle = [BrainSpeakBLE sharedInstance];
+    [bsle sendData:data];
+    
+    //[cb writeInt:dir forVariable:@"JOY_X"];
+    //[cb writeInt:throttle forVariable:@"JOY_Y"];
 }
 
 @end
