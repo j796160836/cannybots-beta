@@ -108,15 +108,21 @@ void loop() {
   processSerial2Radio();
 }
 
+
+void copyData(char *data, int len) {  
+  // has to be at 6 least bytes:  [ID(1)][VARNAME(5)]
+  if (len >= 6) {
+    memcpy(buffer + 2, data, min(20,len));
+    send = true;
+  }
+}
+
+
 void RFduinoGZLL_onReceive(device_t device, int rssi, char *data, int len)
 {
   gzllConnected = true;
   gzllConnectionTimeout = timeNow + GZLL_CONNECTION_TIMEOUT;
-
-  if (len >= 3) {
-    memcpy(buffer + 2, data, min(20,len));
-    send = true;
-  }
+  copyData(data, len);
 }
 
 
@@ -129,25 +135,21 @@ void RFduinoBLE_onDisconnect() {
 }
 
 void RFduinoBLE_onReceive(char *data, int len) {
-  if (len >= 3) {
-    memcpy(buffer + 2, data, min(20,len));
-    send = true;
-  }
+  copyData(data, len);
 }
 
 
 // Serial Input
-// We're expecting messages of 20 bytes in the form:  >>IXYB
+// We're expecting messages of 20 bytes in the form:  
 // Where;
 // >> = start marker, as-is
 // 20 bytes of data to forward
-#define SERIAL2RADIO_MESSAGE_SIZE 20
 void processSerial2Radio() {
   if (!bleConnected && !gzllConnected) 
     return;
-  char msg[SERIAL2RADIO_MESSAGE_SIZE];
+  char msg[SERIAL2RADIO_MESSAGE_SIZE]={0};
   static int c = 0, lastChar = 0;
-  while (Serial.available() >= SERIAL2RADIO_MESSAGE_SIZE) {
+  while (Serial.available() >= SERIAL2RADIO_MESSAGE_SIZE+2) {
     lastChar = c;
     c = Serial.read();
     if ( ('>' == c) && ('>' == lastChar) ) {

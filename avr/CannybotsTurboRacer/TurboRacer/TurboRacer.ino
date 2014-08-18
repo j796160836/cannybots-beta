@@ -65,7 +65,7 @@
 // Interval timer constants (milliseconds)
 #define PRINT_DEBUG_INTERVAL      1000
 
-#define IR_SEND_INTERVAL           100
+#define IR_SEND_INTERVAL           50
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 /// Bot Variables
@@ -117,11 +117,10 @@ int speedB = 0;             // viewed from behind motor 'B' is on the right
 
 // Lap Timing
 unsigned long currentStartLapTime = 0;
-int  lapCount=0;
+int  lapCount = 0;
 
 // Requested actions state
 
-bool sendConfig = false;
 bool sendIR     = false;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -151,7 +150,6 @@ void loop() {
   timeNow = millis();
 
   readSerial();
-  perfromRequestedActions();
   readIRSensors();
   updateLineFollowingStatus();
 
@@ -219,8 +217,14 @@ void joypadManualControlMode() {
     if ( abs(yAxisValue) < JOYPAD_AXIS_DEADZONE)
       yAxisValue = 0;
 
-    speedA =  (yAxisValue + xAxisValue) / 4;
-    speedB =  (yAxisValue - xAxisValue) / 4;
+   if ( 1 ) {//yAxisValue > 0) {
+      speedA =  (yAxisValue + xAxisValue) / 4;
+      speedB =  (yAxisValue - xAxisValue) / 4;
+   } else {
+      speedA =  (yAxisValue - xAxisValue) / 4;
+      speedB =  (yAxisValue + xAxisValue) / 4;
+   }
+
   }
 }
 
@@ -319,7 +323,7 @@ void lap_started() {
 
 // call on lap complete, updates phone with current lap time & lap count, it then restarts the lap timer and incremetn the laptcount
 void lap_completed() {
-  writeData("LTIME",  timeNow-currentStartLapTime);
+  writeData("LTIME",  timeNow - currentStartLapTime);
   writeData("LAPS", lapCount);
   currentStartLapTime = timeNow;
 }
@@ -343,12 +347,9 @@ void sendSensorReadings() {
   static unsigned long irSendLastTime = millis();
   if ( (timeNow - irSendLastTime) < IR_SEND_INTERVAL) {
     return;
-  } else {
-    irSendLastTime = timeNow;
-  };
-  writeData("IR_1", IRvals[0]);
-  writeData("IR_2", IRvals[1]);
-  writeData("IR_3", IRvals[2]);
+  }
+  irSendLastTime = timeNow;
+  writeData("IRVAL", IRvals[0], IRvals[1], IRvals[2]);
 }
 
 // Receiving variable updates
@@ -371,25 +372,15 @@ int updateVariable(const char* name) {
     Kd = readInt();
     return 2;
   } else if (variableNameMatches(name, "GETCF")) {
-    sendConfig = true;
+    writeData("PID", Kp, Kd);
     return 0;
-  }else if (variableNameMatches(name, "SNDIR")) {
+  } else if (variableNameMatches(name, "SNDIR")) {
     sendIR = readInt();
     return 2;
-  } else {  
+  } else {
     // unrecognised variable name, ignore.
   }
   return 0;
 }
 
-// Logic that has been requested by the joypad/phone, trigger by settings a flag variable in 'updateVariable'
-void perfromRequestedActions() {
-  
-   if (sendConfig) {
-      writeData("PID_P", Kp);
-      delay (150);
-      writeData("PID_D", Kd);
-      sendConfig=false;
-   } 
-}
 

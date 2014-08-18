@@ -14,10 +14,10 @@
 
 #include <RFduinoGZLL.h>
 
-#define XAXIS_PIN 2
-#define YAXIS_PIN 3
-#define BUTTON_PIN 4
-#define MSG_LEN 21
+#define XAXIS_PIN    2
+#define YAXIS_PIN    3
+#define BUTTON_PIN   4
+#define MSG_LEN     21
 
 device_t role = DEVICE0;
 

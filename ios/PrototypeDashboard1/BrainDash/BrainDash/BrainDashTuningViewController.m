@@ -59,11 +59,8 @@
 
 
 - (void) viewDidAppear:(BOOL)animated {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateVariable:) name:@"IR_1"  object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateVariable:) name:@"IR_2"  object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateVariable:) name:@"IR_3"  object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateVariable:) name:@"PID_P" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateVariable:) name:@"PID_D" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateVariable:) name:@"IRVAL"  object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateVariable:) name:@"PID" object:nil];
     CannybotsController* cb = [CannybotsController sharedInstance];
     [cb writeInt:0 forVariable:@"GETCF"];
     [cb writeInt:1 forVariable:@"SNDIR"];
@@ -71,18 +68,26 @@
 }
 
 -(void)updateVariable:(NSNotification *)notification {
-    NSString* name = [notification name];
-    NSNumber* val  = [notification object];
-    if ([name isEqualToString:@"IR_1"]) {
-        _IRReading1.text = [val stringValue];
-    } else if ([name isEqualToString:@"IR_2"]) {
-        _IRReading2.text = [val stringValue];
-    } else if ([name isEqualToString:@"IR_3"]) {
-        _IRReading3.text = [val stringValue];
-    } else if ([name isEqualToString:@"PID_P"]) {
-        _pTextField.text = [val stringValue];
-    } else if ([name isEqualToString:@"PID_D"]) {
-        _dTExtField.text = [val stringValue];
+    NSString* name    = [notification name];
+    NSData* data      = [notification object];
+    const char *bytes = [data bytes];
+    
+    //NSString* hexString = [data hexRepresentationWithSpaces:YES];
+    //NSLog(@"UpVarRcv: %@", hexString);
+    
+    if ([name isEqualToString:@"IRVAL"]) {
+        _IRReading1.text = [NSString stringWithFormat:@"%d", CFSwapInt16BigToHost(( (int16_t*) bytes)[0]) ];
+        _IRReading2.text = [NSString stringWithFormat:@"%d", CFSwapInt16BigToHost(( (int16_t*) bytes)[1]) ];
+        _IRReading3.text = [NSString stringWithFormat:@"%d", CFSwapInt16BigToHost(( (int16_t*) bytes)[2]) ];
+    } else if ([name isEqualToString:@"PID"]) {
+        _pTextField.text = [NSString stringWithFormat:@"%d", CFSwapInt16BigToHost(( (int16_t*) bytes)[0]) ];;
+        _dTExtField.text = [NSString stringWithFormat:@"%d", CFSwapInt16BigToHost(( (int16_t*) bytes)[1]) ];;
+        _pStepper.value = [[_pTextField text] intValue];
+        _dStepper.value = [[_dTExtField text] intValue];
+
+        
+    } else {
+        NSLog(@"Un recognised variable: %@", name);
     }
 }
 
@@ -90,11 +95,8 @@
     CannybotsController* cb = [CannybotsController sharedInstance];
     [cb writeInt:0 forVariable:@"SNDIR"];
 
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"IR_1" object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"IR_2" object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"IR_3" object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"PID_P" object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"PID_D" object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"IRVAL" object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"PID" object:nil];
 }
 
 -(IBAction)textFieldReturn:(id)sender

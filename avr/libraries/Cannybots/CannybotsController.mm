@@ -268,27 +268,24 @@
 //////////////////////////////////////////////////////////////////////////////////////
 // Simple Key/Value API
 
-
+typedef __attribute__((__packed__)) struct {
+    uint8_t botId;
+    char    varName[5];
+} msgHeader_t;
 
 - (void) didReceiveData:(NSData *)data {
     @synchronized(self) {
         long      len = [data length];
         uint8_t * buf = (uint8_t*)[data bytes];
         
-        NSString* hexString = [data hexRepresentationWithSpaces:YES];
-        NSLog(@"Received: %@", hexString);
+        //NSString* hexString = [data hexRepresentationWithSpaces:YES];
+        //NSLog(@"Received: %@", hexString);
         
         if (len >=20) {
             uint8_t botId   = buf[0];
-            char    varType = buf[6];
-            
             char    varName[5+1] = {0};
-            char    varVal[12+1] = {0};
             memcpy(varName, &buf[1] , 5);
             varName[5]=0;
-            
-            memcpy(varVal, &buf[7] , 12);
-            varVal[12]=0;
             
             NSString* varNameObj = [[NSString stringWithUTF8String:varName]  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
             
@@ -296,36 +293,18 @@
                 NSLog(@"Couldn't parse name   : %s", varName);
                 return;
             }
-            
-            NSString* varValObj  = [NSString stringWithUTF8String:varVal];
-
-
-            NSObject* varObj = nil;
-            switch (varType) {
-                default:
-                    NSNumberFormatter * f = [[NSNumberFormatter alloc] init];
-                    [f setNumberStyle:NSNumberFormatterDecimalStyle];
-                    varObj = [f numberFromString:varValObj];
-                    break;
-            }
-            if (varObj) {
-                //NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
-                //[dictionary setObject:varObj forKey:varNameObj];
-                //[[NSNotificationCenter defaultCenter] postNotificationName:@"CBDataUpdate" object:dictionary];
-                //NSLog(@"Post notification: '%s'", varNameObj);
-
-                [[NSNotificationCenter defaultCenter] postNotificationName:varNameObj object:varObj];
-            } else {
-                NSLog(@"Couldn't parse Val   : %s", varVal);
-            }
+            NSData* varData =[ NSData dataWithBytes:&buf[6] length:14];
+            // TODO: pass bot id
+            [[NSNotificationCenter defaultCenter] postNotificationName:varNameObj object:varData];
         }
     }
 }
 
-- (void) writeInt:(int16_t)value forVariable:(NSString*)varName {
+- (void) writeInt:(int16_t)p1 forVariable:(NSString*)varName {
     char msg[21] = {0};
-    snprintf(msg, sizeof(msg), "%c%5.5s%c% .10d  ", 0, [varName UTF8String], 'd', value);
-    NSData *data = [NSData dataWithBytesNoCopy:msg length:20 freeWhenDone:NO];
+    snprintf(msg, sizeof(msg), "%c%5.5s%c%c", 0, [varName UTF8String], highByte(p1), lowByte(p1));
+    
+    NSData *data = [NSData dataWithBytesNoCopy:msg length:sizeof(msg)-1 freeWhenDone:NO];
     [bsle sendData:data];
 }
 

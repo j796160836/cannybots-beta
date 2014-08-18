@@ -81,9 +81,6 @@ int throttle = 0;
 -(void)keepAlive:(float)delta {
 }
 
-#define lowByte(v)   ((unsigned char) (v))
-#define highByte(v)  ((unsigned char) (((unsigned int) (v)) >> 8))
-
 
 -(void)tick:(float)delta {
     dir      = 255*leftJoystick.velocity.x;

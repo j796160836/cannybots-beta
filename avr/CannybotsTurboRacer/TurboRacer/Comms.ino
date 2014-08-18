@@ -53,18 +53,31 @@ void readSerial() {
 // Reading data
 
 int readInt() {
-  return word(Serial1.read(), Serial1.read());
+  int v1 = Serial1.read();
+  int v2 = Serial1.read();   
+  return  (v1<<8) | (v2 & 0xFF);
 }
-
-
 
 // Writing data
 
-void writeData(const char* name, int16_t value) {
-  char msg[20 + 1] = {0};
-  snprintf(msg, sizeof(msg), ">>%c%5.5s%c% .10d  ", BOT_ID, name, 'd', value);
-  //Serial.write(msg, sizeof(msg));
-  //Serial.println();
-  Serial1.write(msg, sizeof(msg));
+#define SERIAL_MESSAGE_BUFFER_SIZE 23             // 20 byte paload + 2 byte start marker (>>) + 1 null terminator used during string creation (not sent over serial)
+
+void writeData(const char* name, int16_t p1) {
+  char msg[SERIAL_MESSAGE_BUFFER_SIZE] = {0}; 
+  snprintf(msg, sizeof(msg), ">>%c%5.5s%c%c", BOT_ID, name, highByte(p1), lowByte(p1));
+  Serial1.write(msg,sizeof(msg)-1);
 }
+
+void writeData(const char* name, int16_t p1,  int16_t p2) {
+  char msg[SERIAL_MESSAGE_BUFFER_SIZE] = {0};
+  snprintf(msg, sizeof(msg), ">>%c%5.5s%c%c%c%c", BOT_ID, name, highByte(p1), lowByte(p1), highByte(p1), lowByte(p2));
+  Serial1.write(msg,sizeof(msg)-1);
+}
+
+void writeData(const char* name, int16_t p1,  int16_t p2,  int16_t p3) {
+  char msg[SERIAL_MESSAGE_BUFFER_SIZE] = {0};
+  snprintf(msg, sizeof(msg), ">>%c%5.5s%c%c%c%c%c%c", BOT_ID, name, highByte(p1), lowByte(p1), highByte(p1), lowByte(p2), highByte(p3), lowByte(p3));
+  Serial1.write(msg,sizeof(msg)-1);
+}
+
 
