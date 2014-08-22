@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// CannyBots LineFollowing Robot
+// Cannybots LineFollowing Robot
 //
 // Authors:  Wayne Keenan & Anish Mampetta
 //
 // License: http://opensource.org/licenses/MIT
 //
-// Version:   1.0  -  14.08.2014  -  Inital Version  (wayne@cannybots.com, mampetta@cannybots.com)
+// Version:   1.0  -  14.08.2014  -  Inital Version  (Wayne Keenan & Anish Mampetta)
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -35,25 +35,21 @@
 #define IR1_BIAS                     0
 #define IR2_BIAS                     0
 #define IR3_BIAS                     0
-#define IR_WHITE_THRESHOLD         700
+#define IR_WHITE_THRESHOLD         750
 
 #define MOTOR_MAX_SPEED            255
 #define MOTOR_CRUISE_SPEED         120
 
 #define OFF_LINE_MAX_TIME            0
 
-#define PID_P                        5
-#define PID_D                        1
-#define PID_SAMPLE_TIME              0
-#define PID_SCALE                 10.0
+#define PID_P 5  //PID gains set below in the code.. 
+#define PID_D 1
+#define PID_SAMPLE_TIME              3
 
-#define JOYPAD_ID                    0
-#define JOYPAD_AXIS_DEADZONE        20
-#define JOYPAD_CONNECTION_TIMEOUT  200
 
-#define JOYPAD_LINEFOLLOW_MODE_SCALE 3
-#define JOYPAD_MANUAL_MODE_SCALE     4
-
+#define JOYPAD_ID 0
+#define JOYPAD_AXIS_DEADZONE 10
+#define JOYPAD_CONNECTION_TIMEOUT 10
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 /// Bot Variables
@@ -72,11 +68,14 @@ bool     buttonPressed = 0;              // 0 = not pressed, 1 = pressed
 ////// Process / Algorithms
 
 // PID
-int Kp         = PID_P;            
-int Kd         = PID_D;
-int P_error    = 0;
-int D_error    = 0;
-int error      = 0;
+int Kp = PID_P;            
+int Ki = 0;
+int Kd = PID_D;
+int P_error = 0;
+int I_error = 0;
+int I_val = 0;
+int D_error = 0;
+int error = 0;
 int error_last = 0;                                 // to calculate D_error = error - error_last
 int correction = 0;
 
@@ -129,6 +128,7 @@ void setup() {
 
 
 void loop() {
+  
   timeNow = millis();
 
   readSerial();
@@ -142,7 +142,7 @@ void loop() {
      // in manual mode
     joypadManualControlMode();
   }
-  motorSpeed(speedA*-1, speedB*1);
+  motorSpeed(speedA, speedB);
   printVals();
 }
 
@@ -156,14 +156,15 @@ void calculatePID() {
     return;
   }
   pidLastTime = timeNow;
-
   // process IR readings via PID
-  error_last = error;                                   // store previous error before new one is caluclated
-  error = IRvals[0] - IRvals[2];                        
-
-  P_error = error * Kp / PID_SCALE;                          // calculate proportional term
-  D_error = (error - error_last) * Kd / PID_SCALE;           // calculate differential term
-  correction = P_error + D_error;
+  Kp = 60; Ki = 0; Kd =200;
+  error_last = error; // store previous error value before new one is caluclated
+  error = IRvals[0] - IRvals[2];
+  P_error = error * Kp /100.0; // calculate proportional term
+  I_error = constrain (I_error + error,-1000,1000); // integral term
+  I_val = I_error*Ki/100.0;
+  D_error = (error - error_last) * Kd /100.0;           // calculate differential term
+  correction = P_error + D_error + I_val;
   speedA = cruiseSpeed + correction;
   speedB = cruiseSpeed - correction;
 }
@@ -175,8 +176,8 @@ void calculatePID() {
 // This is called when the bot is on the line
 // speedA and speedB will have already been set by pid_calculate() before this is run
 void  joypadLineFollowingControlMode() {
-  speedA = speedA + (yAxisValue / JOYPAD_LINEFOLLOW_MODE_SCALE); //superpose yAxis with PID output speed
-  speedB = speedB + (yAxisValue / JOYPAD_LINEFOLLOW_MODE_SCALE);
+  speedA = speedA + ((yAxisValue - (xAxisValue/2))/2.0); //superpose yAxis with PID output speed
+  speedB = speedB + ((yAxisValue + (xAxisValue/2))/2.0);
 }
 
 // This is called when the bot is in manual mode.
@@ -187,7 +188,7 @@ void joypadManualControlMode() {
   if ( (timeNow - joypadLastTime) > JOYPAD_CONNECTION_TIMEOUT) {
     // no command has been received in the last X millis, err on the side of caution and stop!
     speedA = 0;
-    speedB =  0;
+    speedB = 0;
     xAxisValue = 0;
     yAxisValue = 0;
   } else {
@@ -197,8 +198,9 @@ void joypadManualControlMode() {
     if ( abs(yAxisValue) < JOYPAD_AXIS_DEADZONE)
       yAxisValue = 0;
 
-    speedA =  (yAxisValue + xAxisValue) / JOYPAD_MANUAL_MODE_SCALE;
-    speedB =  (yAxisValue - xAxisValue) / JOYPAD_MANUAL_MODE_SCALE;
+    speedA =  (yAxisValue - (xAxisValue/2))/3.0;
+    speedB =  (yAxisValue + (xAxisValue/2))/3.0;
+ 
   }
 }
 
@@ -210,7 +212,7 @@ void joypadManualControlMode() {
 void readIRSensors() {
   IRvals[0] = analogRead(IR1_PIN) + IR1_BIAS; //left looking from behind
   IRvals[1] = analogRead(IR2_PIN) + IR2_BIAS; //centre
-  IRvals[2] = analogRead(IR3_PIN) + IR3_BIAS; //right
+  IRvals[2] = analogRead(IR3_PIN) + IR3_BIAS; //right  
 }
 
 
@@ -255,10 +257,10 @@ void updateLineFollowingStatus() {
 
 void printVals() {
   static unsigned long lastPrint = millis();
-  if (millis() - lastPrint < 100) {
+  if (millis() - lastPrint < 200) {
     return;
   }
-  lastPrint = timeNow;
+  lastPrint = millis();
 
   Serial.print(timeNow);
   Serial.print(":IR=(");
@@ -267,16 +269,23 @@ void printVals() {
   Serial.print(IRvals[1], DEC);
   Serial.print(",");
   Serial.print(IRvals[2], DEC);
+  Serial.print("),errors =(");
+  Serial.print(P_error, DEC);
+  Serial.print(",");
+  Serial.print(D_error, DEC);
+  Serial.print(",");
+  Serial.print(I_val, DEC);  
+  Serial.print(",");
+  Serial.print("),Speed(A,B)=(");
+  Serial.print(speedA, DEC);
+  Serial.print(",");
+  Serial.print(speedB, DEC);
   Serial.print("),Joy(X,Y,Button)=(");
   Serial.print(xAxisValue, DEC);
   Serial.print(",");
   Serial.print(yAxisValue, DEC);
   Serial.print(",");
   Serial.print(buttonPressed, DEC);
-  Serial.print("),Speed(A,B)=(");
-  Serial.print(speedA, DEC);
-  Serial.print(",");
-  Serial.print(speedB, DEC);
   Serial.println(")");
 }
 
