@@ -29,6 +29,7 @@ typedef void (^cb_bridged_callback_string)(const char*);
 
 + (id)sharedInstance;
 
+- (void) writeInt:(int16_t)value forVariable:(NSString*)varName;
 
 
 - (void) callMethod:(cb_id*)cid p1:(int16_t)p1 p2:(int16_t)p2 p3:(int16_t)p3;

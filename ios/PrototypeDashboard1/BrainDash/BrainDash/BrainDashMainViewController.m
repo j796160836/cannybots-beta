@@ -8,9 +8,7 @@
 
 #import "BrainDashMainViewController.h"
 
-#import <CannybotsController.h>
-#import "CannybotsRacerGlu.h"
-
+#import "BrainSpeakBLE.h"
 // add a Project reference to cocos2d-ios.xcodeproj, using the dialog box and not the drag drop!! (xcode bug)
 // (rstart xcode helps)
 // modify your Build Settings. Set Always Search User Paths to YES, and add the Cocos2D source directory to the User Header Search Paths (as a recursive path)
@@ -24,12 +22,15 @@
 
 
 @interface BrainDashMainViewController () {
-    CannybotsController* cb;
+    BrainSpeakBLE* bsle;
     CCNode* myGame;
     NSTimer* lapTimer;
     double lapTimerStartTime;
     bool joystickMode;
     int leftMotorSpeed, rightMotorSpeed;
+    
+    BOOL canRotateToAllOrientations;
+
 }
 @end
 
@@ -89,7 +90,7 @@
         [director runWithScene:scene];
     
     
-    cb = [CannybotsController sharedInstance];
+    //cb = [CannybotsController sharedInstance];
 
     joystickMode = true;
     
@@ -111,7 +112,7 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
-    cb=nil;
+    //cb=nil;
 }
 
 #pragma mark - Flipside View
@@ -138,10 +139,6 @@
     [[CCDirector sharedDirector] setDelegate:nil];
 }
 
-
--(BOOL)shouldAutorotateToInterfaceOrientation: (UIInterfaceOrientation)interfaceOrientation {
-    return UIInterfaceOrientationIsLandscape(interfaceOrientation);
-}
 
 
 // Gesture recognisers
@@ -219,12 +216,12 @@
 
 - (IBAction)leftSpeedChanged:(UISlider*)sender {
     leftMotorSpeed=(int)(sender.value);
-    [cb callMethod:&RACER_JOYAXIS p1:leftMotorSpeed p2:rightMotorSpeed];
+    //[cb callMethod:&RACER_JOYAXIS p1:leftMotorSpeed p2:rightMotorSpeed];
     
 }
 - (IBAction)rightSpeedChanged:(UISlider*)sender {
     rightMotorSpeed=(int)(sender.value);
-    [cb callMethod:&RACER_JOYAXIS p1:leftMotorSpeed p2:rightMotorSpeed];
+    //[cb callMethod:&RACER_JOYAXIS p1:leftMotorSpeed p2:rightMotorSpeed];
 }
 
 
@@ -236,17 +233,17 @@
         _leftSpeedSlider.hidden=true;
         _rightSpeedSlider.hidden=true;
         //[cb callMethod:&RACER_LINEFOLLOWING_MODE p1:1];
-        [cb callMethod:&RACER_TANKCONTROL_MODE p1:0 ];
+        //[cb callMethod:&RACER_TANKCONTROL_MODE p1:0 ];
 
     } else if ( 1 == sender.selectedSegmentIndex) {
-        [cb callMethod:&RACER_LINEFOLLOWING_MODE p1:0 ];
+        //[cb callMethod:&RACER_LINEFOLLOWING_MODE p1:0 ];
     } else if ( 2 == sender.selectedSegmentIndex) {
         joystickMode=false;
         _joypadView.hidden=true;
         _leftSpeedSlider.hidden=false;
         _rightSpeedSlider.hidden=false;
         
-        [cb callMethod:&RACER_TANKCONTROL_MODE p1:1 ];
+        //[cb callMethod:&RACER_TANKCONTROL_MODE p1:1 ];
     }
     
 }
@@ -297,8 +294,10 @@
 }
 
 
-- (void) viewDidAppear:(BOOL)animated {
+- (void) viewDidAppearOLD:(BOOL)animated {
     NSLog(@"viewDidAppear");
+    
+/*
     [cb registerHandler:&RACER_LINEFOLLOWING_MODE withBlockFor_INT16_3: ^(int16_t p1, int16_t p2, int16_t p3)
     {
         if (joystickMode) {
@@ -328,13 +327,52 @@
      {
          [self lapStop:p1];
      }];
-    
+    */
     [self reloadScene];
 }
 
 
 - (void) viewWillDisappear:(BOOL)animated {
-    [cb deregisterHandler:&RACER_LINEFOLLOWING_MODE];
+    //[cb deregisterHandler:&RACER_LINEFOLLOWING_MODE];
+}
+
+- (void) viewWillAppear:(BOOL)animated
+{
+	[super viewWillAppear:animated];
+    
+	//	We're going onto the screen, disable auto rotations
+	canRotateToAllOrientations = NO;
+}
+
+- (void) viewDidAppear:(BOOL)animated
+{
+	[super viewDidAppear:animated];
+    
+	//	We're now on the screen, reenable auto rotations
+	canRotateToAllOrientations = YES;
+}
+
+- (BOOL) shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
+{
+	//	(iOS 5)
+	//	If we can auto rotate then only all orientations except upside down
+	if(canRotateToAllOrientations)
+		return (toInterfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
+	//	Otherwise only allow our forced orienation (see below)
+	return (toInterfaceOrientation == self.preferredInterfaceOrientationForPresentation);
+}
+
+- (BOOL) shouldAutorotate
+{
+	//	(iOS 6)
+	//	Only auto rotate if we're on the screen (see above)
+	return canRotateToAllOrientations;
+}
+- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation
+{
+	//	(iOS 6)
+	//	Prefer (force) landscape
+	return UIInterfaceOrientationLandscapeRight;
 }
 
 

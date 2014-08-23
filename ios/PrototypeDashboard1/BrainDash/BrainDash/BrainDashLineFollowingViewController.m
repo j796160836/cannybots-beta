@@ -161,6 +161,8 @@ cb_app_config cbr_settings;
     NSLog(@"Speed = %d", speed);
 }
 
-
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+    return YES;
+}
 
 @end

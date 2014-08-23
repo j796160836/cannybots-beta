@@ -40,15 +40,15 @@
         
         bsle     = [BrainSpeakBLE sharedInstance];
         bsle.cbdelegate = self;
-
+        
         
         cb->begin();
-
+        
         // TODO: re-instate this when we can push/pop handlers using the API
         /*[self registerHandler:&_CB_SYS_LOG withBlockFor_STRING:^(const char* p1){
-            NSLog(@"CB_REMOTE_DBG:%s", p1);
-        }
-        
+         NSLog(@"CB_REMOTE_DBG:%s", p1);
+         }
+         
          ];*/
         
         
@@ -72,8 +72,8 @@
                     NSLog(@"Unrecognised Sys call: %d, %d,%d", p1, p2, p3);
             }
         }
-        ];
-
+         ];
+        
         //            NSLog(@"CB_REMOTE_DBG:%s", p1);
         
     }
@@ -182,7 +182,7 @@
 - (void) setConfigParameter_BOOL:(cb_nv_id*)cid p1:(uint8_t)p1 {
     
     [self callMethod:&_CB_SYS_CALL p1:_CB_SYSCALL_SET_CFG_PARAM p2:cid->cid  p3:p1];
-
+    
     
 }
 
@@ -214,62 +214,94 @@
 
 
 
-- (void) didReceiveData:(NSData *)data {
-        @synchronized(self) {
-    //long      len = [data length];
-    uint8_t * buf = (uint8_t*)[data bytes];
-    
-    NSString* hexString = [data hexRepresentationWithSpaces:YES];
-    NSLog(@"Received: %@", hexString);
-    
-    uint8_t commandId = buf[CB_MSG_OFFSET_CMD];
-    cb_descriptor* desc = cb->getDescriptorForCommand(commandId);
-    //NSLog(@"cmd= %d", commandId);
-    
-    if (desc && CB_CMD_IS_METHOD(commandId)) {
-        //NSLog(@"Method=%s", desc->cid_t.cidMT->name);
+- (void) didReceiveDataCBLIB:(NSData *)data {
+    @synchronized(self) {
+        //long      len = [data length];
+        uint8_t * buf = (uint8_t*)[data bytes];
         
-        if (desc->type == Cannybots::CB_INT16_3) {
-            //NSLog(@"is CB_INT16_3");
-            //NSLog(@"block @ %x", desc->data);
-            if (desc->data) {
-                ((__bridge cb_bridged_callback_int16_3)desc->data)( mk16bit( buf[CB_MSG_OFFSET_DATA+1],buf[CB_MSG_OFFSET_DATA+0]),
-                                                                   mk16bit( buf[CB_MSG_OFFSET_DATA+3],buf[CB_MSG_OFFSET_DATA+2]),
-                                                                   mk16bit( buf[CB_MSG_OFFSET_DATA+5],buf[CB_MSG_OFFSET_DATA+4]));
+        NSString* hexString = [data hexRepresentationWithSpaces:YES];
+        NSLog(@"Received: %@", hexString);
+        
+        uint8_t commandId = buf[CB_MSG_OFFSET_CMD];
+        cb_descriptor* desc = cb->getDescriptorForCommand(commandId);
+        //NSLog(@"cmd= %d", commandId);
+        
+        if (desc && CB_CMD_IS_METHOD(commandId)) {
+            //NSLog(@"Method=%s", desc->cid_t.cidMT->name);
+            
+            if (desc->type == Cannybots::CB_INT16_3) {
+                //NSLog(@"is CB_INT16_3");
+                //NSLog(@"block @ %x", desc->data);
+                if (desc->data) {
+                    ((__bridge cb_bridged_callback_int16_3)desc->data)( mk16bit( buf[CB_MSG_OFFSET_DATA+1],buf[CB_MSG_OFFSET_DATA+0]),
+                                                                       mk16bit( buf[CB_MSG_OFFSET_DATA+3],buf[CB_MSG_OFFSET_DATA+2]),
+                                                                       mk16bit( buf[CB_MSG_OFFSET_DATA+5],buf[CB_MSG_OFFSET_DATA+4]));
+                }
+            } else if (desc->type == Cannybots::CB_INT16_2) {
+                //NSLog(@"is CB_INT16_2");
+                //NSLog(@"block @ %x", desc.data);
+                if (desc->data) {
+                    ((__bridge cb_bridged_callback_int16_2)desc->data)( mk16bit( buf[CB_MSG_OFFSET_DATA+1],buf[CB_MSG_OFFSET_DATA+0]),
+                                                                       mk16bit( buf[CB_MSG_OFFSET_DATA+3],buf[CB_MSG_OFFSET_DATA+2]));
+                }
+            } else if (desc->type == Cannybots::CB_INT16_1) {
+                //NSLog(@"is CB_INT16_2");
+                //NSLog(@"block @ %x", desc.data);
+                if (desc->data) {
+                    ((__bridge cb_bridged_callback_int16_1)desc->data)( mk16bit( buf[CB_MSG_OFFSET_DATA+1],buf[CB_MSG_OFFSET_DATA+0]));
+                }
+            } else if (desc->type == Cannybots::CB_STRING) {
+                //NSLog(@"is CB_STRING");
+                //NSLog(@"block @ %x", desc.data);
+                if (desc->data) {
+                    ((__bridge cb_bridged_callback_string)desc->data)( (const char*) &buf[CB_MSG_OFFSET_DATA+0]);
+                }
+            } else {
+                NSLog(@"ERROR: unrecognised desc.type in didReceiveData (%d)", commandId);
             }
-        } else if (desc->type == Cannybots::CB_INT16_2) {
-            //NSLog(@"is CB_INT16_2");
-            //NSLog(@"block @ %x", desc.data);
-            if (desc->data) {
-                ((__bridge cb_bridged_callback_int16_2)desc->data)( mk16bit( buf[CB_MSG_OFFSET_DATA+1],buf[CB_MSG_OFFSET_DATA+0]),
-                                                                   mk16bit( buf[CB_MSG_OFFSET_DATA+3],buf[CB_MSG_OFFSET_DATA+2]));
-            }
-        } else if (desc->type == Cannybots::CB_INT16_1) {
-            //NSLog(@"is CB_INT16_2");
-            //NSLog(@"block @ %x", desc.data);
-            if (desc->data) {
-                ((__bridge cb_bridged_callback_int16_1)desc->data)( mk16bit( buf[CB_MSG_OFFSET_DATA+1],buf[CB_MSG_OFFSET_DATA+0]));
-            }
-        } else if (desc->type == Cannybots::CB_STRING) {
-            //NSLog(@"is CB_STRING");
-            //NSLog(@"block @ %x", desc.data);
-            if (desc->data) {
-                ((__bridge cb_bridged_callback_string)desc->data)( (const char*) &buf[CB_MSG_OFFSET_DATA+0]);
-            }
-        } else {
-            NSLog(@"ERROR: unrecognised desc.type in didReceiveData (%d)", commandId);
+            
         }
-        
     }
-        }
 }
 
 
 //////////////////////////////////////////////////////////////////////////////////////
-// Bluetooth
+// Simple Key/Value API
 
 
+- (void) didReceiveData:(NSData *)data {
+    @synchronized(self) {
+        long      len = [data length];
+        uint8_t * buf = (uint8_t*)[data bytes];
+        
+        //NSString* hexString = [data hexRepresentationWithSpaces:YES];
+        //NSLog(@"Received: %@", hexString);
+        
+        if (len >=20) {
+            //uint8_t botId   = buf[0];
+            char    varName[5+1] = {0};
+            memcpy(varName, &buf[1] , 5);
+            varName[5]=0;
+            
+            NSString* varNameObj = [[NSString stringWithUTF8String:varName]  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+            
+            if (!varNameObj) {
+                NSLog(@"Couldn't parse name   : %s", varName);
+                return;
+            }
+            NSData* varData =[ NSData dataWithBytes:&buf[6] length:14];
+            // TODO: pass bot id
+            [[NSNotificationCenter defaultCenter] postNotificationName:varNameObj object:varData];
+        }
+    }
+}
 
-
+- (void) writeInt:(int16_t)p1 forVariable:(NSString*)varName {
+    char msg[21] = {0};
+    snprintf(msg, sizeof(msg), "%c%5.5s%c%c",1, [varName UTF8String], highByte(p1), lowByte(p1));
+    
+    NSData *data = [NSData dataWithBytesNoCopy:msg length:sizeof(msg)-1 freeWhenDone:NO];
+    [bsle sendData:data];
+}
 
 @end

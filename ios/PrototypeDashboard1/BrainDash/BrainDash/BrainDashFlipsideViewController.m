@@ -81,6 +81,9 @@
 - (IBAction)soundHorn:(id)sender{
 }
 
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+    return YES;
+}
 
 
 @end

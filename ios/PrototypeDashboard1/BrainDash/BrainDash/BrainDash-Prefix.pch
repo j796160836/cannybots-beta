@@ -14,3 +14,12 @@
     #import <UIKit/UIKit.h>
     #import <Foundation/Foundation.h>
 #endif
+
+
+
+
+#define lowByte(v)   ((unsigned char) (v))
+#define highByte(v)  ((unsigned char) (((unsigned int) (v)) >> 8))
+
+
+

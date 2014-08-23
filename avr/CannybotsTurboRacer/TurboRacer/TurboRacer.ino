@@ -24,7 +24,7 @@
 #define MOTOR_A1_PIN                 3
 #define MOTOR_A2_PIN                 5
 #define MOTOR_B1_PIN                 6
-#define MOTOR_B2_PIN                 9 
+#define MOTOR_B2_PIN                 9
 #define MOTOR_MODE_PIN               2
 
 // Flashy Lights
@@ -35,24 +35,24 @@
 #define IR1_BIAS                     0
 #define IR2_BIAS                     0
 #define IR3_BIAS                     0
-#define IR_WHITE_THRESHOLD         700
+#define IR_WHITE_THRESHOLD         800
 
 #define MOTOR_MAX_SPEED            255
-#define MOTOR_CRUISE_SPEED         120
+#define MOTOR_CRUISE_SPEED         150
 
-#define OFF_LINE_MAX_TIME            0
+#define OFF_LINE_MAX_TIME          0
 
-#define PID_P                        5
-#define PID_D                        1
-#define PID_SAMPLE_TIME              0
-#define PID_SCALE                 10.0
 
-#define JOYPAD_ID                    1
+#define PID_P                      105
+#define PID_D                      145
+
+#define PID_SCALE                100.0
+#define PID_SAMPLE_TIME              5
+
+#define JOYPAD_ID                    0
 #define JOYPAD_AXIS_DEADZONE        20
-#define JOYPAD_CONNECTION_TIMEOUT  200
+#define JOYPAD_CONNECTION_TIMEOUT  2000
 
-#define JOYPAD_LINEFOLLOW_MODE_SCALE 3
-#define JOYPAD_MANUAL_MODE_SCALE     4
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -72,7 +72,7 @@ bool     buttonPressed = 0;              // 0 = not pressed, 1 = pressed
 ////// Process / Algorithms
 
 // PID
-int Kp         = PID_P;            
+int Kp         = PID_P;
 int Kd         = PID_D;
 int P_error    = 0;
 int D_error    = 0;
@@ -120,7 +120,7 @@ void setup() {
   pinMode(MOTOR_B2_PIN, OUTPUT);
   pinMode(MOTOR_MODE_PIN, OUTPUT);
   digitalWrite(MOTOR_MODE_PIN, HIGH);   //to set controller to Phase/Enable mode
-  motorSpeed(0,0);
+  motorSpeed(0, 0);
 
   // Headlights...
   pinMode(STATUS_LED_PIN, OUTPUT);
@@ -129,21 +129,44 @@ void setup() {
 
 
 void loop() {
+  //Serial.println(millis()-timeNow); // loop time delta
   timeNow = millis();
-
   readSerial();
   readIRSensors();
+  printVals();
   updateLineFollowingStatus();
 
   if (isLineFollowingMode) {
     calculatePID();
     joypadLineFollowingControlMode();
-  } else {    
-     // in manual mode
+  } else {
+    // in manual mode
+    if (!forceManualMode) {
+      autoFindLine();
+    }
     joypadManualControlMode();
   }
-  motorSpeed(speedA, speedB);
-  printVals();
+  motorSpeed(speedA, -speedB);
+}
+
+#define AUTOFIND_SPEED_DELTA 25
+#define AUTOFIND_DELAY        5
+#define AUTOFIND_MAX_TIME   100
+
+void autoFindLine() {
+  return;
+  if (offTheLineTime > AUTOFIND_MAX_TIME)
+    return;
+
+  // is the left side of the bot on white
+  if ((IRvals[0] <= IR_WHITE_THRESHOLD )) {
+    speedA = speedA + AUTOFIND_SPEED_DELTA;
+    speedB = speedB - AUTOFIND_SPEED_DELTA;
+  } else {
+    speedA = speedA - AUTOFIND_SPEED_DELTA;
+    speedB = speedB + AUTOFIND_SPEED_DELTA;
+  }
+  //delay(AUTOFIND_DELAY);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -151,21 +174,22 @@ void loop() {
 
 void calculatePID() {
   // Calculate PID on a regular time basis
-  if ((timeNow - pidLastTime) < PID_SAMPLE_TIME ) {
+  if ((millis() - pidLastTime) < PID_SAMPLE_TIME ) {
     // return if called too soon
     return;
   }
-  pidLastTime = timeNow;
+
+  pidLastTime = millis();
 
   // process IR readings via PID
   error_last = error;                                   // store previous error before new one is caluclated
-  error = IRvals[0] - IRvals[2];                        
+  error = IRvals[0] - IRvals[2];
 
-  P_error = error * Kp / PID_SCALE;                          // calculate proportional term
-  D_error = (error - error_last) * Kd / PID_SCALE;           // calculate differential term
+  P_error = error * (Kp / PID_SCALE);                          // calculate proportional term
+  D_error = (error - error_last) * (Kd / PID_SCALE);           // calculate differential term
   correction = P_error + D_error;
-  speedA = cruiseSpeed + correction;
-  speedB = cruiseSpeed - correction;
+  speedA = cruiseSpeed - correction;
+  speedB = cruiseSpeed + correction;
 }
 
 
@@ -175,8 +199,8 @@ void calculatePID() {
 // This is called when the bot is on the line
 // speedA and speedB will have already been set by pid_calculate() before this is run
 void  joypadLineFollowingControlMode() {
-  speedA = speedA + (yAxisValue / JOYPAD_LINEFOLLOW_MODE_SCALE); //superpose yAxis with PID output speed
-  speedB = speedB + (yAxisValue / JOYPAD_LINEFOLLOW_MODE_SCALE);
+  speedA = speedA + (yAxisValue / 2) - (xAxisValue / 64); //superpose yAxis with PID output speed
+  speedB = speedB + (yAxisValue / 2) + (xAxisValue / 64);
 }
 
 // This is called when the bot is in manual mode.
@@ -196,9 +220,35 @@ void joypadManualControlMode() {
       xAxisValue = 0;
     if ( abs(yAxisValue) < JOYPAD_AXIS_DEADZONE)
       yAxisValue = 0;
+    int y = yAxisValue;
+    int x = xAxisValue;
 
-    speedA =  (yAxisValue + xAxisValue) / JOYPAD_MANUAL_MODE_SCALE;
-    speedB =  (yAxisValue - xAxisValue) / JOYPAD_MANUAL_MODE_SCALE;
+#define X_DEAD_MIN 64
+#define Y_DEAD_MIN 64
+#define X_MAX      64
+
+    if (y > 0) {
+      if ( y > Y_DEAD_MIN)
+        y = map(y, Y_DEAD_MIN, 255, 0, 255);
+    } else {
+      if ( y < -Y_DEAD_MIN)
+        y = map(y, -Y_DEAD_MIN, -255, 0, -255);
+    }
+
+    if (x > 0) {
+      if ( x > X_DEAD_MIN)
+        x = map(x, X_DEAD_MIN, 255, 0, X_MAX);
+    } else {
+      if ( x < -X_DEAD_MIN)
+        x = map(x, -X_DEAD_MIN, -255, 0, -X_MAX);
+    }
+    // joypad
+    //speedA =  y - x;
+    //speedB =  y + x;
+    // phone
+    
+    speedA =  yAxisValue/2 - xAxisValue/2;
+    speedB =  yAxisValue/2 + xAxisValue/2;
   }
 }
 
@@ -247,7 +297,7 @@ void updateLineFollowingStatus() {
     forceManualMode = 1;
   else
     forceManualMode = 0;
- 
+
   if (forceManualMode) {
     isLineFollowingMode = 0;
   }
@@ -290,25 +340,137 @@ void printVals() {
 // B = unsigned byte for button pressed: 0 = no, 1 = yes
 void readSerial() {
   static int c = 0, lastChar = 0;
-  while (Serial1.available() >= 6) {
+  while (Serial1.available() >= ) { FIX this for GZLL/BLE
     lastChar = c;
-    c = Serial1.read();
+    c = getCh();
     if ( ('>' == c) && ('>' == lastChar) ) {
-      if (JOYPAD_ID == Serial1.read()) {
-        xAxisValue    = Serial1.read();
-        yAxisValue    = Serial1.read();
-        buttonPressed = Serial1.read();
-        xAxisValue = map(xAxisValue, 0, 255, -255, 255);
-        yAxisValue = map(yAxisValue, 0, 255, -255, 255);
-      } else {
-        // ignore the data
-        Serial1.read();
-        Serial1.read();
-        Serial1.read();
-      }
+      //if (JOYPAD_ID == Serial1.read()) {
+      //}
+      getCh(); // ignore joypad id
+      xAxisValue    = getCh();
+      yAxisValue    = getCh();
+      buttonPressed = getCh();
+      xAxisValue = map(xAxisValue, 0, 255, -255, 255);
+      yAxisValue = map(yAxisValue, 0, 255, -255, 255);
       lastChar = c = 0;
       joypadLastTime = timeNow;                      // record the time we last received a joypad command.
+    } else if ( ('$' == c) && ('$' == lastChar) ){
+      char   varName[6]    = {0};                    // 5  + 1 null
+
+      byte id =  getCh();
+      int  bytesRemaining = 20-6;          // we have to consume any unused serial data of the fixed 20 bytes
+      
+      if (1) { //id == JOYPAD_ID) {
+        // read bytes 1..5 = Var name
+        for (int i = 0 ; i < 5; i++) {
+          varName[i] = getCh();
+        }
+        varName[5] = 0;
+        updateVariable(varName, &bytesRemaining);
+#if 1
+        Serial.print("id=");
+        Serial.print(id);
+        Serial.print(",name=");
+        Serial.println(varName);
+#endif
+      }
+      // consume and ignore any remaining bytes
+      while (bytesRemaining--) {
+        getCh();
+      }
     }
   }
 }
+
+byte getCh() {
+  int c=-1;
+  //while (!Serial1.available());
+  do {
+    c= Serial1.read();    
+  } while (c==-1);
+  //Serial.println(c,HEX);
+  return c & 0xFF;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Message Handling
+
+//// Sending variable update out
+
+#define IR_SEND_INTERVAL           50
+bool sendIR     = false;
+void sendSensorReadings() {
+  if (!sendIR) {
+    return;
+  }
+  static unsigned long irSendLastTime = millis();
+  if ( (timeNow - irSendLastTime) < IR_SEND_INTERVAL) {
+    return;
+  }
+  irSendLastTime = timeNow;
+  writeData("IRVAL", IRvals[0], IRvals[1], IRvals[2]);
+}
+
+
+// Receiving variable updates
+
+// Helper macro(s)
+#define variableNameMatches(a,b) (strncmp(a,b,5)==0)
+
+// read in the serial data, return number of bytes consumed.
+void updateVariable(const char* name, int* count) {
+
+  if (variableNameMatches(name, "JOY01")) {
+    xAxisValue    = readInt(count);
+    yAxisValue    = readInt(count);
+    buttonPressed = readInt(count);
+  } else if (variableNameMatches(name, "PID_P")) {
+    Kp = readInt(count);
+  } else if (variableNameMatches(name, "PID_D")) {
+    Kd = readInt(count);
+  } else if (variableNameMatches(name, "GETCF")) {
+    writeData("PID", Kp, Kd);
+  } else if (variableNameMatches(name, "SNDIR")) {
+    sendIR = readInt(count);
+  } else {
+    // unrecognised variable name, ignore.
+  }
+}
+
+
+
+// Reading data
+
+int readInt(int* count) {
+  int v1 = getCh();
+  int v2 = getCh();   
+  *count-=2;
+  return  (v1<<8) | (v2 & 0xFF);
+}
+
+
+
+// Writing data
+
+#define SERIAL_MESSAGE_BUFFER_SIZE 23             // 20 byte paload + 2 byte start marker (>>) + 1 null terminator used during string creation (not sent over serial)
+
+void writeData(const char* name, int16_t p1) {
+  char msg[SERIAL_MESSAGE_BUFFER_SIZE] = {0}; 
+  snprintf(msg, sizeof(msg), ">>%c%5.5s%c%c", 0, name, highByte(p1), lowByte(p1));
+  Serial1.write(msg,sizeof(msg)-1);
+}
+
+void writeData(const char* name, int16_t p1,  int16_t p2) {
+  char msg[SERIAL_MESSAGE_BUFFER_SIZE] = {0};
+  snprintf(msg, sizeof(msg), ">>%c%5.5s%c%c%c%c", 0, name, highByte(p1), lowByte(p1), highByte(p1), lowByte(p2));
+  Serial1.write(msg,sizeof(msg)-1);
+}
+
+void writeData(const char* name, int16_t p1,  int16_t p2,  int16_t p3) {
+  char msg[SERIAL_MESSAGE_BUFFER_SIZE] = {0};
+  snprintf(msg, sizeof(msg), ">>%c%5.5s%c%c%c%c%c%c", 0, name, highByte(p1), lowByte(p1), highByte(p1), lowByte(p2), highByte(p3), lowByte(p3));
+  Serial1.write(msg,sizeof(msg)-1);
+}
+
+
 
