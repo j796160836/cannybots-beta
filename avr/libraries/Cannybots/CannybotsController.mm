@@ -268,10 +268,6 @@
 //////////////////////////////////////////////////////////////////////////////////////
 // Simple Key/Value API
 
-typedef __attribute__((__packed__)) struct {
-    uint8_t botId;
-    char    varName[5];
-} msgHeader_t;
 
 - (void) didReceiveData:(NSData *)data {
     @synchronized(self) {
@@ -282,7 +278,7 @@ typedef __attribute__((__packed__)) struct {
         //NSLog(@"Received: %@", hexString);
         
         if (len >=20) {
-            uint8_t botId   = buf[0];
+            //uint8_t botId   = buf[0];
             char    varName[5+1] = {0};
             memcpy(varName, &buf[1] , 5);
             varName[5]=0;
@@ -302,7 +298,7 @@ typedef __attribute__((__packed__)) struct {
 
 - (void) writeInt:(int16_t)p1 forVariable:(NSString*)varName {
     char msg[21] = {0};
-    snprintf(msg, sizeof(msg), "%c%5.5s%c%c", 0, [varName UTF8String], highByte(p1), lowByte(p1));
+    snprintf(msg, sizeof(msg), "%c%5.5s%c%c",1, [varName UTF8String], highByte(p1), lowByte(p1));
     
     NSData *data = [NSData dataWithBytesNoCopy:msg length:sizeof(msg)-1 freeWhenDone:NO];
     [bsle sendData:data];

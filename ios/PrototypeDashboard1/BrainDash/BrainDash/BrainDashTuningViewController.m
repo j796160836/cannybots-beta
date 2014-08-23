@@ -67,6 +67,7 @@
 
 }
 
+
 -(void)updateVariable:(NSNotification *)notification {
     NSString* name    = [notification name];
     NSData* data      = [notification object];
@@ -76,9 +77,17 @@
     //NSLog(@"UpVarRcv: %@", hexString);
     
     if ([name isEqualToString:@"IRVAL"]) {
-        _IRReading1.text = [NSString stringWithFormat:@"%d", CFSwapInt16BigToHost(( (int16_t*) bytes)[0]) ];
-        _IRReading2.text = [NSString stringWithFormat:@"%d", CFSwapInt16BigToHost(( (int16_t*) bytes)[1]) ];
-        _IRReading3.text = [NSString stringWithFormat:@"%d", CFSwapInt16BigToHost(( (int16_t*) bytes)[2]) ];
+        int ir1= CFSwapInt16BigToHost(( (int16_t*) bytes)[0]);
+        int ir2= CFSwapInt16BigToHost(( (int16_t*) bytes)[1]);
+        int ir3= CFSwapInt16BigToHost(( (int16_t*) bytes)[2]);
+        _IRReading1.text = [NSString stringWithFormat:@"%d", ir1 ];
+        _IRReading2.text = [NSString stringWithFormat:@"%d", ir2 ];
+        _IRReading3.text = [NSString stringWithFormat:@"%d", ir3 ];
+        
+        _ir1Level.progress = (1.0/1024.0) * ir1;
+        _ir2Level.progress = (1.0/1024.0) * ir1;
+        _ir3Level.progress = (1.0/1024.0) * ir1;
+        
     } else if ([name isEqualToString:@"PID"]) {
         _pTextField.text = [NSString stringWithFormat:@"%d", CFSwapInt16BigToHost(( (int16_t*) bytes)[0]) ];;
         _dTExtField.text = [NSString stringWithFormat:@"%d", CFSwapInt16BigToHost(( (int16_t*) bytes)[1]) ];;
@@ -156,3 +165,11 @@
 
 
 @end
+
+@implementation UIProgressView (customView)
+- (CGSize)sizeThatFits:(CGSize)size {
+    CGSize newSize = CGSizeMake(self.frame.size.width,9);
+    return newSize;
+}
+@end
+

@@ -90,7 +90,7 @@ int throttle = 0;
     throttle = abs(throttle) < 10  ? 0 : throttle;
    // CannybotsController* cb = [CannybotsController sharedInstance];
     char msg[21] = {0};
-    snprintf(msg, sizeof(msg), "%c%5.5s%c%c%c%c%c%c", 0, "JOY01", highByte(dir), lowByte(dir), highByte(throttle), lowByte(throttle), highByte(0), lowByte(0));
+    snprintf(msg, sizeof(msg), "%c%5.5s%c%c%c%c%c%c",1, "JOY01", highByte(dir), lowByte(dir), highByte(throttle), lowByte(throttle), highByte(0), lowByte(0));
     NSData *data = [NSData dataWithBytesNoCopy:msg length:20 freeWhenDone:NO];
     BrainSpeakBLE*  bsle = [BrainSpeakBLE sharedInstance];
     [bsle sendData:data];

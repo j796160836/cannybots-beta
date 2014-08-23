@@ -28,6 +28,9 @@
 @property (weak, nonatomic) IBOutlet UITextField *IRReading3;
 - (IBAction)ledColourSelected:(id)sender;
 @property (weak, nonatomic) IBOutlet JRTranscriptView *debugView;
+@property (weak, nonatomic) IBOutlet UIProgressView *ir1Level;
+@property (weak, nonatomic) IBOutlet UIProgressView *ir2Level;
+@property (weak, nonatomic) IBOutlet UIProgressView *ir3Level;
 
 -(IBAction)textFieldReturn:(id)sender;
 - (IBAction)pStepperValueChanged:(UIStepper*)sender;

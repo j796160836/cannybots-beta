@@ -94,6 +94,7 @@ void loop() {
         RFduinoGZLL.end();
         delay(50);
         RFduinoBLE.begin();
+        RFduinoBLE_update_conn_interval(20, 20);
       }
       startGZLL   = !startGZLL;
     }
@@ -138,6 +139,8 @@ void RFduinoBLE_onReceive(char *data, int len) {
   copyData(data, len);
 }
 
+//TODO: void RFduinoBLE_onRSSI(int rssi) {
+//}
 
 // Serial Input
 // We're expecting messages of 20 bytes in the form:  

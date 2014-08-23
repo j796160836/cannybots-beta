@@ -53,7 +53,7 @@
 #define PID_SAMPLE_TIME              0
 #define PID_SCALE                 10.0
 
-#define JOYPAD_ID                    0
+#define JOYPAD_ID                    1
 // Anish Joypad     =  0
 // Waynes barebones =  1
 // Default iOS app  = 10
@@ -212,19 +212,15 @@ void joypadManualControlMode() {
     yAxisValue = 0;
   } else {
     // If the xis readings are small set them to 0
-    if ( abs(xAxisValue) < JOYPAD_AXIS_DEADZONE)
+    if ( abs(xAxisValue) < JOYPAD_AXIS_DEADZONE) {
       xAxisValue = 0;
-    if ( abs(yAxisValue) < JOYPAD_AXIS_DEADZONE)
+    }
+    if ( abs(yAxisValue) < JOYPAD_AXIS_DEADZONE) {
       yAxisValue = 0;
+    }
 
-   if ( 1 ) {//yAxisValue > 0) {
       speedA =  (yAxisValue + xAxisValue) / 4;
       speedB =  (yAxisValue - xAxisValue) / 4;
-   } else {
-      speedA =  (yAxisValue - xAxisValue) / 4;
-      speedB =  (yAxisValue + xAxisValue) / 4;
-   }
-
   }
 }
 
@@ -286,6 +282,8 @@ void printVals() {
   }
   lastPrint = timeNow;
 
+  if (!Serial)
+    return;
   Serial.print(timeNow);
   Serial.print(":IR=(");
   Serial.print(IRvals[0], DEC);
@@ -358,29 +356,23 @@ void sendSensorReadings() {
 #define variableNameMatches(a,b) (strncmp(a,b,5)==0)
 
 // read in the serial data, return number of bytes consumed.
-int updateVariable(const char* name) {
+void updateVariable(const char* name, int* count) {
 
   if (variableNameMatches(name, "JOY01")) {
-    xAxisValue    = readInt();
-    yAxisValue    = readInt();
-    buttonPressed = readInt();
-    return 6;
+    xAxisValue    = readInt(count);
+    yAxisValue    = readInt(count);
+    buttonPressed = readInt(count);
   } else if (variableNameMatches(name, "PID_P")) {
-    Kp = readInt();
-    return 2;
+    Kp = readInt(count);
   } else if (variableNameMatches(name, "PID_D")) {
-    Kd = readInt();
-    return 2;
+    Kd = readInt(count);
   } else if (variableNameMatches(name, "GETCF")) {
     writeData("PID", Kp, Kd);
-    return 0;
   } else if (variableNameMatches(name, "SNDIR")) {
-    sendIR = readInt();
-    return 2;
+    sendIR = readInt(count);
   } else {
     // unrecognised variable name, ignore.
   }
-  return 0;
 }
 
 

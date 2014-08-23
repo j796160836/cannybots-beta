@@ -31,7 +31,7 @@ void readSerial() {
           varName[i] = Serial1.read();
         }
         varName[5] = 0;
-        bytesRemaining-=updateVariable(varName);
+        updateVariable(varName, &bytesRemaining);
 #if 0
         Serial.print("id=");
         Serial.print(id);
@@ -52,9 +52,10 @@ void readSerial() {
 
 // Reading data
 
-int readInt() {
+int readInt(int* count) {
   int v1 = Serial1.read();
   int v2 = Serial1.read();   
+  *count-=2;
   return  (v1<<8) | (v2 & 0xFF);
 }
 
