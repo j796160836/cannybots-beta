@@ -11,9 +11,10 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Bot constants
+#define RACER_ID                     0
+
 
 ////// Hardware Constants
-
 // Infrared
 #define IR_NUM_SENSORS               3
 #define IR1_PIN                     A6
@@ -32,26 +33,26 @@
 
 ////// Processing constants
 
-#define IR1_BIAS                     0
+#define IR1_BIAS                     12
 #define IR2_BIAS                     0
-#define IR3_BIAS                     0
-#define IR_WHITE_THRESHOLD         800
+#define IR3_BIAS                     -75
+
+#define IR_WHITE_THRESHOLD         700
 
 #define MOTOR_MAX_SPEED            255
-#define MOTOR_CRUISE_SPEED         150
+#define MOTOR_CRUISE_SPEED         120
 
 #define OFF_LINE_MAX_TIME          0
 
 
-#define PID_P                      105
-#define PID_D                      145
+#define PID_P                      20
+#define PID_D                      90
 
 #define PID_SCALE                100.0
 #define PID_SAMPLE_TIME              5
 
-#define JOYPAD_ID                    0
 #define JOYPAD_AXIS_DEADZONE        20
-#define JOYPAD_CONNECTION_TIMEOUT  2000
+
 
 
 
@@ -90,8 +91,6 @@ bool forceManualMode     = false;
 unsigned long timeNow = millis();                    // the time at the start of the loop()
 unsigned long pidLastTime = millis();                // when the PID was calculated last
 unsigned long joypadLastTime = millis();             // the time the bot last received a joypad command
-unsigned long offLineLastTime = millis();            // last time the bot came off the line
-unsigned long offTheLineTime = 0;                    // how long has the bot been off the line, total since last leaving the line
 
 ////// Outputs
 
@@ -103,6 +102,10 @@ int cruiseSpeed = MOTOR_CRUISE_SPEED;      // default cruise speed when line fol
 int speedA = 0;             // viewed from behind motor 'A' is on the left
 int speedB = 0;             // viewed from behind motor 'B' is on the right
 
+
+// Lap Timing
+unsigned long currentStartLapTime = millis();
+int  lapCount = 0;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -127,47 +130,42 @@ void setup() {
   digitalWrite(STATUS_LED_PIN, HIGH);
 }
 
-
+unsigned long loopTime = 0;
 void loop() {
-  //Serial.println(millis()-timeNow); // loop time delta
+  loopTime = millis() - timeNow;
   timeNow = millis();
+
   readSerial();
   readIRSensors();
-  printVals();
   updateLineFollowingStatus();
+  detectLapMarkers();
 
   if (isLineFollowingMode) {
     calculatePID();
     joypadLineFollowingControlMode();
   } else {
     // in manual mode
-    if (!forceManualMode) {
-      autoFindLine();
-    }
     joypadManualControlMode();
   }
   motorSpeed(speedA, -speedB);
+  printVals();
 }
 
-#define AUTOFIND_SPEED_DELTA 25
-#define AUTOFIND_DELAY        5
-#define AUTOFIND_MAX_TIME   100
-
-void autoFindLine() {
-  return;
-  if (offTheLineTime > AUTOFIND_MAX_TIME)
-    return;
-
-  // is the left side of the bot on white
-  if ((IRvals[0] <= IR_WHITE_THRESHOLD )) {
-    speedA = speedA + AUTOFIND_SPEED_DELTA;
-    speedB = speedB - AUTOFIND_SPEED_DELTA;
-  } else {
-    speedA = speedA - AUTOFIND_SPEED_DELTA;
-    speedB = speedB + AUTOFIND_SPEED_DELTA;
+#define GREY_MIN 650 
+#define GREY_MAX 900
+void detectLapMarkers() {
+  if ( ( IRvals[0] > GREY_MIN ) && (IRvals[0] < GREY_MAX  ) &&
+       ( IRvals[1] > GREY_MIN ) && (IRvals[1] < GREY_MAX  ) &&
+       ( IRvals[2] > GREY_MIN ) && (IRvals[2] < GREY_MAX  ) ) {
+    // debounce (seconds)         
+    if (  ( millis()-currentStartLapTime) > 2000 ) {
+      Serial.println("Lap marker detected");
+      lap_completed();
+    //lap_started();
+    }
   }
-  //delay(AUTOFIND_DELAY);
 }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // PID
@@ -207,49 +205,14 @@ void  joypadLineFollowingControlMode() {
 // Use it to map the joypad X & Y axis (which both range from -255..255) to motor speeds (also -255..255)
 
 void joypadManualControlMode() {
-  // check if we have recently received joypad input
-  if ( (timeNow - joypadLastTime) > JOYPAD_CONNECTION_TIMEOUT) {
-    // no command has been received in the last X millis, err on the side of caution and stop!
-    speedA = 0;
-    speedB =  0;
+  // If the xis readings are small set them to 0
+  if ( abs(xAxisValue) < JOYPAD_AXIS_DEADZONE)
     xAxisValue = 0;
+  if ( abs(yAxisValue) < JOYPAD_AXIS_DEADZONE)
     yAxisValue = 0;
-  } else {
-    // If the xis readings are small set them to 0
-    if ( abs(xAxisValue) < JOYPAD_AXIS_DEADZONE)
-      xAxisValue = 0;
-    if ( abs(yAxisValue) < JOYPAD_AXIS_DEADZONE)
-      yAxisValue = 0;
-    int y = yAxisValue;
-    int x = xAxisValue;
 
-#define X_DEAD_MIN 64
-#define Y_DEAD_MIN 64
-#define X_MAX      64
-
-    if (y > 0) {
-      if ( y > Y_DEAD_MIN)
-        y = map(y, Y_DEAD_MIN, 255, 0, 255);
-    } else {
-      if ( y < -Y_DEAD_MIN)
-        y = map(y, -Y_DEAD_MIN, -255, 0, -255);
-    }
-
-    if (x > 0) {
-      if ( x > X_DEAD_MIN)
-        x = map(x, X_DEAD_MIN, 255, 0, X_MAX);
-    } else {
-      if ( x < -X_DEAD_MIN)
-        x = map(x, -X_DEAD_MIN, -255, 0, -X_MAX);
-    }
-    // joypad
-    //speedA =  y - x;
-    //speedB =  y + x;
-    // phone
-    
-    speedA =  yAxisValue/2 - xAxisValue/2;
-    speedB =  yAxisValue/2 + xAxisValue/2;
-  }
+  speedA =  yAxisValue / 2 - xAxisValue / 2;
+  speedB =  yAxisValue / 2 + xAxisValue / 2;
 }
 
 
@@ -258,8 +221,11 @@ void joypadManualControlMode() {
 // Inputs
 
 void readIRSensors() {
+  analogRead(IR1_PIN); //delay(5);
   IRvals[0] = analogRead(IR1_PIN) + IR1_BIAS; //left looking from behind
+  analogRead(IR2_PIN); //delay(5);
   IRvals[1] = analogRead(IR2_PIN) + IR2_BIAS; //centre
+  analogRead(IR3_PIN); //delay(5);
   IRvals[2] = analogRead(IR3_PIN) + IR3_BIAS; //right
 }
 
@@ -281,36 +247,27 @@ void motorSpeed(int _speedA, int _speedB) {
 // Utilities
 
 void updateLineFollowingStatus() {
-  if ((IRvals[1] <= IR_WHITE_THRESHOLD )) {
-    offTheLineTime += timeNow - offLineLastTime;
-    offLineLastTime = timeNow;
-
-    if (offTheLineTime > OFF_LINE_MAX_TIME) {
-      isLineFollowingMode = 0;
-    }
-  } else {
-    offTheLineTime = 0;
+  if (IRvals[1] >= IR_WHITE_THRESHOLD ) {
     isLineFollowingMode = 1;
+  } else {
+    isLineFollowingMode = 0;
   }
-
-  if (buttonPressed)
-    forceManualMode = 1;
-  else
-    forceManualMode = 0;
-
-  if (forceManualMode) {
+  if (buttonPressed) {
+    forceManualMode = true;
     isLineFollowingMode = 0;
   }
 }
 
 void printVals() {
   static unsigned long lastPrint = millis();
-  if (millis() - lastPrint < 100) {
+  if (millis() - lastPrint < 1000) {
     return;
   }
   lastPrint = millis();
 
   Serial.print(timeNow);
+  Serial.print(",");
+  Serial.print(loopTime);
   Serial.print(":IR=(");
   Serial.print(IRvals[0], DEC);
   Serial.print(",");
@@ -327,68 +284,97 @@ void printVals() {
   Serial.print(yAxisValue, DEC);
   Serial.print(",");
   Serial.print(buttonPressed, DEC);
-  Serial.println(")");
+  Serial.print("),mem=");
+  Serial.println(freeRam());
+
+  //lap_started();
+  //lap_completed();
+  //lap_stopTiming();
 }
 
+int freeRam () {
+  extern int __heap_start, *__brkval;
+  int v;
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Lap Timing
+
+// this should be called at least once to inform the client (e.g. phone) that the bot has started racing
+void lap_started() {
+  currentStartLapTime = timeNow;
+  writeData("LAPGO",  0, lapCount);
+  //lapCount++;
+}
+
+// call on lap complete, updates phone with current lap time & lap count, it then restarts the lap timer and incremetn the laptcount
+void lap_completed() {
+  writeData("LAPST",  timeNow - currentStartLapTime, lapCount);
+  currentStartLapTime = timeNow;
+  lapCount++;
+}
+
+// this should be called to tell the client (e.g. phone app) that lap timing and counting has finished
+void lap_stopTiming() {
+  writeData("LEND");
+}
+
+
+
+
 // Serial Input
-// We're expecting messages of 6 bytes in the form:  >>IXYB
+// We're expecting messages of 4 bytes in the form:  >>ICL
 // Where;
 // >> = start marker, as-is
-// I = joypad ID  (0-7 for GZLL joypad ID's)
-// X = unsigned byte for xAxis:          0 .. 255 mapped to -254 .. 254
-// Y = unsigned byte for yAxis:          0 .. 255 mapped to -254 .. 254
-// B = unsigned byte for button pressed: 0 = no, 1 = yes
+// I  = ID
+// L  = bytes remaining
+
 void readSerial() {
   static int c = 0, lastChar = 0;
-  while (Serial1.available() >= ) { FIX this for GZLL/BLE
+  char   varName[6]  = {0};                    // 5  + 1 null
+  if (Serial1.available() >= 2) { // =  2 (>>) + 2 (CRC,ID) + 5 (varname) + 1 (bytesleft)
+    //Serial.println("message ready!");
+
     lastChar = c;
     c = getCh();
-    if ( ('>' == c) && ('>' == lastChar) ) {
-      //if (JOYPAD_ID == Serial1.read()) {
-      //}
-      getCh(); // ignore joypad id
-      xAxisValue    = getCh();
-      yAxisValue    = getCh();
-      buttonPressed = getCh();
-      xAxisValue = map(xAxisValue, 0, 255, -255, 255);
-      yAxisValue = map(yAxisValue, 0, 255, -255, 255);
-      lastChar = c = 0;
-      joypadLastTime = timeNow;                      // record the time we last received a joypad command.
-    } else if ( ('$' == c) && ('$' == lastChar) ){
-      char   varName[6]    = {0};                    // 5  + 1 null
-
-      byte id =  getCh();
-      int  bytesRemaining = 20-6;          // we have to consume any unused serial data of the fixed 20 bytes
-      
-      if (1) { //id == JOYPAD_ID) {
-        // read bytes 1..5 = Var name
-        for (int i = 0 ; i < 5; i++) {
-          varName[i] = getCh();
-        }
-        varName[5] = 0;
-        updateVariable(varName, &bytesRemaining);
-#if 1
-        Serial.print("id=");
-        Serial.print(id);
-        Serial.print(",name=");
-        Serial.println(varName);
-#endif
+    if ( ( ('>' == c) && ('>' == lastChar) ) ) {
+      int crc            = getCh();
+      int id             = getCh();
+      for (int i = 0 ; i < 5; i++) {
+        varName[i] = getCh();
       }
-      // consume and ignore any remaining bytes
-      while (bytesRemaining--) {
+      varName[5] = 0;
+      int bytesRemaining = getCh();
+      //while ( Serial1.available() < bytesRemaining);
+      updateVariable(varName, &bytesRemaining);
+#if 0
+      Serial.print("id=");
+      Serial.print(id);
+      Serial.print(",name=");
+      Serial.println(varName);
+#endif
+      //Serial.print("slurp...");
+      while (bytesRemaining-- > 0) {
         getCh();
       }
+      //Serial.println("...ah");
+      c = 0;
     }
+    // consume and ignore any remaining bytes
   }
 }
 
 byte getCh() {
-  int c=-1;
-  //while (!Serial1.available());
+  int c = -1;
+  while (!Serial1.available());
   do {
-    c= Serial1.read();    
-  } while (c==-1);
-  //Serial.println(c,HEX);
+    c = Serial1.read();
+    delay(1);
+  } while (c == -1);
+  //Serial.write(c);
   return c & 0xFF;
 }
 
@@ -408,7 +394,7 @@ void sendSensorReadings() {
     return;
   }
   irSendLastTime = timeNow;
-  writeData("IRVAL", IRvals[0], IRvals[1], IRvals[2]);
+  //writeData("IRVAL", IRvals[0], IRvals[1], IRvals[2]);
 }
 
 
@@ -424,12 +410,13 @@ void updateVariable(const char* name, int* count) {
     xAxisValue    = readInt(count);
     yAxisValue    = readInt(count);
     buttonPressed = readInt(count);
+    joypadLastTime = millis();
   } else if (variableNameMatches(name, "PID_P")) {
     Kp = readInt(count);
   } else if (variableNameMatches(name, "PID_D")) {
     Kd = readInt(count);
   } else if (variableNameMatches(name, "GETCF")) {
-    writeData("PID", Kp, Kd);
+    //writeData("PID", Kp, Kd);
   } else if (variableNameMatches(name, "SNDIR")) {
     sendIR = readInt(count);
   } else {
@@ -442,34 +429,41 @@ void updateVariable(const char* name, int* count) {
 // Reading data
 
 int readInt(int* count) {
-  int v1 = getCh();
-  int v2 = getCh();   
-  *count-=2;
-  return  (v1<<8) | (v2 & 0xFF);
+  byte v1 = getCh();
+  byte v2 = getCh();
+  *count -= 2;
+  return  ( (v1 & 0xFF) << 8) | (v2 & 0xFF);
 }
 
 
 
 // Writing data
 
-#define SERIAL_MESSAGE_BUFFER_SIZE 23             // 20 byte paload + 2 byte start marker (>>) + 1 null terminator used during string creation (not sent over serial)
+void writeData(const char* name) {
+  char msg[9] = {0};
+  snprintf(msg, sizeof(msg), ">>%c%c%5.5s%c%c%c", 0, RACER_ID, name, 0);
+  Serial1.write(msg, sizeof(msg) - 1);
+}
 
 void writeData(const char* name, int16_t p1) {
-  char msg[SERIAL_MESSAGE_BUFFER_SIZE] = {0}; 
-  snprintf(msg, sizeof(msg), ">>%c%5.5s%c%c", 0, name, highByte(p1), lowByte(p1));
-  Serial1.write(msg,sizeof(msg)-1);
+  char msg[13] = {0};
+  snprintf(msg, sizeof(msg), ">>%c%c%5.5s%c%c%c", 0, RACER_ID, name, 2, highByte(p1), lowByte(p1));
+  //Serial.print("Write:");
+  //Serial.println(  sizeof(msg) - 1,DEC);
+  Serial1.write(msg, sizeof(msg) - 1);
+  //Serial1.flush();
 }
 
 void writeData(const char* name, int16_t p1,  int16_t p2) {
-  char msg[SERIAL_MESSAGE_BUFFER_SIZE] = {0};
-  snprintf(msg, sizeof(msg), ">>%c%5.5s%c%c%c%c", 0, name, highByte(p1), lowByte(p1), highByte(p1), lowByte(p2));
-  Serial1.write(msg,sizeof(msg)-1);
+  char msg[15] = {0};
+  snprintf(msg, sizeof(msg), ">>%c%c%5.5s%c%c%c%c%c", 0, RACER_ID, name, 4, highByte(p1), lowByte(p1), highByte(p2), lowByte(p2));
+  Serial1.write(msg, sizeof(msg) - 1);
 }
 
 void writeData(const char* name, int16_t p1,  int16_t p2,  int16_t p3) {
-  char msg[SERIAL_MESSAGE_BUFFER_SIZE] = {0};
-  snprintf(msg, sizeof(msg), ">>%c%5.5s%c%c%c%c%c%c", 0, name, highByte(p1), lowByte(p1), highByte(p1), lowByte(p2), highByte(p3), lowByte(p3));
-  Serial1.write(msg,sizeof(msg)-1);
+  char msg[17] = {0};
+  snprintf(msg, sizeof(msg), ">>%c%c%5.5s%c%c%c%c%c%c%c", 0, RACER_ID, name, 6, highByte(p1), lowByte(p1), highByte(p2), lowByte(p2), highByte(p3), lowByte(p3));
+  Serial1.write(msg, sizeof(msg) - 1);
 }
 
 

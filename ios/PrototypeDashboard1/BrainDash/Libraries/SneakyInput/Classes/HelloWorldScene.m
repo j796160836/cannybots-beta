@@ -36,18 +36,22 @@
 		SneakyJoystickSkinnedBase *leftJoy = [[SneakyJoystickSkinnedBase alloc] init];
 		leftJoy.position = ccp(w/4,h/2);
         leftJoy.backgroundSprite = [CCSprite spriteWithImageNamed:@"joystick.png"];
-
-        
         leftJoy.thumbSprite =  [CCSprite spriteWithImageNamed:@"knob.png"];
-        
 		leftJoy.joystick = [[SneakyJoystick alloc] initWithRect:leftJoy.backgroundSprite.boundingBox];
 		leftJoystick = leftJoy.joystick;
 		[self addChild:leftJoy];
 		
+		SneakyJoystickSkinnedBase *rightJoy = [[SneakyJoystickSkinnedBase alloc] init];
+		rightJoy.position = ccp(w-w/4,h/2);
+        rightJoy.backgroundSprite = [CCSprite spriteWithImageNamed:@"joystick.png"];
+        rightJoy.thumbSprite =  [CCSprite spriteWithImageNamed:@"knob.png"];
+		rightJoy.joystick = [[SneakyJoystick alloc] initWithRect:rightJoy.backgroundSprite.boundingBox];
+		rightJoystick = rightJoy.joystick;
+		[self addChild:rightJoy];
         
   
 		SneakyButtonSkinnedBase *rightBut = [[SneakyButtonSkinnedBase alloc] init];
-		rightBut.position = ccp(w- w/8  ,h/2);
+		rightBut.position = ccp(w- w/2  ,h/2);
         rightBut.defaultSprite = [CCSprite spriteWithImageNamed:@"button.png"];
         rightBut.activatedSprite = [CCSprite spriteWithImageNamed:@"button.png"];
         rightBut.pressSprite = [CCSprite spriteWithImageNamed:@"button.png"];
@@ -86,16 +90,16 @@ long map(long x, long in_min, long in_max, long out_min, long out_max)
 
 
 -(void)tick:(float)delta {
-    dir      = 255*leftJoystick.velocity.x;
+    dir      = 255*rightJoystick.velocity.x;
     throttle = 255*leftJoystick.velocity.y;
     // deadzone check
     dir      =      abs(dir) < 10  ? 0 : dir;
     throttle = abs(throttle) < 10  ? 0 : throttle;
     // CannybotsController* cb = [CannybotsController sharedInstance];
-    char msg[21] = {0};
+    char msg[12] = {0};
     snprintf(msg, sizeof(msg), "%c%5.5s%c%c%c%c%c%c",1, "JOY01", highByte(dir), lowByte(dir), highByte(throttle), lowByte(throttle), highByte(0), lowByte(0));
     //snprintf(msg, sizeof(msg), "%c%c%c%c",0, map(dir, -255,255,0,255), map(throttle, -255,255, 0, 255), rightButton.active == YES);
-    NSData *data = [NSData dataWithBytesNoCopy:msg length:20 freeWhenDone:NO];
+    NSData *data = [NSData dataWithBytesNoCopy:msg length:sizeof(msg)-1 freeWhenDone:NO];
     BrainSpeakBLE*  bsle = [BrainSpeakBLE sharedInstance];
     [bsle sendData:data];
     

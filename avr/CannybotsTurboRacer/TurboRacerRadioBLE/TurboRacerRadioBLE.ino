@@ -29,7 +29,7 @@
 char bleName[BLE_ADVERTISEMENT_DATA_MAX] = {0};
 volatile bool bleConnected = false;
 
-uint8_t buffer[RADIO2SERIAL_MESSAGE_SIZE] = {'$', '$'};
+uint8_t buffer[RADIO2SERIAL_MESSAGE_SIZE] = {'>', '>'};
 volatile bool send = false;
 
 
@@ -63,7 +63,7 @@ void RFduinoBLE_onDisconnect() {
 }
 
 void RFduinoBLE_onReceive(char *data, int len) {
-  if (len >=6) {
+  if (len >=2) {
     copyData(data, len);
     send = true;
   }

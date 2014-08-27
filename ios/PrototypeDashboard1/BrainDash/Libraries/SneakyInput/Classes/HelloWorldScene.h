@@ -14,6 +14,7 @@
 @interface HelloWorld : CCScene
 {
 	SneakyJoystick *leftJoystick;
+	SneakyJoystick *rightJoystick;
 	SneakyButton *rightButton;
 }
 
