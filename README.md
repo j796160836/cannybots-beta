@@ -24,10 +24,12 @@ Wayne Keenan
 
 ##2. Arduino Library Dependancies
 
-If any exist copy the folders under: 
-	* cannybots-beta/avr/libraries
-to: 
-	* Documents/Arduino/libraries
+If any folders exist under: 
+* cannybots-beta/avr/libraries
+
+copy them to: 
+
+* Documents/Arduino/libraries
 
 You may need to create the folder, if so you might want to consider just copying the whole libraries folder from the git repo to the Arduiono sketchbook folder.
 
@@ -36,20 +38,22 @@ You may need to create the folder, if so you might want to consider just copying
 
 You can either:
 
-a) Set the board type to Leonardo 
+* Set the board type to Leonardo 
 
 OR
 
-b) Install the Pololu add-on
+* Install the Pololu add-on
 
 Please follow the instruction here: http://www.pololu.com/docs/0J61/all#5.2 
 
-The main benefit of the Pololu add-on is that the Pololu bootloader enables low-voltage (Vin <4.3v) detection by the user sketch after a reset.
+The main benefits of the Pololu add-on is that the Pololu bootloader enables:
+* low-voltage (Vin <4.3v) detection by the user sketch after a reset.
+* forcing the AVR into bootloader mode then connecting RST to GND twice within 750 ms after power on
 
 
 
 
-##4. Arduino IDE RFduino SUpport
+##4. Arduino IDE RFduino Support
 
 a) Install RFduino v2.1 Library for Arduino
 
@@ -74,7 +78,7 @@ these need to replace sub-folders under the RFduino folder that was installed in
 * RFduinoGZLL.zip			unzip under:  	[ArduinoIDE_Install_PATH]/Java/hardware/arduino/RFduino/libraries
 * libRFduinoGZLL.zip		unzip under:	[ArduinoIDE_Install_PATH]/Java/hardware/arduino/RFduino/source
 
-It's preferable to move or just delete the existing folders rather than renamethem in-place:
+It's preferable to move or just delete the existing folders rather than renaming them in-place:
 
 * [ArduinoIDE_Install_PATH]/Java/hardware/arduino/RFduino/libraries/RFduinoGZLL
 * [ArduinoIDE_Install_PATH]/Java/hardware/arduino/RFduino/libraries/libRFduinoGZLL
