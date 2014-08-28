@@ -83,6 +83,10 @@ It's preferable to move or just delete the existing folders rather than renaming
 * [ArduinoIDE_Install_PATH]/Java/hardware/arduino/RFduino/libraries/RFduinoGZLL
 * [ArduinoIDE_Install_PATH]/Java/hardware/arduino/RFduino/libraries/libRFduinoGZLL
 
+For convenience these are the direct links to the zips in the online repo: 
+
+* https://github.com/Cannybots/cannybots-beta/blob/master/avr/patches/RFduino/RFduinoGZLL.zip
+* https://github.com/Cannybots/cannybots-beta/blob/master/avr/patches/RFduino/libRFduinoGZLL.zip
 
 
 ##5. Arduino IDE: Over-The-Air programming
