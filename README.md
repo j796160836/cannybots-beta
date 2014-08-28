@@ -2,19 +2,16 @@
 
 This repository contains the beta source code for CannyBots, including:
 
-1.  Cannybots robot line following
-
+1. Cannybots robot line following
 2. Cannybots Arduino and iOS libraries
-
 3. Programming an Arduino Over the Air 
-
 4. Historical and experimental code
+5. RFduino Libray Patches
 
 by
 Anish Mampetta
 &
 Wayne Keenan
-
 
 
 #Installation
