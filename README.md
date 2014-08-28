@@ -1,8 +1,8 @@
 #cannybots-beta
 
-This repository contains the beta source code for Cannybots, including:
+This repository contains the beta source code for CannyBots, including:
 
-1  Cannybots robot line following
+1.  Cannybots robot line following
 
 2. Cannybots Arduino and iOS libraries
 
