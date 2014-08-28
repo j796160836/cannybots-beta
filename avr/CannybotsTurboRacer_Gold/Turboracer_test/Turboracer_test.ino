@@ -38,8 +38,7 @@
 #define IR_WHITE_THRESHOLD         750
 
 #define MOTOR_MAX_SPEED            255
-#define MOTOR_CRUISE_SPEED         120
-
+#define MOTOR_CRUISE_SPEED         0
 #define OFF_LINE_MAX_TIME            0
 
 #define PID_P 5  //PID gains set below in the code.. 
@@ -83,6 +82,7 @@ int correction = 0;
 // LineFollowing State
 bool isLineFollowingMode = false;
 bool forceManualMode     = false;
+int justOut = 0; // to break the speed if the bot just came out of line
 
 // Timers in milli-seconds (1/1000 of a second)
 
@@ -165,8 +165,8 @@ void calculatePID() {
   I_error = I_sum*Ki/100.0;
   D_error = (error - error_last) * Kd /100.0;           // calculate differential term
   correction = P_error + D_error + I_error;
-  speedA = cruiseSpeed - correction;
-  speedB = cruiseSpeed + correction;
+  //speedA = cruiseSpeed - correction;
+  //speedB = cruiseSpeed + correction;
 }
 
 
@@ -176,8 +176,10 @@ void calculatePID() {
 // This is called when the bot is on the line
 // speedA and speedB will have already been set by pid_calculate() before this is run
 void  joypadLineFollowingControlMode() {
-  speedA = speedA + ((yAxisValue - (xAxisValue/2))/2.0); //superpose yAxis with PID output speed
-  speedB = speedB + ((yAxisValue + (xAxisValue/2))/2.0);
+
+  speedA = yAxisValue - correction;
+  speedB = yAxisValue + correction;
+   
 }
 
 // This is called when the bot is in manual mode.
@@ -185,6 +187,7 @@ void  joypadLineFollowingControlMode() {
 
 void joypadManualControlMode() {
   // check if we have recently received joypad input
+  
   if ( (timeNow - joypadLastTime) > JOYPAD_CONNECTION_TIMEOUT) {
     // no command has been received in the last X millis, err on the side of caution and stop!
     speedA = 0;
@@ -198,8 +201,16 @@ void joypadManualControlMode() {
     if ( abs(yAxisValue) < JOYPAD_AXIS_DEADZONE)
       yAxisValue = 0;
 
-    speedA =  (yAxisValue - (xAxisValue/2))/3.0;
-    speedB =  (yAxisValue + (xAxisValue/2))/3.0;
+    if (justOut = 1){
+    if (yAxisValue >= 0){
+      yAxisValue = 0;
+    }
+      else
+      justOut = 0;
+    }
+      
+    speedA =  (yAxisValue - xAxisValue)/3.0;
+    speedB =  (yAxisValue + xAxisValue)/3.0;
  
   }
 }

@@ -24,15 +24,15 @@ void setup()
 {
   Serial.begin(9600);
   pinMode(BUTTON_PIN, INPUT);
-  RFduinoGZLL.hostBaseAddress = 0x12ABCDEF;
+  RFduinoGZLL.hostBaseAddress = 0x12ABCD12;
   RFduinoGZLL.begin(role);
 }
 
 void loop()
 {
   bool buttonPressed = digitalRead(BUTTON_PIN)  & 0xFF;
-  uint8_t xAxis = 255-(analogRead(XAXIS_PIN)/4) ;          // scale from 0..1023 to 0-255 so data fits in a byte
-  uint8_t yAxis = 255-(analogRead(YAXIS_PIN)/4) ;
+  uint8_t xAxis = 255-(analogRead(XAXIS_PIN)/4);          // scale from 0..1023 to 0-255 so data fits in a byte
+  uint8_t yAxis = (analogRead(YAXIS_PIN)/4)-255;
   
   snprintf(msg, MSG_LEN, "%c%c%c", xAxis, yAxis, buttonPressed );
   
