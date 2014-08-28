@@ -21,14 +21,16 @@ Wayne Keenan
 
 ##1. Versions
 
-*Arduino IDE:  Arduino 1.5.7
-*RFduino Lib:  v2.1
+* Arduino IDE:  Arduino 1.5.7
+* RFduino Lib:  v2.1
 
 
 ##2. Arduino Library Dependancies
 
-copy the folders under: cannybots-beta/avr/libraries
-to: Documents/Arduino/libraries
+If any exist copy the folders under: 
+	* cannybots-beta/avr/libraries
+to: 
+	* Documents/Arduino/libraries
 
 You may need to create the folder, if so you might want to consider just copying the whole libraries folder from the git repo to the Arduiono sketchbook folder.
 
@@ -52,20 +54,25 @@ The main benefit of the Pololu add-on is that the Pololu bootloader enables low-
 
 ##4. Arduino IDE RFduino SUpport
 
-a) Install RFduino Library for ARduino
+a) Install RFduino v2.1 Library for Arduino
 
-Download and install the v2.1 of the RFduino library:  http://www.rfdigital.com/wp-content/uploads/2014/03/RFduino_2.1.zip
+Download and install the v2.1 of the RFduino library:  
 
-It *MUST* be  v2.1 because of some customisations we've made. You also must be using ARduino IDE 1.5.7 or higher for the RFduiono library to work.
+* http://www.rfdigital.com/wp-content/uploads/2014/03/RFduino_2.1.zip
 
-Unzip the foleder under:  [ArduinoIDE_Install_PATH]/Java/hardware/arduino/
+It *MUST* be  v2.1 because of some customisations we've made. 
+You also must be using ARduino IDE 1.5.7 or higher for the RFduino library to work.
+
+Unzip the folder under:  [ArduinoIDE_Install_PATH]/Java/hardware/arduino/
 
 
-b) custom Arduino Gazell libraries
+b) custom Arduino Gazelle libraries
 
-you will find 2 zips under :  cannybots-beta/avr/patches/RFduino/
+you will find 2 zips in this git repo under :  
 
-these need replace sub-folders under the RFduino folder that was installed into the ARduino IDE
+* cannybots-beta/avr/patches/RFduino/
+
+these need to replace sub-folders under the RFduino folder that was installed into the Arduino IDE in the previous step.
 
 * RFduinoGZLL.zip			unzip under:  	[ArduinoIDE_Install_PATH]/Java/hardware/arduino/RFduino/libraries
 * libRFduinoGZLL.zip		unzip under:	[ArduinoIDE_Install_PATH]/Java/hardware/arduino/RFduino/source
