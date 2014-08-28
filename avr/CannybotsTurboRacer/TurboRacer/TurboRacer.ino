@@ -158,7 +158,7 @@ void detectLapMarkers() {
        ( IRvals[1] > GREY_MIN ) && (IRvals[1] < GREY_MAX  ) &&
        ( IRvals[2] > GREY_MIN ) && (IRvals[2] < GREY_MAX  ) ) {
     // debounce (seconds)         
-    if (  ( millis()-currentStartLapTime) > 2000 ) {
+    if (  ( millis()-currentStartLapTime) > 1000 ) {
       Serial.println("Lap marker detected");
       lap_completed();
     //lap_started();
@@ -221,11 +221,11 @@ void joypadManualControlMode() {
 // Inputs
 
 void readIRSensors() {
-  analogRead(IR1_PIN); //delay(5);
+  analogRead(IR1_PIN); //delay(1);
   IRvals[0] = analogRead(IR1_PIN) + IR1_BIAS; //left looking from behind
-  analogRead(IR2_PIN); //delay(5);
+  analogRead(IR2_PIN); //delay(1);
   IRvals[1] = analogRead(IR2_PIN) + IR2_BIAS; //centre
-  analogRead(IR3_PIN); //delay(5);
+  analogRead(IR3_PIN); //pdelay(1);
   IRvals[2] = analogRead(IR3_PIN) + IR3_BIAS; //right
 }
 
