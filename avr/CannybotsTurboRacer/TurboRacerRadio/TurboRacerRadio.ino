@@ -22,6 +22,7 @@ volatile bool send = false;
 
 void setup() {
   Serial.begin(9600, RX_PIN, TX_PIN);        // UART Baud is limited to 9600 when the BLE stack is on.
+  RFduinoGZLL.hostBaseAddress = 0x12ABCD12;
   RFduinoGZLL.begin(role);
 }
 
