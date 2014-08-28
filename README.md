@@ -86,7 +86,8 @@ e.g. on Mac: 		/Applications/Arduino.app/Contents/Resources/Java/hardware/arduin
 
 append:
 
-```rfduinoisp.name=RFduino as ISP (Cannybots)
+```
+rfduinoisp.name=RFduino as ISP (Cannybots)
 rfduinoisp.communication=serial
 rfduinoisp.protocol=avrisp
 rfduinoisp.speed=9600
