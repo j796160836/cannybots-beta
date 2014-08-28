@@ -50,8 +50,33 @@ Please follow the instruction here: http://www.pololu.com/docs/0J61/all#5.2
 The main benefit of the Pololu add-on is that the Pololu bootloader enables low-voltage (Vin <4.3v) detection by the user sketch after a reset.
 
 
+4. Arduino IDE RFduino SUpport
 
-4. Arduino IDE: Over-The-Air programming
+a) Code RFduino Library for ARduino
+
+Download and install the v2.1 of the RFduino library:  http://www.rfdigital.com/wp-content/uploads/2014/03/RFduino_2.1.zip
+
+It *MUST* be  v2.1 because of some customisations we've made. You also must be using ARduino IDE 1.5.7 or higher for the RFduiono library to work.
+
+Unzip the foleder under:  [ArduinoIDE_Install_PATH]/Java/hardware/arduino/
+
+
+b) custom Arduino Gazell libraries
+
+you will find 2 zips under :  cannybots-beta/avr/patches/RFduino/
+
+these need replace sub-folders under the RFduino folder that was installed into the ARduino IDE
+
+RFduinoGZLL.zip			unzip under:  	[ArduinoIDE_Install_PATH]/Java/hardware/arduino/RFduino/libraries
+libRFduinoGZLL.zip		unzip under:	[ArduinoIDE_Install_PATH]/Java/hardware/arduino/RFduino/source
+
+It's preferable to move or just delete the existing folders rather than renamethem in-place:
+[ArduinoIDE_Install_PATH]/Java/hardware/arduino/RFduino/libraries/RFduinoGZLL
+[ArduinoIDE_Install_PATH]/Java/hardware/arduino/RFduino/libraries/libRFduinoGZLL
+
+
+
+5. Arduino IDE: Over-The-Air programming
 
 1.  edit: [Arduino_INSTALL]/Java/hardware/arduino/avr/programmers.txt
 
