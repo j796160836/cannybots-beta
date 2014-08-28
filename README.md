@@ -86,7 +86,7 @@ e.g. on Mac: 		/Applications/Arduino.app/Contents/Resources/Java/hardware/arduin
 
 append:
 
-rfduinoisp.name=RFduino as ISP (Cannybots)
+'''rfduinoisp.name=RFduino as ISP (Cannybots)
 rfduinoisp.communication=serial
 rfduinoisp.protocol=avrisp
 rfduinoisp.speed=9600
@@ -94,6 +94,7 @@ rfduinoisp.program.protocol=avrisp
 rfduinoisp.program.speed=9600
 rfduinoisp.program.tool=avrdude
 rfduinoisp.program.extra_params=-P{serial.port} -b{program.speed}
+'''
 
 b). Restart the IDE
 
