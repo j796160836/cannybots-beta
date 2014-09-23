@@ -1,9 +1,9 @@
 
 // Choose one of:
 
-#define  RADIO_ONLY_GZLL
+//#define  RADIO_ONLY_GZLL
 //#define  RADIO_ONLY_BLE
-//#define RADIO_TOGGLE
+#define RADIO_TOGGLE
 //#define RADIO_NONE
 
 
@@ -34,21 +34,25 @@ void radio_setup() {
 // Radio toggling
 
 #ifdef RADIO_TOGGLE
-
 volatile bool startGZLL = true;
 volatile bool bleConnected = false;
 volatile unsigned long nextRadioToggleTime = millis();
+#endif
 
+volatile bool gzllConnected = false;
+volatile unsigned long gzllConnectionTimeout = 0;
 
 void radio_loop() {
-
+#if defined(RADIO_ONLY_GZLL) || defined(RADIO_TOGGLE)
   loop_gzll();
+#endif  
 
+#ifdef RADIO_TOGGLE
   if (!bleConnected && !gzllConnected) {
     if (millis() > nextRadioToggleTime) {
 #ifdef DEBUG
       Serial.println("RADIO_TOGGLE");
-#endif
+#endif //DEBUG
       nextRadioToggleTime = millis() + TOGGLE_MILLIS;
 
       if (startGZLL) {
@@ -64,21 +68,16 @@ void radio_loop() {
       startGZLL   = !startGZLL;
     }
   }
-
+#endif // RADIO_TOGGLE
 
 }
-#else
-void radio_loop() {
-    loop_gzll();
-}
-#endif
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // GZLL
 
-volatile bool gzllConnected = false;
-volatile unsigned long gzllConnectionTimeout = 0;
+
 
 void setup_gzll() {
   //RFduinoGZLL.hostBaseAddress = 0x12ABCD12;
