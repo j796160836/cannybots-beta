@@ -12,6 +12,8 @@
 #define DEBUG 
 
 #include <RFduinoGZLL.h>
+#include <RFduinoBLE.h>
+
 // Bot constants
 
 ////// Hardware Constants
@@ -60,9 +62,9 @@
 int IRvals[IR_NUM_SENSORS] = {0};
 
 // Joypad
-int16_t  xAxisValue    = 0;              // (left) -255 .. 255 (right)
-int16_t  yAxisValue    = 0;              // (down) -255 .. 255 (up)
-bool     buttonPressed = 0;              // 0 = not pressed, 1 = pressed
+volatile int16_t  xAxisValue    = 0;              // (left) -255 .. 255 (right)
+volatile int16_t  yAxisValue    = 0;              // (down) -255 .. 255 (up)
+volatile bool     buttonPressed = 0;              // 0 = not pressed, 1 = pressed
 
 
 ////// Process / Algorithms
@@ -120,13 +122,14 @@ void setup() {
   pinMode(MOTOR_B1_PIN, OUTPUT);
   pinMode(MOTOR_B2_PIN, OUTPUT);
   
-  motorTest();
+  //motorTest();
 
-  setup_radio();
+  radio_setup();
 }
 
 void loop() {
-
+  radio_loop();
+  
   timeNow = millis();
 
   readIRSensors();
@@ -191,8 +194,6 @@ void joypadManualControlMode() {
     // no command has been received in the last X millis, err on the side of caution and stop!
     speedA = 0;
     speedB = 0;
-    xAxisValue = 0;
-    yAxisValue = 0;
   } else {
     // If the xis readings are small set them to 0
     if ( abs(xAxisValue) < JOYPAD_AXIS_DEADZONE)
@@ -211,6 +212,7 @@ void joypadManualControlMode() {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Inputs
 
+// Sensors
 void readIRSensors() {
   IRvals[0] = analogRead(IR1_PIN) + IR1_BIAS; //left looking from behind
   IRvals[1] = analogRead(IR2_PIN) + IR2_BIAS; //centre
@@ -220,6 +222,7 @@ void readIRSensors() {
 // Joypad
 
 // this is called when a data packet is received via the radio, do very little processing, just set some vars.
+// NOTE: because this is called as a background event then any printed value may be more recent than the value used in the prior PID calc.
 void joypad_update(int x, int y, int b) {
    xAxisValue = x;
    yAxisValue = y;
