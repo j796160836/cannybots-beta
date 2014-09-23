@@ -12,7 +12,7 @@
 #define BLE_TX_POWER_LEVEL         0
 
 #define TOGGLE_MILLIS 1500
-#define TOGGLE_GZLL_CONNECTION_TIMEOUT 2000
+#define TOGGLE_GZLL_CONNECTION_TIMEOUT 250
 
 void radio_setup() {
 
@@ -21,7 +21,7 @@ void radio_setup() {
 #elif defined(RADIO_ONLY_BLE)
   setup_ble();
 #elif defined(RADIO_TOGGLE)
-  // handled in radio_loop()
+  // Setup of BLE & GZLL is handled in radio_loop()
 #elif defined(RADIO_NONE)
   // no radio chosen
 #else
@@ -37,16 +37,12 @@ void radio_setup() {
 
 volatile bool startGZLL = true;
 volatile bool bleConnected = false;
-volatile bool gzllConnected = false;
 volatile unsigned long nextRadioToggleTime = millis();
-volatile unsigned long gzllConnectionTimeout = 0;
+
 
 void radio_loop() {
 
-  if ( gzllConnected && (timeNow  > gzllConnectionTimeout)) {
-    gzllConnected = false;
-    client_disconnected();
-  }
+  loop_gzll();
 
   if (!bleConnected && !gzllConnected) {
     if (millis() > nextRadioToggleTime) {
@@ -73,6 +69,7 @@ void radio_loop() {
 }
 #else
 void radio_loop() {
+    loop_gzll();
 }
 #endif
 
@@ -80,16 +77,25 @@ void radio_loop() {
 ////////////////////////////////////////////////////////////////////////////////////////
 // GZLL
 
+volatile bool gzllConnected = false;
+volatile unsigned long gzllConnectionTimeout = 0;
+
 void setup_gzll() {
   //RFduinoGZLL.hostBaseAddress = 0x12ABCD12;
   RFduinoGZLL.begin(HOST);
 }
 
+void loop_gzll() {
+  // simulate a GZLL disconnect event
+  if ( gzllConnected && (timeNow  > gzllConnectionTimeout)) {
+    gzllConnected = false;
+    client_disconnected();
+  }
+}
+
 void RFduinoGZLL_onReceive(device_t device, int rssi, char *data, int len) {
-#ifdef RADIO_TOGGLE
   gzllConnected = true;
   gzllConnectionTimeout = timeNow + TOGGLE_GZLL_CONNECTION_TIMEOUT;
-#endif
   process_message(data, len);
 }
 
@@ -116,16 +122,16 @@ void RFduinoBLE_onReceive(char *data, int len) {
 void RFduinoBLE_onConnect() {
 #ifdef RADIO_TOGGLE
   bleConnected = true;
-#endif  
+#endif
 #ifdef DEBUG
-    Serial.println("BLE_ISCON");
+  Serial.println("BLE_ISCON");
 #endif
 }
 
 void RFduinoBLE_onDisconnect() {
-#ifdef RADIO_TOGGLE  
+#ifdef RADIO_TOGGLE
   bleConnected = false;
-#endif  
+#endif
   client_disconnected();
 }
 
@@ -153,7 +159,7 @@ void process_message(char *data, int len) {
 
 // tidyup helper for when GZLL connection timesout or BLE client disconnects
 void client_disconnected() {
-  joypad_update(0,0,0);
+  joypad_update(0, 0, 0);
 }
 
 
