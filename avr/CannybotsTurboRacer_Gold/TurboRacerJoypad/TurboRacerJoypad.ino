@@ -24,7 +24,7 @@ void setup()
 {
   Serial.begin(9600);
   pinMode(BUTTON_PIN, INPUT);
-  RFduinoGZLL.hostBaseAddress = 0x12ABCDEF;
+  //RFduinoGZLL.hostBaseAddress = 0x12ABCDEF;
   RFduinoGZLL.begin(role);
 }
 
@@ -37,7 +37,12 @@ void loop()
   snprintf(msg, MSG_LEN, "%c%c%c", xAxis, yAxis, buttonPressed );
   
   RFduinoGZLL.sendToHost((const char*)msg, MSG_LEN-1);      // don't bother sending the NULL byte at the end
-  Serial.write((uint8_t*)msg, MSG_LEN);
+  //Serial.write((uint8_t*)msg, MSG_LEN);
+  Serial.print(xAxis);
+  Serial.print("\t");  
+  Serial.print(yAxis);
+  Serial.print("\t");  
+  Serial.println(buttonPressed);
   delay(5);
 }
 
