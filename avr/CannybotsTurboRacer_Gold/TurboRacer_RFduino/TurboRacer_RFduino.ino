@@ -9,7 +9,10 @@
 // Version:   1.0  -  22.09.2014  -  Inital Version  (Wayne Keenan & Anish Mampetta)
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////
-#define DEBUG 
+
+// uncomment this to get debug message on serial 
+// #define DEBUG
+// Note that it will interfer with the operation of the motor driver, still useful though.
 
 #include <RFduinoGZLL.h>
 #include <RFduinoBLE.h>
@@ -51,7 +54,6 @@
 
 #define JOYPAD_ID 0
 #define JOYPAD_AXIS_DEADZONE 10
-#define JOYPAD_CONNECTION_TIMEOUT 10
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 /// Bot Variables
@@ -90,7 +92,6 @@ bool forceManualMode     = false;
 
 unsigned long timeNow = millis();                    // the time at the start of the loop()
 unsigned long pidLastTime = millis();                // when the PID was calculated last
-unsigned long joypadLastTime = millis();             // the time the bot last received a joypad command
 unsigned long offLineLastTime = millis();            // last time the bot came off the line
 unsigned long offTheLineTime = 0;                    // how long has the bot been off the line, total since last leaving the line
 
@@ -114,14 +115,14 @@ void setup() {
   Serial.begin(9600);
 #endif
 
-//  dumpAnalogReadingsForAllPins();
-  
+  //  dumpAnalogReadingsForAllPins();
+
   // Motor pins
   pinMode(MOTOR_A1_PIN, OUTPUT);
   pinMode(MOTOR_A2_PIN, OUTPUT);
   pinMode(MOTOR_B1_PIN, OUTPUT);
   pinMode(MOTOR_B2_PIN, OUTPUT);
-  
+
   //motorTest();
 
   radio_setup();
@@ -129,7 +130,7 @@ void setup() {
 
 void loop() {
   radio_loop();
-  
+
   timeNow = millis();
 
   readIRSensors();
@@ -189,22 +190,18 @@ void  joypadLineFollowingControlMode() {
 // Use it to map the joypad X & Y axis (which both range from -255..255) to motor speeds (also -255..255)
 
 void joypadManualControlMode() {
-  // check if we have recently received joypad input
-  if ( (timeNow - joypadLastTime) > JOYPAD_CONNECTION_TIMEOUT) {
-    // no command has been received in the last X millis, err on the side of caution and stop!
-    speedA = 0;
-    speedB = 0;
-  } else {
+
     // If the xis readings are small set them to 0
     if ( abs(xAxisValue) < JOYPAD_AXIS_DEADZONE)
       xAxisValue = 0;
     if ( abs(yAxisValue) < JOYPAD_AXIS_DEADZONE)
       yAxisValue = 0;
 
-    speedA =  (yAxisValue - (xAxisValue / 2)) / 3.0;
-    speedB =  (yAxisValue + (xAxisValue / 2)) / 3.0;
+    //speedA =  (yAxisValue + (xAxisValue / 2)) / 3.0;
+    //speedB =  (yAxisValue - (xAxisValue / 2)) / 3.0;
+    speedA =  xAxisValue;
+    speedB =  -yAxisValue;
 
-  }
 }
 
 
@@ -224,9 +221,9 @@ void readIRSensors() {
 // this is called when a data packet is received via the radio, do very little processing, just set some vars.
 // NOTE: because this is called as a background event then any printed value may be more recent than the value used in the prior PID calc.
 void joypad_update(int x, int y, int b) {
-   xAxisValue = x;
-   yAxisValue = y;
-   buttonPressed = b;
+  xAxisValue = x;
+  yAxisValue = y;
+  buttonPressed = b;
 }
 
 
@@ -236,8 +233,10 @@ void joypad_update(int x, int y, int b) {
 void motorSpeed(int _speedA, int _speedB) {
   _speedA = constrain(_speedA, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
   _speedB = constrain(_speedB, -MOTOR_MAX_SPEED, MOTOR_MAX_SPEED);
+  
   digitalWrite(MOTOR_A1_PIN, _speedA >= 0 ? HIGH : LOW) ;
   analogWrite (MOTOR_A2_PIN, abs(_speedA));
+  
   digitalWrite(MOTOR_B1_PIN, _speedB >= 0 ? HIGH : LOW);
   analogWrite (MOTOR_B2_PIN, abs(_speedB));
 }
@@ -308,9 +307,9 @@ void dumpAnalogReadingsForAllPins() {
   while (1) {
     for (int pin = 2; pin < 7; pin++) {
       analogRead(pin);
-      Serial.print(pin,DEC);
+      Serial.print(pin, DEC);
       Serial.print("=");
-      Serial.print( analogRead(pin),DEC);
+      Serial.print( analogRead(pin), DEC);
       Serial.print("\t");
     }
     Serial.println("\t");
