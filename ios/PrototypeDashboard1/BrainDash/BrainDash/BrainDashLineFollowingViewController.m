@@ -16,6 +16,7 @@
 
 @interface BrainDashLineFollowingViewController ()
 {
+    bool manualModePressed ;
 }
 @end
 
@@ -25,14 +26,13 @@
 @synthesize referenceAttitude = _referenceAttitude;
 
 
-
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         _mManager = [[CMMotionManager alloc] init];
         _referenceAttitude = nil;
-
+        manualModePressed = false;
     }
     return self;
 }
@@ -86,6 +86,7 @@ cb_app_config cbr_settings;
 #define PAUSE_HACK   [NSThread sleepForTimeInterval: 0.2];
 
 - (IBAction)goLeft:(id)sender {
+
     return;
     CannybotsController* cb = [CannybotsController sharedInstance];
 
@@ -167,9 +168,19 @@ cb_app_config cbr_settings;
 }
 
 - (IBAction)stop:(id)sender {
+    //NSLog(@"manualMode touch up inside3");
+    manualModePressed = false;
 }
 
 - (IBAction)go:(id)sender {
+    CMDeviceMotion *deviceMotion = self.mManager.deviceMotion;
+    CMAttitude *attitude         = deviceMotion.attitude;
+    self.referenceAttitude       = attitude;
+    
+}
+- (IBAction)manualModePressed:(UIButton *)sender forEvent:(UIEvent *)event {
+    //NSLog(@"manualMode");
+    manualModePressed = true;
 }
 
 - (IBAction)speedChanged:(UISlider*)sender {
@@ -200,25 +211,22 @@ long map(long x, long in_min, long in_max, long out_min, long out_max);
 // @see: http://blog.denivip.ru/index.php/2013/07/the-art-of-core-motion-in-ios/?lang=en
 // @see: https://github.com/trentbrooks/ofxCoreMotion/blob/master/ofxCoreMotion/src/ofxCoreMotion.mm
 
+static bool sendUpdate =false;
 - (void)startUpdateAccelerometer
 {
     CMDeviceMotion *deviceMotion = self.mManager.deviceMotion;
-    CMAttitude *attitude = deviceMotion.attitude;
-    self.referenceAttitude = attitude;
-    
-    
+    CMAttitude *attitude         = deviceMotion.attitude;
+    self.referenceAttitude       = attitude;
     self.mManager.deviceMotionUpdateInterval = 0.1;
- 
-    
+    sendUpdate = true;
     
     // Pitch: A pitch is a rotation around a lateral (X) axis that passes through the device from side to side
+    // pitch is rotation about the gfx x axis when in portrait mode
+    
     // Roll: A roll is a rotation around a longitudinal (Y) axis that passes through the device from its top to bottom
+    // roll  is rotation about the gfx y axis when in portrait mode
+
     // Yaw: A yaw is a rotation around an axis (Z) that runs vertically through the device. It is perpendicular to the body of the device, with its origin at the center of gravity and directed toward the bottom of the device
-    
-    //[self.mManager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion *devMotion, NSError *error) {
-    
-    //  CMAttitudeReferenceFrameXMagneticNorthZVertical
-    // CMAttitudeReferenceFrameXArbitraryCorrectedZVertical
     
     CMAttitudeReferenceFrame refFrame =CMAttitudeReferenceFrameXArbitraryCorrectedZVertical;
     
@@ -244,74 +252,42 @@ long map(long x, long in_min, long in_max, long out_min, long out_max);
         float pitch = radiansToDegrees(atan2(2*(quat.x*quat.w + quat.y*quat.z), 1 - 2*quat.x*quat.x - 2*quat.z*quat.z));
         float yaw = radiansToDegrees(asin(2*quat.x*quat.y + 2*quat.w*quat.z));
 
-        if (roll < -45)   roll = -45;
-        if (roll > 45) roll = 45;
-        if (pitch < -90) pitch = -90;
-        if (pitch > 90)  pitch = 90;
-        if (yaw < -90) yaw = -90;
-        if (yaw > 90)  yaw = 90;
-
+        if (roll < -45)  roll = -45;
+        if (roll > 45)   roll = 45;
+        //if (pitch < -90) pitch = -90;
+        //if (pitch > 90)  pitch = 90;
+        if (yaw < -90)   yaw = -90;
+        if (yaw > 90)    yaw = 90;
         
-        //uint8_t xAxis = map(-    yaw, -90,  90, 0, 255);       // pitch is rotation about the gfx x axis when in portrait mode
-        //uint8_t yAxis = map( (roll-45), -45, 135-45, 0, 255);       // roll  is rotation about the gfx y axis when in portrait mode
-        uint8_t xAxis = map(-    yaw, -90,  90, 0, 255);       // pitch is rotation about the gfx x axis when in portrait mode
-        uint8_t yAxis = map( (roll), -45,45, 0, 255);       // roll  is rotation about the gfx y axis when in portrait mode
+        uint8_t xAxis = map(-yaw,  -90, 90, 0, 255);
+        uint8_t yAxis = map( roll, -45, 45, 0, 255);
         
-        
-        NSLog(@"%f,%f,%f = %d, %d", roll, pitch, yaw, xAxis, yAxis);
-        
-        char msg[15] = {0};
-        snprintf(msg, sizeof(msg), "%c%c%c", xAxis, yAxis, 0);
-  
-        NSData *data = [NSData dataWithBytesNoCopy:msg length:3 freeWhenDone:NO];
-        BrainSpeakBLE*  bsle = [BrainSpeakBLE sharedInstance];
-        [bsle sendData:data];
+        //NSLog(@"%f,%f,%f = %d, %d", roll, pitch, yaw, xAxis, yAxis);
+        if (sendUpdate)
+            [self sendJoypadUpdate:xAxis y:yAxis b:manualModePressed];
 
     }];
 
-    /*
-    NSTimeInterval updateInterval = 0.07;
-
-    if ([self.mManager isAccelerometerAvailable] == YES) {
-        [self.mManager setAccelerometerUpdateInterval:updateInterval];
-        
-        
-        [self.mManager startAccelerometerUpdatesToQueue:[NSOperationQueue currentQueue] withHandler:^(CMAccelerometerData *accelerometerData, NSError *error)
-         {
-     
-             NSLog(@"%f,%f", accelerometerData.acceleration.x, accelerometerData.acceleration.y);
-     
-             char msg[15] = {0};
-             //float xAxis= accelerometerData.acceleration.x * 255.0;
-             //float yAxis= accelerometerData.acceleration.y * 255.0;
-             float xAxis= accelerometerData.acceleration.x * 255.0;
-             float yAxis= accelerometerData.acceleration.y * 255.0;
-             
-             snprintf(msg, sizeof(msg), "%c%c%c",
-                      map(yAxis, -255,255, 0, 255),
-                      map(xAxis, -255,255, 0, 255),
-                      0);
-             
-             NSData *data = [NSData dataWithBytesNoCopy:msg length:3 freeWhenDone:NO];
-             BrainSpeakBLE*  bsle = [BrainSpeakBLE sharedInstance];
-             [bsle sendData:data];
-         }];
-    }
-     */
-    
 }
 
 - (void)stopUpdate
 {
-    if ([self.mManager isAccelerometerActive] == YES)
+    if ([self.mManager isDeviceMotionActive] == YES)
     {
-        [self.mManager stopAccelerometerUpdates];
+        sendUpdate = false;
         [self.mManager stopDeviceMotionUpdates];
+        [self sendJoypadUpdate:0x7f y:0x7f b:0];
     }
     
 }
 
-
+- (void) sendJoypadUpdate:(uint8_t)x y:(uint8_t)y b:(uint8_t)b {
+    char msg[15] = {0};
+    snprintf(msg, sizeof(msg), "%c%c%c", x, y, b);
+    NSData *data = [NSData dataWithBytesNoCopy:msg length:3 freeWhenDone:NO];
+    BrainSpeakBLE*  bsle = [BrainSpeakBLE sharedInstance];
+    [bsle sendData:data];
+}
 
 
 

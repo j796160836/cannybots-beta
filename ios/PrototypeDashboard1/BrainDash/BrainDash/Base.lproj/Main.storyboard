@@ -43,7 +43,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OAa-so-AIL" userLabel="Go">
-                                <rect key="frame" x="137" y="339" width="183" height="128"/>
+                                <rect key="frame" x="-15" y="147" width="183" height="128"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" image="Button Play.png">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -53,16 +53,17 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jEl-Ay-irU" userLabel="Stop">
-                                <rect key="frame" x="-6" y="339" width="183" height="128"/>
+                                <rect key="frame" x="-15" y="317" width="183" height="128"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" image="Button Stop.png">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
+                                    <action selector="manualModePressed:forEvent:" destination="W2C-3U-v7E" eventType="touchDown" id="bVf-yh-71R"/>
                                     <action selector="stop:" destination="W2C-3U-v7E" eventType="touchUpInside" id="oD2-Lg-7OQ"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Mou-FC-GbV" userLabel="Right">
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Mou-FC-GbV" userLabel="Right">
                                 <rect key="frame" x="168" y="147" width="183" height="128"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" image="Arrow Left 3.png">
@@ -72,7 +73,7 @@
                                     <action selector="goRight:" destination="W2C-3U-v7E" eventType="touchUpInside" id="Okj-xj-SSF"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vWN-ZE-14V" userLabel="Left">
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vWN-ZE-14V" userLabel="Left">
                                 <rect key="frame" x="-31" y="147" width="183" height="128"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" image="Arrow Right 3.png">
@@ -82,7 +83,7 @@
                                     <action selector="goLeft:" destination="W2C-3U-v7E" eventType="touchUpInside" id="GnR-fF-wdd"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FdF-2l-fSL" userLabel="Swith">
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FdF-2l-fSL" userLabel="Swith">
                                 <rect key="frame" x="69" y="54" width="183" height="128"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" image="Button Shuffle.png">
@@ -92,7 +93,7 @@
                                     <action selector="swapLanes:" destination="W2C-3U-v7E" eventType="touchUpInside" id="RwF-Qf-6Xz"/>
                                 </connections>
                             </button>
-                            <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.40000000000000002" minValue="0.0" maxValue="1" minimumValueImage="Speed Low.png" maximumValueImage="Speed High.png" translatesAutoresizingMaskIntoConstraints="NO" id="3Nv-3J-5eI" userLabel="Speed">
+                            <slider hidden="YES" opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.40000000000000002" minValue="0.0" maxValue="1" minimumValueImage="Speed Low.png" maximumValueImage="Speed High.png" translatesAutoresizingMaskIntoConstraints="NO" id="3Nv-3J-5eI" userLabel="Speed">
                                 <rect key="frame" x="18" y="294" width="284" height="38"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <connections>

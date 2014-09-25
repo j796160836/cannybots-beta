@@ -59,7 +59,7 @@
 
 
 - (void) viewDidAppear:(BOOL)animated {
-
+    return;
     CannybotsController* cb = [CannybotsController sharedInstance];
     [cb registerHandler:&RACER_PID withBlockFor_INT16_3: ^(int16_t p1, int16_t p2, int16_t p3)
      {
