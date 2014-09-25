@@ -268,12 +268,15 @@
 - (void)sendData:(NSData*)newData{
     //Output data to UART peripheral
     NSString *hexString = [newData hexRepresentationWithSpaces:YES];
-    NSLog(@"Sending: %@", hexString);
+    //NSLog(@"Sending: %@", hexString);
     [_currentPeripheral writeRawData:newData];
 }
 
 // called by the UART
 - (void) didReceiveData:(NSData*)newData{
+    NSString *hexString = [newData hexRepresentationWithSpaces:YES];
+    //NSLog(@"Received: %@", hexString);
+    NSLog(@"BLE_DBG: %@", [[NSString alloc] initWithData:newData encoding:NSUTF8StringEncoding]);
     [self.cbdelegate didReceiveData:newData];
     
 }

@@ -352,7 +352,7 @@
 	canRotateToAllOrientations = YES;
 }
 
-- (BOOL) shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
+- (BOOL) shouldAutorotateToInterfaceOrientationOLD:(UIInterfaceOrientation)toInterfaceOrientation
 {
 	//	(iOS 5)
 	//	If we can auto rotate then only all orientations except upside down
@@ -362,13 +362,13 @@
 	return (toInterfaceOrientation == self.preferredInterfaceOrientationForPresentation);
 }
 
-- (BOOL) shouldAutorotate
+- (BOOL) shouldAutorotateOLD
 {
 	//	(iOS 6)
 	//	Only auto rotate if we're on the screen (see above)
 	return canRotateToAllOrientations;
 }
-- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation
+- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentationOLD
 {
 	//	(iOS 6)
 	//	Prefer (force) landscape

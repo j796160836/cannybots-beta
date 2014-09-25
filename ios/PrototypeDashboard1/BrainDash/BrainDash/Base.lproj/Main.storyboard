@@ -12,7 +12,7 @@
                     <nil key="simulatedStatusBarMetrics"/>
                     <nil key="simulatedTopBarMetrics"/>
                     <nil key="simulatedBottomBarMetrics"/>
-                    <simulatedOrientationMetrics key="simulatedOrientationMetrics" orientation="landscapeRight"/>
+                    <simulatedOrientationMetrics key="simulatedOrientationMetrics"/>
                     <tabBar key="tabBar" contentMode="scaleToFill" id="rKx-O1-a57">
                         <rect key="frame" x="129" y="330" width="163" height="49"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
@@ -39,7 +39,7 @@
                         <viewControllerLayoutGuide type="bottom" id="HHj-mV-pXk"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="jLZ-Vp-XqQ">
-                        <rect key="frame" x="0.0" y="0.0" width="568" height="320"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OAa-so-AIL" userLabel="Go">
@@ -105,7 +105,6 @@
                             </imageView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                        <simulatedOrientationMetrics key="simulatedOrientationMetrics" orientation="landscapeRight"/>
                     </view>
                     <tabBarItem key="tabBarItem" title="" image="Arrow Up 3.png" id="kJt-Mt-Wri"/>
                 </viewController>
@@ -204,7 +203,7 @@
                         <viewControllerLayoutGuide type="bottom" id="Vsu-je-H1O"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="t7x-xE-goY">
-                        <rect key="frame" x="0.0" y="0.0" width="568" height="320"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <segmentedControl hidden="YES" opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="fDW-eq-zwW">
@@ -234,12 +233,12 @@
                                 </connections>
                             </slider>
                             <view opaque="NO" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3eX-5C-B1n" userLabel="Joypad View">
-                                <rect key="frame" x="0.0" y="0.0" width="568" height="263"/>
+                                <rect key="frame" x="0.0" y="89" width="320" height="303"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                             </view>
                             <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="Cannybots_Logo_2000x446.png" translatesAutoresizingMaskIntoConstraints="NO" id="Dua-Ne-KFU">
-                                <rect key="frame" x="332" y="0.0" width="236" height="56"/>
+                                <rect key="frame" x="6" y="0.0" width="320" height="57"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                             </imageView>
                             <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Laps" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cJl-QE-Wte">
@@ -291,7 +290,6 @@
                             </textField>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                        <simulatedOrientationMetrics key="simulatedOrientationMetrics" orientation="landscapeRight"/>
                     </view>
                     <tabBarItem key="tabBarItem" title="" image="Game Pad.png" id="UfL-k4-uce"/>
                     <connections>
@@ -539,7 +537,7 @@
                         <viewControllerLayoutGuide type="bottom" id="L4W-0v-O9D"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="B1F-KF-dlC">
-                        <rect key="frame" x="0.0" y="0.0" width="568" height="320"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <segmentedControl hidden="YES" opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="P3a-z9-nnl">
@@ -557,7 +555,7 @@
                                 </connections>
                             </segmentedControl>
                             <stepper opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" maximumValue="65535" translatesAutoresizingMaskIntoConstraints="NO" id="Lyl-CR-Crq" userLabel="PID P Stepper">
-                                <rect key="frame" x="206" y="-151" width="94" height="29"/>
+                                <rect key="frame" x="206" y="97" width="94" height="29"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <connections>
                                     <action selector="pStepperValueChanged:" destination="UG3-Gk-tOv" eventType="valueChanged" id="QcB-r6-oPF"/>
@@ -629,7 +627,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <stepper opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" maximumValue="65535" translatesAutoresizingMaskIntoConstraints="NO" id="xXZ-nN-Twm" userLabel="PID P Stepper">
-                                <rect key="frame" x="206" y="-108" width="94" height="29"/>
+                                <rect key="frame" x="206" y="140" width="94" height="29"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <connections>
                                     <action selector="iStepperValueChanged:" destination="UG3-Gk-tOv" eventType="valueChanged" id="MEX-hv-P8w"/>
@@ -653,7 +651,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <stepper opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" maximumValue="65535" translatesAutoresizingMaskIntoConstraints="NO" id="EY1-iU-Duj" userLabel="PID P Stepper">
-                                <rect key="frame" x="206" y="-64" width="94" height="29"/>
+                                <rect key="frame" x="206" y="184" width="94" height="29"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <connections>
                                     <action selector="dStepperValueChanged:" destination="UG3-Gk-tOv" eventType="valueChanged" id="BBs-HI-3o0"/>
@@ -677,7 +675,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <stepper hidden="YES" opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" maximumValue="255" stepValue="5" translatesAutoresizingMaskIntoConstraints="NO" id="5kI-Go-jaC" userLabel="PID P Stepper">
-                                <rect key="frame" x="204" y="-19" width="94" height="29"/>
+                                <rect key="frame" x="204" y="229" width="94" height="29"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <connections>
                                     <action selector="ledBrightnessValueChanged:" destination="UG3-Gk-tOv" eventType="valueChanged" id="iUa-sG-b7v"/>
@@ -757,7 +755,6 @@
                             </view>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                        <simulatedOrientationMetrics key="simulatedOrientationMetrics" orientation="landscapeRight"/>
                     </view>
                     <tabBarItem key="tabBarItem" title="" image="Control Panel.png" id="LHb-ji-rgb"/>
                     <connections>
@@ -793,7 +790,7 @@
                         <viewControllerLayoutGuide type="bottom" id="UFJ-Ps-nVt"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="GFE-GP-pTA">
-                        <rect key="frame" x="0.0" y="0.0" width="568" height="320"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="Cannybots_Logo_2000x446.png" translatesAutoresizingMaskIntoConstraints="NO" id="UWm-Ax-T5r">
@@ -801,7 +798,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             </imageView>
                             <pickerView contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="AGG-IU-iUJ">
-                                <rect key="frame" x="0.0" y="97" width="568" height="162"/>
+                                <rect key="frame" x="0.0" y="97" width="320" height="162"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                             </pickerView>
                             <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zEr-L7-fqg">
@@ -885,7 +882,6 @@
                             </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                        <simulatedOrientationMetrics key="simulatedOrientationMetrics" orientation="landscapeRight"/>
                     </view>
                     <tabBarItem key="tabBarItem" title="" image="Gears.png" id="1Ve-9l-X2a"/>
                 </viewController>
@@ -902,7 +898,7 @@
                         <viewControllerLayoutGuide type="bottom" id="yyN-xJ-21c"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="mB5-aq-dRu">
-                        <rect key="frame" x="0.0" y="0.0" width="568" height="320"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="Cannybots_Logo_2000x446.png" translatesAutoresizingMaskIntoConstraints="NO" id="UhP-kL-rkN">
@@ -910,7 +906,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             </imageView>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="ctF-Oc-hhz">
-                                <rect key="frame" x="0.0" y="169" width="568" height="102"/>
+                                <rect key="frame" x="0.0" y="169" width="320" height="350"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <connections>
@@ -959,7 +955,6 @@
                             </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                        <simulatedOrientationMetrics key="simulatedOrientationMetrics" orientation="landscapeRight"/>
                     </view>
                     <tabBarItem key="tabBarItem" title="" image="Clock.png" id="sVP-cH-TD4"/>
                     <connections>

@@ -6,8 +6,11 @@
 //  Copyright (c) 2014 CannyBots. All rights reserved.
 //
 
+
+
 #import "BrainDashLineFollowingViewController.h"
 #import <CannybotsController.h>
+#import "BrainSpeakBLE.h"
 
 #import "CannybotsRacerGlu.h"
 
@@ -18,29 +21,41 @@
 
 @implementation BrainDashLineFollowingViewController
 
+@synthesize mManager = _mManager;
+@synthesize referenceAttitude = _referenceAttitude;
+
+
+
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        // Custom initialization
+        _mManager = [[CMMotionManager alloc] init];
+        _referenceAttitude = nil;
+
     }
     return self;
 }
+
+
 
 cb_app_config cbr_settings;
 
 - (void)viewDidLoad
 {
     
-    cannybotsRacerGlu_setupConfig(&cbr_settings);
+    //cannybotsRacerGlu_setupConfig(&cbr_settings);
 
     [super viewDidLoad];
 }
 
 - (void) viewDidAppear:(BOOL)animated {
+    [self startUpdateAccelerometer ];
 }
 
 - (void) viewWillDisappear:(BOOL)animated {
+    [self stopUpdate];
+    
 }   
 
 - (void)didReceiveMemoryWarning
@@ -71,7 +86,7 @@ cb_app_config cbr_settings;
 #define PAUSE_HACK   [NSThread sleepForTimeInterval: 0.2];
 
 - (IBAction)goLeft:(id)sender {
-
+    return;
     CannybotsController* cb = [CannybotsController sharedInstance];
 
     //[cb setConfigParameter_UINT32:&cfg_type p1:0xFF00FF00]; PAUSE_HACK;
@@ -140,6 +155,7 @@ cb_app_config cbr_settings;
 }
 
 - (IBAction)goRight:(id)sender {
+    return;
     [self goLeft:sender];
     
     CannybotsController* cb = [CannybotsController sharedInstance];
@@ -164,5 +180,139 @@ cb_app_config cbr_settings;
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     return YES;
 }
+
+// Core Motion
+
+- (CMMotionManager *)mManager
+{
+    if (!_mManager) {
+        _mManager = [[CMMotionManager alloc] init];
+    }
+    return _mManager;
+}
+
+#define radiansToDegrees(x) (180/M_PI)*x
+
+
+long map(long x, long in_min, long in_max, long out_min, long out_max);
+
+// @see:  http://wwwbruegge.in.tum.de/lehrstuhl_1/home/98-teaching/tutorials/505-sgd-ws13-tutorial-core-motion
+// @see: http://blog.denivip.ru/index.php/2013/07/the-art-of-core-motion-in-ios/?lang=en
+// @see: https://github.com/trentbrooks/ofxCoreMotion/blob/master/ofxCoreMotion/src/ofxCoreMotion.mm
+
+- (void)startUpdateAccelerometer
+{
+    CMDeviceMotion *deviceMotion = self.mManager.deviceMotion;
+    CMAttitude *attitude = deviceMotion.attitude;
+    self.referenceAttitude = attitude;
+    
+    
+    self.mManager.deviceMotionUpdateInterval = 0.1;
+ 
+    
+    
+    // Pitch: A pitch is a rotation around a lateral (X) axis that passes through the device from side to side
+    // Roll: A roll is a rotation around a longitudinal (Y) axis that passes through the device from its top to bottom
+    // Yaw: A yaw is a rotation around an axis (Z) that runs vertically through the device. It is perpendicular to the body of the device, with its origin at the center of gravity and directed toward the bottom of the device
+    
+    //[self.mManager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion *devMotion, NSError *error) {
+    
+    //  CMAttitudeReferenceFrameXMagneticNorthZVertical
+    // CMAttitudeReferenceFrameXArbitraryCorrectedZVertical
+    
+    CMAttitudeReferenceFrame refFrame =CMAttitudeReferenceFrameXArbitraryCorrectedZVertical;
+    
+    if ( ! ([CMMotionManager availableAttitudeReferenceFrames] & refFrame)) {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"CoreMotion Error"
+                                                        message:@"Request reference frame not available."
+                                                       delegate:nil
+                                              cancelButtonTitle:@"OK"
+                                              otherButtonTitles:nil];
+        [alert show];
+    }
+    
+    [self.mManager startDeviceMotionUpdatesUsingReferenceFrame:refFrame toQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion *devMotion, NSError *error) {
+        
+        CMDeviceMotion *deviceMotion = self.mManager.deviceMotion;
+        CMAttitude *attitude = deviceMotion.attitude;
+        if (self.referenceAttitude != nil ) {
+            [attitude multiplyByInverseOfAttitude:self.referenceAttitude];
+        }
+        
+        CMQuaternion quat = attitude.quaternion;
+        float roll = radiansToDegrees(atan2(2*(quat.y*quat.w - quat.x*quat.z), 1 - 2*quat.y*quat.y - 2*quat.z*quat.z)) ;
+        float pitch = radiansToDegrees(atan2(2*(quat.x*quat.w + quat.y*quat.z), 1 - 2*quat.x*quat.x - 2*quat.z*quat.z));
+        float yaw = radiansToDegrees(asin(2*quat.x*quat.y + 2*quat.w*quat.z));
+
+        if (roll < -45)   roll = -45;
+        if (roll > 45) roll = 45;
+        if (pitch < -90) pitch = -90;
+        if (pitch > 90)  pitch = 90;
+        if (yaw < -90) yaw = -90;
+        if (yaw > 90)  yaw = 90;
+
+        
+        //uint8_t xAxis = map(-    yaw, -90,  90, 0, 255);       // pitch is rotation about the gfx x axis when in portrait mode
+        //uint8_t yAxis = map( (roll-45), -45, 135-45, 0, 255);       // roll  is rotation about the gfx y axis when in portrait mode
+        uint8_t xAxis = map(-    yaw, -90,  90, 0, 255);       // pitch is rotation about the gfx x axis when in portrait mode
+        uint8_t yAxis = map( (roll), -45,45, 0, 255);       // roll  is rotation about the gfx y axis when in portrait mode
+        
+        
+        NSLog(@"%f,%f,%f = %d, %d", roll, pitch, yaw, xAxis, yAxis);
+        
+        char msg[15] = {0};
+        snprintf(msg, sizeof(msg), "%c%c%c", xAxis, yAxis, 0);
+  
+        NSData *data = [NSData dataWithBytesNoCopy:msg length:3 freeWhenDone:NO];
+        BrainSpeakBLE*  bsle = [BrainSpeakBLE sharedInstance];
+        [bsle sendData:data];
+
+    }];
+
+    /*
+    NSTimeInterval updateInterval = 0.07;
+
+    if ([self.mManager isAccelerometerAvailable] == YES) {
+        [self.mManager setAccelerometerUpdateInterval:updateInterval];
+        
+        
+        [self.mManager startAccelerometerUpdatesToQueue:[NSOperationQueue currentQueue] withHandler:^(CMAccelerometerData *accelerometerData, NSError *error)
+         {
+     
+             NSLog(@"%f,%f", accelerometerData.acceleration.x, accelerometerData.acceleration.y);
+     
+             char msg[15] = {0};
+             //float xAxis= accelerometerData.acceleration.x * 255.0;
+             //float yAxis= accelerometerData.acceleration.y * 255.0;
+             float xAxis= accelerometerData.acceleration.x * 255.0;
+             float yAxis= accelerometerData.acceleration.y * 255.0;
+             
+             snprintf(msg, sizeof(msg), "%c%c%c",
+                      map(yAxis, -255,255, 0, 255),
+                      map(xAxis, -255,255, 0, 255),
+                      0);
+             
+             NSData *data = [NSData dataWithBytesNoCopy:msg length:3 freeWhenDone:NO];
+             BrainSpeakBLE*  bsle = [BrainSpeakBLE sharedInstance];
+             [bsle sendData:data];
+         }];
+    }
+     */
+    
+}
+
+- (void)stopUpdate
+{
+    if ([self.mManager isAccelerometerActive] == YES)
+    {
+        [self.mManager stopAccelerometerUpdates];
+        [self.mManager stopDeviceMotionUpdates];
+    }
+    
+}
+
+
+
+
 
 @end
