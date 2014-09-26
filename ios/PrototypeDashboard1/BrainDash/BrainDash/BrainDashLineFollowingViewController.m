@@ -223,18 +223,14 @@
     
     // Forward/Backward
 
-    roll = roll * self.invertThrottleSwitch.on?-1:1;
+    if (self.invertThrottleSwitch.on)
+        roll = roll * -1;
     
     // Turning
     if (self.invertDirectionSwitch.on) {
         pitch = pitch * -1;
         yaw   = yaw   * -1;
     }
-    
-    //pitch = map(pitch, _minPitch, _maxPitch, 0, 255);
-    //yaw   = map(  yaw, _minYaw, _maxYaw,     0, 255);
-    //roll  = map( roll, _minRoll, _maxRoll,   0, 255);
-
     NSLog(@"INV? : roll/throttle=(%.0f), pitch/handlebars=(%.0f), yaw/steer=(%.0f)",  roll, pitch, yaw);
 
     float xAxis = 0;
@@ -260,9 +256,7 @@
             break;
 
     }
-    //pitch = map(pitch, _minPitch, _maxPitch, 0, 255);
-    //yaw   = map(  yaw, _minYaw, _maxYaw,     0, 255);
-    //roll  = map( roll, _minRoll, _maxRoll,   0, 255);
+
     uint8_t xAxisByte  = map(xAxis, -180, 180, 0,255);
     uint8_t yAxisByte  = map(yAxis, -180, 180, 0,255);
     NSLog(@"maxR=%d,maxP=%d,maxY=%d\t\t%d,%d",
