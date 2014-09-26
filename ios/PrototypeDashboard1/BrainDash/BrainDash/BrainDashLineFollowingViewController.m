@@ -12,11 +12,12 @@
 #import <CannybotsController.h>
 #import "BrainSpeakBLE.h"
 
-#import "CannybotsRacerGlu.h"
 
 @interface BrainDashLineFollowingViewController ()
 {
     bool manualModePressed ;
+    bool sendUpdate;
+    int  currentControlMode;
 }
 @end
 
@@ -33,166 +34,77 @@
         _mManager = [[CMMotionManager alloc] init];
         _referenceAttitude = nil;
         manualModePressed = false;
+
+        
     }
     return self;
 }
 
-
-
-cb_app_config cbr_settings;
-
-- (void)viewDidLoad
-{
-    
-    //cannybotsRacerGlu_setupConfig(&cbr_settings);
-
+- (void)viewDidLoad {
     [super viewDidLoad];
+    //self.wheelSlider.value = 45;
+    //self.handlebarSlider.value = 45;
+    //self.accelSlider.value = 45;
+    //rself.controlModeSegment.selectedSegmentIndex=0;
+    
+    [self accelChanged:self.accelSlider];
+    [self wheelChanged:self.wheelSlider];
+    [self handlebarChanged:self.handlebarSlider];
+    [self controlModeChanged:self.controlModeSegment];
 }
 
 - (void) viewDidAppear:(BOOL)animated {
-    [self startUpdateAccelerometer ];
 }
 
 - (void) viewWillDisappear:(BOOL)animated {
     [self stopUpdate];
-    
 }   
 
-- (void)didReceiveMemoryWarning
-{
+- (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
-{
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}3
-*/
+// Button presses
 - (IBAction)swapLanes:(id)sender {
-    CannybotsController* cb = [CannybotsController sharedInstance];
-    
-    //NSArray* configDescriptors =
-    [cb getConfigParameterList]; // result returned async
-
-    //NSLog(@"Config Params: %@",configDescriptors);
 }
-
-#define PAUSE_HACK   [NSThread sleepForTimeInterval: 0.2];
 
 - (IBAction)goLeft:(id)sender {
-
-    return;
-    CannybotsController* cb = [CannybotsController sharedInstance];
-
-    //[cb setConfigParameter_UINT32:&cfg_type p1:0xFF00FF00]; PAUSE_HACK;
-    [cb setConfigParameter_UINT16:&cfg_id p1:0x0707];    PAUSE_HACK;
-    [cb setConfigParameter_UINT16:&cfg_version p1:0x0101];    PAUSE_HACK;
-    //[cb setConfigParameter_UINT32:&cfg_authentication_pin p1:0x01020304]; PAUSE_HACK;
-
-    
-    [cb setConfigParameter_UINT8:&cfg_battery_hasSense p1:0];    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_battery_pin_sense p1:0];    PAUSE_HACK;
-
-    
-    [cb setConfigParameter_INT16:&cfg_ir_max   p1:1000];    PAUSE_HACK;
-    [cb setConfigParameter_INT16:&cfg_ir_whiteThreshold   p1:700];    PAUSE_HACK;
-
-    
-    // TODO: crate convineice for Arduiono pins
-    [cb setConfigParameter_UINT8:&cfg_ir_pin_1 p1:24]; PAUSE_HACK; // A6
-    [cb setConfigParameter_UINT8:&cfg_ir_pin_2 p1:26]; PAUSE_HACK; // A8
-    [cb setConfigParameter_UINT8:&cfg_ir_pin_3 p1:29]; PAUSE_HACK; // A10
-    
-    [cb setConfigParameter_UINT8:&cfg_ir_bias_1 p1:1]; PAUSE_HACK; // A6
-    [cb setConfigParameter_UINT8:&cfg_ir_bias_2 p1:2]; PAUSE_HACK; // A8
-    [cb setConfigParameter_UINT8:&cfg_ir_bias_3 p1:3]; PAUSE_HACK; // A10
-    
-
-    [cb setConfigParameter_UINT8:&cfg_motorDriver_type p1:0];    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorDriver_driveModePin p1:2];    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorDriver_maxSpeed p1:255];    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorDriver_hasDriveMode p1:1];    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorDriver_hasMotorSense p1:0];    PAUSE_HACK;
-
-
-    [cb setConfigParameter_UINT8:&cfg_motorA_pin_1 p1:3];    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorA_pin_2 p1:5];    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorA_pin_sense p1:0];    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorA_postiveSpeedisFwd p1:1];    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorA_id p1:0];    PAUSE_HACK;
-
-    [cb setConfigParameter_UINT8:&cfg_motorB_pin_1 p1:6];    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorB_pin_2 p1:9];    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorB_pin_sense p1:0];    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorB_postiveSpeedisFwd p1:1];    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorB_id p1:1];    PAUSE_HACK;
-
-    [cb setConfigParameter_UINT8:&cfg_motor_speedSmoothingDivisions p1:1];    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motor_speedSmoothingMaxDelta p1:255];    PAUSE_HACK;
-
-    [cb setConfigParameter_INT16:&cfg_pid_p   p1:3];    PAUSE_HACK;
-    [cb setConfigParameter_INT16:&cfg_pid_i   p1:0];    PAUSE_HACK;
-    [cb setConfigParameter_INT16:&cfg_pid_d   p1:1];    PAUSE_HACK;
-    [cb setConfigParameter_INT16:&cfg_pid_divisor   p1:10];    PAUSE_HACK;
-    [cb setConfigParameter_INT16:&cfg_pid_sampleTime   p1:5];    PAUSE_HACK;
-
-
-    [cb setConfigParameter_UINT8:&cfg_joystick_xAxisDeadzone p1:50];    PAUSE_HACK;
-
-    [cb setConfigParameter_UINT8:&cfg_cruiseSpeed_defaultSpeed p1:120];    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_cruiseSpeed_manualMaxSpeed p1:255];    PAUSE_HACK;
-    
-    [cb setConfigParameter_INT16:&cfg_offLineMaxTime   p1:200];    PAUSE_HACK;
-    [cb setConfigParameter_UINT16:&cfg_info_printValsInterval p1:1000];    PAUSE_HACK;
-    
-    [cb setConfigParameter_BOOL:&cfg_debugFlag p1:false];    PAUSE_HACK;
-
 }
 
 - (IBAction)goRight:(id)sender {
-    return;
-    [self goLeft:sender];
-    
-    CannybotsController* cb = [CannybotsController sharedInstance];
-
-    [cb setConfigParameter_UINT16:&cfg_id p1:0x0123];    PAUSE_HACK;
-
-    [cb setConfigParameter_UINT8:&cfg_motorA_postiveSpeedisFwd p1:0];    PAUSE_HACK;
-    [cb setConfigParameter_UINT8:&cfg_motorB_postiveSpeedisFwd p1:0];    PAUSE_HACK;
 }
 
+
 - (IBAction)stop:(id)sender {
-    //NSLog(@"manualMode touch up inside3");
     manualModePressed = false;
+}
+- (IBAction)manualModePressed:(UIButton *)sender forEvent:(UIEvent *)event {
+    manualModePressed = true;
+    [self startUpdateAccelerometer ];
+    [self resetReferenceFrameToCurrent];
 }
 
 - (IBAction)go:(id)sender {
-    CMDeviceMotion *deviceMotion = self.mManager.deviceMotion;
-    CMAttitude *attitude         = deviceMotion.attitude;
-    self.referenceAttitude       = attitude;
-    
-}
-- (IBAction)manualModePressed:(UIButton *)sender forEvent:(UIEvent *)event {
-    //NSLog(@"manualMode");
-    manualModePressed = true;
+    [self startUpdateAccelerometer ];
+    [self resetReferenceFrameToCurrent];
 }
 
+
 - (IBAction)speedChanged:(UISlider*)sender {
-    int speed= (int)(sender.value * 255);
-    NSLog(@"Speed = %d", speed);
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     return YES;
 }
 
+
 // Core Motion
+
+- (void) resetReferenceFrameToCurrent {
+    CMDeviceMotion *deviceMotion = self.mManager.deviceMotion;
+    CMAttitude *attitude         = deviceMotion.attitude;
+    self.referenceAttitude       = attitude;
+}
 
 - (CMMotionManager *)mManager
 {
@@ -202,16 +114,10 @@ cb_app_config cbr_settings;
     return _mManager;
 }
 
-#define radiansToDegrees(x) (180/M_PI)*x
-
-
-long map(long x, long in_min, long in_max, long out_min, long out_max);
-
 // @see:  http://wwwbruegge.in.tum.de/lehrstuhl_1/home/98-teaching/tutorials/505-sgd-ws13-tutorial-core-motion
 // @see: http://blog.denivip.ru/index.php/2013/07/the-art-of-core-motion-in-ios/?lang=en
 // @see: https://github.com/trentbrooks/ofxCoreMotion/blob/master/ofxCoreMotion/src/ofxCoreMotion.mm
 
-static bool sendUpdate =false;
 - (void)startUpdateAccelerometer
 {
     CMDeviceMotion *deviceMotion = self.mManager.deviceMotion;
@@ -219,15 +125,7 @@ static bool sendUpdate =false;
     self.referenceAttitude       = attitude;
     self.mManager.deviceMotionUpdateInterval = 0.1;
     sendUpdate = true;
-    
-    // Pitch: A pitch is a rotation around a lateral (X) axis that passes through the device from side to side
-    // pitch is rotation about the gfx x axis when in portrait mode
-    
-    // Roll: A roll is a rotation around a longitudinal (Y) axis that passes through the device from its top to bottom
-    // roll  is rotation about the gfx y axis when in portrait mode
 
-    // Yaw: A yaw is a rotation around an axis (Z) that runs vertically through the device. It is perpendicular to the body of the device, with its origin at the center of gravity and directed toward the bottom of the device
-    
     CMAttitudeReferenceFrame refFrame =CMAttitudeReferenceFrameXArbitraryCorrectedZVertical;
     
     if ( ! ([CMMotionManager availableAttitudeReferenceFrames] & refFrame)) {
@@ -246,26 +144,11 @@ static bool sendUpdate =false;
         if (self.referenceAttitude != nil ) {
             [attitude multiplyByInverseOfAttitude:self.referenceAttitude];
         }
-        
         CMQuaternion quat = attitude.quaternion;
         float roll = radiansToDegrees(atan2(2*(quat.y*quat.w - quat.x*quat.z), 1 - 2*quat.y*quat.y - 2*quat.z*quat.z)) ;
         float pitch = radiansToDegrees(atan2(2*(quat.x*quat.w + quat.y*quat.z), 1 - 2*quat.x*quat.x - 2*quat.z*quat.z));
         float yaw = radiansToDegrees(asin(2*quat.x*quat.y + 2*quat.w*quat.z));
-
-        if (roll < -45)  roll = -45;
-        if (roll > 45)   roll = 45;
-        //if (pitch < -90) pitch = -90;
-        //if (pitch > 90)  pitch = 90;
-        if (yaw < -90)   yaw = -90;
-        if (yaw > 90)    yaw = 90;
-        
-        uint8_t xAxis = map(-yaw,  -90, 90, 0, 255);
-        uint8_t yAxis = map( roll, -45, 45, 0, 255);
-        
-        //NSLog(@"%f,%f,%f = %d, %d", roll, pitch, yaw, xAxis, yAxis);
-        if (sendUpdate)
-            [self sendJoypadUpdate:xAxis y:yAxis b:manualModePressed];
-
+        [self updateOrientationPitch:pitch roll:roll yaw:yaw];
     }];
 
 }
@@ -281,6 +164,114 @@ static bool sendUpdate =false;
     
 }
 
+// snesitivity of 'acceleration' (pitch)
+- (IBAction)accelChanged:(UISlider *)sender {
+    
+    self.maxRoll = sender.maximumValue-sender.value;
+    self.minRoll = -self.maxRoll;
+    NSLog(@"accelChanged=%f", sender.value);
+}
+
+// snesitivity of 'wheel' mode (yaw)
+- (IBAction)wheelChanged:(UISlider *)sender {
+    self.maxYaw = sender.maximumValue-sender.value;
+    self.minYaw = -self.maxYaw;
+    NSLog(@"wheelChanged=%f", sender.value);
+}
+
+// snesitivity of 'handlebars' (roll)
+- (IBAction)handlebarChanged:(UISlider *)sender {
+    self.maxPitch = sender.maximumValue-sender.value;
+    self.minPitch = -self.maxPitch;
+    NSLog(@"handlebarChanged=%f", sender.value);
+
+}
+- (IBAction)controlModeChanged:(UISegmentedControl *)sender {
+    currentControlMode = sender.selectedSegmentIndex;
+    NSLog(@"controlModeChanged=%d", currentControlMode);
+}
+
+- (void) updateOrientationPitch:(float)pitch roll:(float)roll yaw:(float)yaw {
+    
+    // Pitch: A pitch is a rotation around a lateral (X) axis that passes through the device from side to side
+    // pitch is rotation about the gfx x axis when in portrait mode
+    
+    // Roll: A roll is a rotation around a longitudinal (Y) axis that passes through the device from its top to bottom
+    // roll  is rotation about the gfx y axis when in portrait mode
+    
+    // Yaw: A yaw is a rotation around an axis (Z) that runs vertically through the device. It is perpendicular to the body of the device, with its origin at the center of gravity and directed toward the bottom of the device
+    NSLog(@"INPUT: roll/throttle=(%.0f), pitch/handlebars=(%.0f), yaw/steer=(%.0f)",  roll, pitch, yaw);
+    
+    
+    if (roll < self.minRoll)  roll = self.minRoll;
+    if (roll > self.maxRoll)  roll = self.maxRoll;
+    if (pitch < self.minPitch) pitch = self.minPitch;
+    if (pitch > self.maxPitch) pitch = self.maxPitch;
+    if (yaw < self.minYaw)   yaw = self.minYaw;
+    if (yaw > self.maxYaw)   yaw = self.maxYaw;
+    NSLog(@"CLAMP: roll/throttle=(%.0f), pitch/handlebars=(%.0f), yaw/steer=(%.0f)",  roll, pitch, yaw);
+
+    if (pitch !=0.0)
+        pitch = map(pitch, self.minPitch, self.maxPitch, -180, 180);
+    if (yaw !=0.0)
+        yaw   = map(  yaw, self.minYaw, self.maxYaw,     -180, 180);
+    if (roll !=0.0)
+        roll  = map( roll, self.minRoll, self.maxRoll,   -180, 180);
+    NSLog(@"MAP  : roll/throttle=(%.0f), pitch/handlebars=(%.0f), yaw/steer=(%.0f)",  roll, pitch, yaw);
+
+    
+    
+    // Forward/Backward
+
+    roll = roll * self.invertThrottleSwitch.on?-1:1;
+    
+    // Turning
+    if (self.invertDirectionSwitch.on) {
+        pitch = pitch * -1;
+        yaw   = yaw   * -1;
+    }
+    
+    //pitch = map(pitch, _minPitch, _maxPitch, 0, 255);
+    //yaw   = map(  yaw, _minYaw, _maxYaw,     0, 255);
+    //roll  = map( roll, _minRoll, _maxRoll,   0, 255);
+
+    NSLog(@"INV? : roll/throttle=(%.0f), pitch/handlebars=(%.0f), yaw/steer=(%.0f)",  roll, pitch, yaw);
+
+    float xAxis = 0;
+    float yAxis = 0;
+    
+    switch (currentControlMode) {
+        case 0: // Wheel mode,  yaw  is steering wheel
+            xAxis = yaw;
+            yAxis = roll;
+            break;
+    
+        case 1: // handle bar, roll/twisty handlebar
+            xAxis = pitch;
+            yAxis = roll;
+            break;
+        case 2:
+            xAxis = (pitch + yaw)/2;
+            yAxis = roll;
+            break;
+        default:
+            xAxis = 0;
+            yAxis = 0;
+            break;
+
+    }
+    //pitch = map(pitch, _minPitch, _maxPitch, 0, 255);
+    //yaw   = map(  yaw, _minYaw, _maxYaw,     0, 255);
+    //roll  = map( roll, _minRoll, _maxRoll,   0, 255);
+    uint8_t xAxisByte  = map(xAxis, -180, 180, 0,255);
+    uint8_t yAxisByte  = map(yAxis, -180, 180, 0,255);
+    NSLog(@"maxR=%d,maxP=%d,maxY=%d\t\t%d,%d",
+          self.maxRoll, self.maxPitch, self.maxYaw,
+          xAxisByte, yAxisByte);
+    
+    if (sendUpdate)
+        [self sendJoypadUpdate:xAxisByte y:yAxisByte b:manualModePressed];
+}
 - (void) sendJoypadUpdate:(uint8_t)x y:(uint8_t)y b:(uint8_t)b {
     char msg[15] = {0};
     snprintf(msg, sizeof(msg), "%c%c%c", x, y, b);

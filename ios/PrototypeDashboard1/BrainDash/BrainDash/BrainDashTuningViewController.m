@@ -101,6 +101,7 @@
 }
 
 - (void) viewWillDisappear:(BOOL)animated {
+    return;
     CannybotsController* cb = [CannybotsController sharedInstance];
     [cb deregisterHandler:&RACER_PID];
     [cb deregisterHandler:&RACER_IRBIAS];

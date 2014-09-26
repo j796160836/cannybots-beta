@@ -99,11 +99,11 @@ long map(long x, long in_min, long in_max, long out_min, long out_max)
     char msg[15] = {0};
     //snprintf(msg, sizeof(msg), "%c%c%5.5s%c%c%c%c%c%c%c",0,0, "JOY01", 6,highByte(dir), lowByte(dir), highByte(throttle), lowByte(throttle), highByte(0), lowByte(0));
     //NSData *data = [NSData dataWithBytesNoCopy:msg length:14 freeWhenDone:NO];
-    NSLog(@"joy!");
+    //NSLog(@"joy!");
     snprintf(msg, sizeof(msg), "%c%c%c",map(dir, -255,255,0,255), map(throttle, -255,255, 0, 255), rightButton.active == YES);
     NSData *data = [NSData dataWithBytesNoCopy:msg length:3 freeWhenDone:NO];
     BrainSpeakBLE*  bsle = [BrainSpeakBLE sharedInstance];
-    //[bsle sendData:data];
+    [bsle sendData:data];
     
     //[cb writeInt:dir forVariable:@"JOY_X"];
     //[cb writeInt:throttle forVariable:@"JOY_Y"];
