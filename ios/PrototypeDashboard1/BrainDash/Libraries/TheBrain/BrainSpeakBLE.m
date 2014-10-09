@@ -278,7 +278,6 @@
 - (void) didReceiveData:(NSData*)newData{
     
     NSString* hexString = [newData hexRepresentationWithSpaces:YES];    
-    [self.cbdelegate didReceiveData:newData];
     
 }
 

@@ -11,7 +11,6 @@
 #import <CoreBluetooth/CBPeripheralManager.h>
 #import "UARTPeripheral.h"
 
-#import "CannybotsController.h"
 
 
 #define BLE_CONN_RETRY_DELAY 1.0f
@@ -31,7 +30,6 @@ typedef enum {
 
 @property (nonatomic, assign) ConnectionStatus                connectionStatus;
 
-@property (nonatomic, retain) id<CannybotsReceiver>           cbdelegate;
 
 
 - (void)sendData:(NSData*)newData;

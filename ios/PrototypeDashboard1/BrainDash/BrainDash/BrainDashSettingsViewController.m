@@ -8,7 +8,6 @@
 
 #import "BrainDashSettingsViewController.h"
 
-#import "CannybotsController.h"
 
 
 @interface BrainDashSettingsViewController ()
@@ -30,12 +29,7 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    
-    CannybotsController* cb = [CannybotsController sharedInstance];
 
-    NSArray* configDescriptors = [cb getConfigParameterList];
-    
-    NSLog(@"Config Params: %@",configDescriptors);
 }
 
 - (void)didReceiveMemoryWarning

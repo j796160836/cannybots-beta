@@ -39,10 +39,10 @@
         cb = &Cannybots::getInstance();
         
         bsle     = [BrainSpeakBLE sharedInstance];
-        bsle.cbdelegate = self;
+        //bsle.cbdelegate = self;
 
         
-        cb->begin();
+        //cb->begin();
 
         // TODO: re-instate this when we can push/pop handlers using the API
         /*[self registerHandler:&_CB_SYS_LOG withBlockFor_STRING:^(const char* p1){

@@ -7,11 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B010D3B519994858002DDBA3 /* CannybotsRacerGlu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B010D3B419994858002DDBA3 /* CannybotsRacerGlu.cpp */; };
 		B01EEBDF1948F94F00E6D3A4 /* Speed High Rot.png in Resources */ = {isa = PBXBuildFile; fileRef = B01EEBDD1948F94F00E6D3A4 /* Speed High Rot.png */; };
 		B01EEBE01948F94F00E6D3A4 /* Speed Low Rot.png in Resources */ = {isa = PBXBuildFile; fileRef = B01EEBDE1948F94F00E6D3A4 /* Speed Low Rot.png */; };
-		B0B067BD196D542B00ABC209 /* CannybotsController.mm in Sources */ = {isa = PBXBuildFile; fileRef = B0B067BC196D542B00ABC209 /* CannybotsController.mm */; };
-		B0BE4123196093E2003F530B /* Cannybots.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B0BE4121196093E2003F530B /* Cannybots.cpp */; };
+		B09F58E919AF7CD800EC526F /* CannybotsController.mm in Sources */ = {isa = PBXBuildFile; fileRef = B09F58E719AF7CD800EC526F /* CannybotsController.mm */; };
 		B0C87347196742D600238594 /* Clock.png in Resources */ = {isa = PBXBuildFile; fileRef = B0C87346196742D600238594 /* Clock.png */; };
 		B0C8734E19674B8800238594 /* HighScores.m in Sources */ = {isa = PBXBuildFile; fileRef = B0C8734B19674B8800238594 /* HighScores.m */; };
 		B0C8734F19674B8800238594 /* HighScoresViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B0C8734D19674B8800238594 /* HighScoresViewController.m */; };
@@ -108,24 +106,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		B010D3AE1999411B002DDBA3 /* CannybotsRacerGlu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CannybotsRacerGlu.h; sourceTree = "<group>"; };
-		B010D3B419994858002DDBA3 /* CannybotsRacerGlu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CannybotsRacerGlu.cpp; sourceTree = "<group>"; };
 		B01EEBDD1948F94F00E6D3A4 /* Speed High Rot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Speed High Rot.png"; sourceTree = "<group>"; };
 		B01EEBDE1948F94F00E6D3A4 /* Speed Low Rot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Speed Low Rot.png"; sourceTree = "<group>"; };
-		B069D2C5197145E800F4378A /* CannyLapCounter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CannyLapCounter.h; path = ../../../avr/CannyLapCounter/CannyLapCounter.h; sourceTree = "<group>"; };
-		B0B067BC196D542B00ABC209 /* CannybotsController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CannybotsController.mm; sourceTree = "<group>"; };
-		B0B067BF196D559C00ABC209 /* CannybotsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CannybotsController.h; sourceTree = "<group>"; };
-		B0B067C2196D7EAA00ABC209 /* CannybotsTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CannybotsTypes.h; sourceTree = "<group>"; };
-		B0BE4121196093E2003F530B /* Cannybots.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Cannybots.cpp; sourceTree = "<group>"; };
-		B0BE4122196093E2003F530B /* Cannybots.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cannybots.h; sourceTree = "<group>"; };
+		B09F58E719AF7CD800EC526F /* CannybotsController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = CannybotsController.mm; path = ../../../avr/CannybotsRacer_CannybotsLib/libraries/Cannybots/CannybotsController.mm; sourceTree = "<group>"; };
+		B09F58E819AF7CD800EC526F /* CannybotsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CannybotsController.h; path = ../../../avr/CannybotsRacer_CannybotsLib/libraries/Cannybots/CannybotsController.h; sourceTree = "<group>"; };
 		B0C87346196742D600238594 /* Clock.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Clock.png; sourceTree = "<group>"; };
 		B0C8734A19674B8800238594 /* HighScores.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HighScores.h; sourceTree = "<group>"; };
 		B0C8734B19674B8800238594 /* HighScores.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HighScores.m; sourceTree = "<group>"; };
 		B0C8734C19674B8800238594 /* HighScoresViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HighScoresViewController.h; sourceTree = "<group>"; };
 		B0C8734D19674B8800238594 /* HighScoresViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HighScoresViewController.m; sourceTree = "<group>"; };
-		B0DDB031198C327D0062AA13 /* CannybotsUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CannybotsUtils.h; sourceTree = "<group>"; };
-		B0DDB033198C32EA0062AA13 /* CannybotsInt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CannybotsInt.h; sourceTree = "<group>"; };
-		B0DDB034198C34200062AA13 /* CannybotsConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CannybotsConfig.h; sourceTree = "<group>"; };
 		B0DDB048198C3F980062AA13 /* JRTranscriptView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRTranscriptView.h; sourceTree = "<group>"; };
 		B0DDB049198C3F980062AA13 /* JRTranscriptView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRTranscriptView.m; sourceTree = "<group>"; };
 		B916F520190529B40057388D /* BrainSpeakBLE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrainSpeakBLE.h; sourceTree = "<group>"; };
@@ -243,32 +232,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		B010D3AC1999411B002DDBA3 /* CannybotsRacer */ = {
-			isa = PBXGroup;
-			children = (
-				B010D3B419994858002DDBA3 /* CannybotsRacerGlu.cpp */,
-				B010D3AE1999411B002DDBA3 /* CannybotsRacerGlu.h */,
-			);
-			name = CannybotsRacer;
-			path = ../../../avr/CannybotsRacer;
-			sourceTree = "<group>";
-		};
-		B0BE4120196093E2003F530B /* Cannybots */ = {
-			isa = PBXGroup;
-			children = (
-				B0DDB034198C34200062AA13 /* CannybotsConfig.h */,
-				B0B067C2196D7EAA00ABC209 /* CannybotsTypes.h */,
-				B0DDB031198C327D0062AA13 /* CannybotsUtils.h */,
-				B0DDB033198C32EA0062AA13 /* CannybotsInt.h */,
-				B0BE4122196093E2003F530B /* Cannybots.h */,
-				B0BE4121196093E2003F530B /* Cannybots.cpp */,
-				B0B067BF196D559C00ABC209 /* CannybotsController.h */,
-				B0B067BC196D542B00ABC209 /* CannybotsController.mm */,
-			);
-			name = Cannybots;
-			path = ../../../avr/libraries/Cannybots;
-			sourceTree = "<group>";
-		};
 		B0C8734919674B8800238594 /* HighScores */ = {
 			isa = PBXGroup;
 			children = (
@@ -304,11 +267,10 @@
 		B92C59D118FEC8FE005EC882 = {
 			isa = PBXGroup;
 			children = (
-				B010D3AC1999411B002DDBA3 /* CannybotsRacer */,
+				B09F58E719AF7CD800EC526F /* CannybotsController.mm */,
+				B09F58E819AF7CD800EC526F /* CannybotsController.h */,
 				B0DDB035198C3F980062AA13 /* JRTranscriptView */,
-				B069D2C5197145E800F4378A /* CannyLapCounter.h */,
 				B0C8734919674B8800238594 /* HighScores */,
-				B0BE4120196093E2003F530B /* Cannybots */,
 				B9AD5E5C193EF58A00BC9631 /* graphics */,
 				B9AD5E1D193E64C800BC9631 /* icons */,
 				B9F68B3419055C9F00F6654D /* cocos2d-ios.xcodeproj */,
@@ -698,16 +660,15 @@
 				B92C59EA18FEC8FE005EC882 /* main.m in Sources */,
 				B916F522190529B40057388D /* BrainSpeakBLE.m in Sources */,
 				B0C8734F19674B8800238594 /* HighScoresViewController.m in Sources */,
+				B09F58E919AF7CD800EC526F /* CannybotsController.mm in Sources */,
 				B9AD5E62193EF9D400BC9631 /* BrainDashLineFollowingViewController.m in Sources */,
 				B9A660161905AA35004869BF /* SneakyButtonSkinnedBase.m in Sources */,
 				B9A6600E1905AA07004869BF /* HelloWorldScene.m in Sources */,
-				B0BE4123196093E2003F530B /* Cannybots.cpp in Sources */,
 				B92C5A6418FEFD1D005EC882 /* NSString+hex.m in Sources */,
 				B9AD5E76194071DA00BC9631 /* BrainDashSettingsViewController.m in Sources */,
 				B92C5A6118FEFD1D005EC882 /* UARTPeripheral.m in Sources */,
 				B92C59F718FEC8FE005EC882 /* BrainDashFlipsideViewController.m in Sources */,
 				B9A660151905AA35004869BF /* SneakyJoystickSkinnedBase.m in Sources */,
-				B010D3B519994858002DDBA3 /* CannybotsRacerGlu.cpp in Sources */,
 				B92C5A6218FEFD1D005EC882 /* CBUUID+StringExtraction.m in Sources */,
 				B92C59EE18FEC8FE005EC882 /* BrainDashAppDelegate.m in Sources */,
 				B9AD5E73193F66E800BC9631 /* BrainDashTuningViewController.m in Sources */,
@@ -716,7 +677,6 @@
 				B0C8734E19674B8800238594 /* HighScores.m in Sources */,
 				B92C59F418FEC8FE005EC882 /* BrainDashMainViewController.m in Sources */,
 				B9AD5E791941A0DE00BC9631 /* NSObject+performBlockAfterDelay.m in Sources */,
-				B0B067BD196D542B00ABC209 /* CannybotsController.mm in Sources */,
 				B9A660191905AA82004869BF /* SneakyButton.m in Sources */,
 				B92C5A6318FEFD1D005EC882 /* NSData+hex.m in Sources */,
 			);

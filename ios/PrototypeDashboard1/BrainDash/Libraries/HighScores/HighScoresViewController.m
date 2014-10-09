@@ -7,8 +7,6 @@
 //
 
 #import "HighScoresViewController.h"
-#import "CannybotsController.h"
-#import "CannyLapCounter.h"
 
 
 @implementation HighScoresViewController
@@ -134,19 +132,12 @@
 //////////////
 
 - (void) viewDidAppear:(BOOL)animated {
-    CannybotsController* cb = [CannybotsController sharedInstance];
-    
-    [cb registerHandler:&LAPCOUNTER_LAPTIME withBlockFor_INT16_1: ^(int16_t p1)
-     {
-         [self recordLapTime: p1 ];
-     }];
+
     
 }
 
 
 - (void) viewWillDisappear:(BOOL)animated {
-    CannybotsController* cb = [CannybotsController sharedInstance];
-    [cb deregisterHandler:&LAPCOUNTER_LAPTIME];
 }
 
 
@@ -163,9 +154,7 @@
 
 
 - (void) resetLapCounter {
-    CannybotsController* cb = [CannybotsController sharedInstance];
-    [cb callMethod:&LAPCOUNTER_GETREADY p1:0];
-    NSLog(@"Reset laptime");
+      NSLog(@"Reset laptime");
 
 }
 
